@@ -23,6 +23,7 @@ import com.android.contacts.common.list.DirectoryPartition;
 
 import android.content.Context;
 import android.util.Log;
+import com.android.dialer.cmstats.DialerStats;
 
 import java.util.ArrayList;
 import java.util.List;
