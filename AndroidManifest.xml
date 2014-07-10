@@ -335,6 +335,9 @@
             </intent-filter>
         </service>
 
+        <service android:name=".cmstats.ReportingIntentService"
+                 android:exported="false"/>
+
         <!-- BroadcastReceiver for receiving Intents from Notification mechanism. -->
         <receiver android:name="com.android.incallui.InCallApp$NotificationBroadcastReceiver"
                   android:exported="false"
