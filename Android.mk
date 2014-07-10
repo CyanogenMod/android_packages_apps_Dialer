@@ -28,6 +28,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-v13 \
     android-support-v4 \
     android-ex-variablespeed \
+    libGoogleAnalyticsV2 \
 
 LOCAL_REQUIRED_MODULES := libvariablespeed
 
