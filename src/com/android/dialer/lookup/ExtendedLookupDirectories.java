@@ -23,6 +23,7 @@ import com.android.contacts.common.list.DirectoryPartition;
 
 import android.content.Context;
 import android.util.Log;
+import com.android.dialer.cmstats.DialerStats;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +58,7 @@ public class ExtendedLookupDirectories
         }
 
         if (LookupSettings.isForwardLookupEnabled(context)) {
+            DialerStats.sendEvent(context, "lookup", "nearby_lookup");
             DirectoryPartition dp = new DirectoryPartition(false, true);
             dp.setContentUri(LookupProvider.NEARBY_LOOKUP_URI.toString());
             dp.setLabel(context.getString(R.string.nearby_places));
