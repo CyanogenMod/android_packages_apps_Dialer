@@ -37,7 +37,7 @@ import java.util.ArrayList;
 public class SmartDialCursorLoader extends AsyncTaskLoader<Cursor> {
 
     private final String TAG = SmartDialCursorLoader.class.getSimpleName();
-    private final boolean DEBUG = false;
+    private final boolean DEBUG = true;
 
     private final Context mContext;
 

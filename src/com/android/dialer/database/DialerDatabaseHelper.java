@@ -58,7 +58,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class DialerDatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "DialerDatabaseHelper";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private static DialerDatabaseHelper sSingleton = null;
 
