@@ -1,5 +1,7 @@
 package com.android.dialer.dialpad;
 
+import java.util.ArrayList;
+
 /**
  * Note: These methods currently take characters as arguments. For future planned language support,
  * they will need to be changed to use codepoints instead of characters.
@@ -40,4 +42,9 @@ public interface SmartDialMap {
      * from accented characters.
      */
     public char normalizeCharacter(char ch);
+
+    public ArrayList<String> generateNamePrefixes(String index);
+
+    public boolean matchesCombination(SmartDialNameMatcher smartDialNameMatcher, String displayName, String query,
+            ArrayList<SmartDialMatchPosition> matchList);
 }
