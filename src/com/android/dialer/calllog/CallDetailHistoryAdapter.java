@@ -17,16 +17,28 @@
 package com.android.dialer.calllog;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.provider.CallLog.Calls;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.TextView;
-
+import android.widget.Toast;
+import com.android.callrecorder.CallRecorder;
+import com.android.callrecorder.CallRecordingDataStore;
+import com.android.callrecorder.CallRecordingPlayer;
 import com.android.dialer.PhoneCallDetails;
 import com.android.dialer.R;
+import com.android.services.callrecorder.common.CallRecording;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * Adapter for a ListView containing history items from the details of a call.
@@ -59,9 +71,13 @@ public class CallDetailHistoryAdapter extends BaseAdapter {
         }
     };
 
+    private CallRecordingDataStore mCallRecordingDataStore;
+    private CallRecordingPlayer mCallRecordingPlayer;
+
     public CallDetailHistoryAdapter(Context context, LayoutInflater layoutInflater,
             CallTypeHelper callTypeHelper, PhoneCallDetails[] phoneCallDetails,
-            boolean showVoicemail, boolean showCallAndSms, View controls) {
+            boolean showVoicemail, boolean showCallAndSms, View controls,
+            CallRecordingDataStore callRecordingDataStore, CallRecordingPlayer callRecordingPlayer) {
         mContext = context;
         mLayoutInflater = layoutInflater;
         mCallTypeHelper = callTypeHelper;
@@ -69,6 +85,8 @@ public class CallDetailHistoryAdapter extends BaseAdapter {
         mShowVoicemail = showVoicemail;
         mShowCallAndSms = showCallAndSms;
         mControls = controls;
+        mCallRecordingDataStore = callRecordingDataStore;
+        mCallRecordingPlayer = callRecordingPlayer;
     }
 
     @Override
@@ -157,7 +175,83 @@ public class CallDetailHistoryAdapter extends BaseAdapter {
             durationView.setText(formatDuration(details.duration));
         }
 
+        GetRecordingsTask task = new GetRecordingsTask(result);
+        task.execute(details);
+
         return result;
+    }
+
+    class GetRecordingsTask extends AsyncTask<PhoneCallDetails, Void, List<CallRecording>> {
+        private View mView;
+
+        public GetRecordingsTask(View v) {
+            mView = v;
+        }
+
+        @Override
+        protected List<CallRecording> doInBackground(PhoneCallDetails... params) {
+            mCallRecordingDataStore.open(mContext); // opens unless already open
+            PhoneCallDetails details = params[0];
+            return mCallRecordingDataStore.getRecordings(details.number.toString(), new Date(details.date));
+        }
+
+        @Override
+        protected void onPostExecute(List<CallRecording> recordings) {
+            ViewGroup playbackView = (ViewGroup)mView.findViewById(R.id.recording_playback_layout);
+            playbackView.removeAllViews();
+            for (CallRecording recording : recordings) {
+                PlayButton button = new PlayButton(mContext, recording);
+                playbackView.addView(button);
+            }
+        }
+    }
+
+    // button to toggle playback for a call recording
+    public class PlayButton extends Button implements View.OnClickListener {
+
+        private boolean mPlaying = false;
+        private CallRecording mRecording;
+
+        public PlayButton(Context context, CallRecording recording) {
+            super(context);
+            mRecording = recording;
+            reset();
+            setBackgroundColor(Color.TRANSPARENT);
+            setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (!mPlaying) {
+                mCallRecordingPlayer.play(mRecording.fileName, this);
+                if (!mCallRecordingPlayer.isPlaying()) {
+                    Toast toast = Toast.makeText(mContext, R.string.call_playback_error_message, Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            }
+            else {
+                mCallRecordingPlayer.stop();
+            }
+            mPlaying = mCallRecordingPlayer.isPlaying();
+            if (mPlaying) {
+                setText(R.string.stop_call_playback);
+                setImage(R.drawable.ic_playback_stop_holo_dark);
+            }
+            else {
+                setText(R.string.start_call_playback);
+                setImage(R.drawable.ic_playback_holo_dark);
+            }
+        }
+
+        public void reset() {
+            mPlaying = false;
+            setText(R.string.start_call_playback);
+            setImage(R.drawable.ic_playback_holo_dark);
+        }
+
+        private void setImage(int r) {
+            setCompoundDrawablesRelativeWithIntrinsicBounds(r, 0, 0, 0);
+        }
     }
 
     private String formatDuration(long elapsedSeconds) {
