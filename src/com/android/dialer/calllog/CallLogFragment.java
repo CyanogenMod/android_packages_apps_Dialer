@@ -231,6 +231,11 @@ public class CallLogFragment extends ListFragment
         String currentCountryIso = GeoUtil.getCurrentCountryIso(getActivity());
         mAdapter = ObjectFactory.newCallLogAdapter(getActivity(), this, new ContactInfoHelper(
                 getActivity(), currentCountryIso), true, true);
+        if (mCallTypeFilter == CallLogQueryHandler.CALL_TYPE_ALL) {
+            mAdapter.setStatsLabel("call_log_all");
+        } else if (mCallTypeFilter == Calls.MISSED_TYPE) {
+            mAdapter.setStatsLabel("call_log_missed");
+        }
         setListAdapter(mAdapter);
         getListView().setItemsCanFocus(true);
     }
