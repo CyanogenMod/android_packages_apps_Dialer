@@ -211,7 +211,7 @@ public class CallRecorderService extends Service {
         if (audioFormat == MediaRecorder.OutputFormat.AMR_WB){
             return number + "_" + timestamp + ".amr";
         } else {
-            return number + "_" + timestamp + ".m4a ";
+            return number + "_" + timestamp + ".m4a";
         }
     }
 
