@@ -28,4 +28,8 @@
     <color name="empty_list_text_color">#b3ffffff</color>
     <color name="remove_text_color">#b3ffffff</color>
     <color name="call_log_expanded_background_color">@*android:color/material_blue_grey</color>
+    <color name="actionbar_background_color">#D24D57</color>
+    <color name="actionbar_background_color_dark">#D24D57</color> 
+    <color name="action_bar_background">#D24D57</color>
+    <color name="floating_action_button_icon_color">#D24D57</color>
 </resources>
