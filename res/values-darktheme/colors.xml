@@ -16,7 +16,7 @@
 
 <resources>
     <color name="dialtacts_primary_text_color">#ffffff</color>
-    <color name="dialtacts_secondary_text_color">#b3ffffff</color>
+    <color name="dialtacts_secondary_text_color">#ffffff</color>
     <color name="setting_background_color">@*android:color/material_blue_grey</color>
     <color name="recent_call_log_item_phone_icon_tint">#ffffff</color>
     <color name="background_dialer_white">@*android:color/material_blue_grey</color>
@@ -28,8 +28,29 @@
     <color name="empty_list_text_color">#b3ffffff</color>
     <color name="remove_text_color">#b3ffffff</color>
     <color name="call_log_expanded_background_color">@*android:color/material_blue_grey</color>
-    <color name="actionbar_background_color">#D24D57</color>
-    <color name="actionbar_background_color_dark">#D24D57</color> 
-    <color name="action_bar_background">#D24D57</color>
-    <color name="floating_action_button_icon_color">#D24D57</color>
+    <color name="actionbar_background_color">#3F51B5</color>
+    <color name="actionbar_background_color_dark">#3F51B5</color> 
+    <color name="action_bar_background">#3F51B5</color>
+    <color name="accent_color_dark">#FF4081</color>	
+    <color name="accent_color_light">#FF4081</color>
+    <color name="background_dialpad">#000000</color>
+    <color name="background_dialpad_pressed">#FF4081</color>
+    <color name="dialpad_primary_text_color">#FF4081</color>
+    <color name="dialpad_secondary_text_color">#FF4081</color>
+    <color name="dialpad_digits_text_color">#FF4081</color>
+    <color name="dialpad_separator_line_color">#000000</color>
+    <color name="dialpad_icon_tint">#FF4081</color>
+    <color name="actionbar_unselected_text_color">#3F51B5</color>
+    <color name="incall_accent_color">#ffffff</color>
+    <color name="setting_primary_color">#ffffff</color>
+    <color name="setting_secondary_color">#ffffff</color>
+    <color name="setting_accent_color">#FF4081</color>
+    <color name="incall_background_color">#3F51B5</color>
+    <color name="incall_call_banner_background_color">#3F51B5</color>	
+    <color name="incall_action_bar_background_color">#3F51B5</color>	
+    <color name="incall_banner_secondary_background_color">#3F51B5</color>	
+    <color name="textColorIconOverlay">#ffffffff</color>
+    <color name="textColorIconOverlayShadow">#66212121</color> 
+    <color name="actionbar_text_color">#ffffffff</color>  	
+
 </resources>
