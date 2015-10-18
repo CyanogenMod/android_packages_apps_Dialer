@@ -63,8 +63,10 @@
     <color name="setting_primary_color">#ffffff</color>
     <color name="setting_secondary_color">#ffffff</color>
     <color name="setting_accent_color">@color/midnight_theme</color>
+    <color name="incall_background_color">@color/pb_ab</color>
+    <color name="incall_call_banner_background_color">@color/pb_ab</color>	
     <color name="incall_action_bar_background_color">@color/pb_ab</color>	
-    <color name="incall_banner_secondary_background_color">@color/pb_sb</color>	
+    <color name="incall_banner_secondary_background_color">@color/pb_ab</color>	
     <color name="textColorIconOverlay">#ffffffff</color>
     <color name="textColorIconOverlayShadow">#66212121</color> 
     <color name="actionbar_text_color">#ffffffff</color>  	
@@ -85,10 +87,12 @@
     <color name="contact_all_list_background_color">@color/midnight_primary</color>
     <color name="incall_background_color">@color/midnight_primary</color>
     <color name="incall_accent_color">#ffffffff</color>
-    <color name="incall_call_banner_background_color">@color/pb_ab</color>
+    <color name="incall_call_banner_background_color">@color/incall_background_color</color>
     <color name="incall_call_banner_text_color">#ffffffff</color>
     <color name="incall_call_banner_subtext_color">#ccffffff</color>
+    <color name="incall_banner_secondary_background_color">@color/midnight_secondary</color>
     <color name="incall_banner_secondary_text_color">#ff333333</color>
+    <color name="incall_action_bar_background_color">@color/incall_background_color</color>
     <color name="incall_action_bar_text_color">@color/incall_call_banner_text_color</color>
     <color name="on_hold_dim_effect">@color/midnight_theme</color>
     <color name="conference_call_manager_background_color">#fff8f8f8</color>
@@ -98,7 +102,7 @@
     <color name="secondary_call_info_divider_highlight_color">#ffffffff</color>
     <color name="end_call_touch_feedback_tint">#ffdddddd</color>
     <color name="incall_dialpad_background_pressed">@color/midnight_theme</color>
-    <color name="button_background_color">@color/pb_ab</color>
+    <color name="button_background_color">@color/incall_background_color</color>
     <color name="button_selected_color">@color/midnight_theme</color>
     <color name="button_default_color">#b3ffffff</color>
     <color name="button_disabled_color">#33ffffff</color>
@@ -112,7 +116,7 @@
     <color name="glowpad_end_call_widget_normal_tint">#ffe74c3c</color>
     <color name="glowpad_incoming_widget_tint">#ffa3a3a3</color>
     <color name="glowpad_incoming_widget_background_tint">#ffffffff</color>
-    <color name="incall_dialpad_touch_tint">@color/midnight_theme</color>
+    <color name="incall_dialpad_touch_tint">#ffffffff</color>
 
     <color name="dialer_red_highlight_color">#ffe74c3c</color>
     <color name="dialer_green_highlight_color">#ff27ae60</color>
@@ -143,25 +147,4 @@
     <color name="answered_call">@color/dialer_green_highlight_color</color>
     <color name="dialer_dialpad_touch_tint">@color/midnight_theme</color>
     <color name="floating_action_button_touch_tint">@color/midnight_theme</color>
-
-    <array name="background_colors">
-        <item>@color/pb_ab</item>
-        <item>@color/pb_sb</item>
-        <item>@color/midnight_theme</item>
-        <item>@color/pb_ab</item>
-        <item>@color/pb_sb</item>
-        <item>@color/midnight_theme</item>
-    </array>
-
-    <!-- Darker versions of background_colors, two shades darker. These colors are used for the
-         status bar. -->
-    <array name="background_colors_dark">
-        <item>@color/pb_ab</item>
-        <item>@color/pb_sb</item>
-        <item>@color/midnight_theme</item>
-        <item>@color/pb_ab</item>
-        <item>@color/pb_sb</item>
-        <item>@color/midnight_theme</item>
-    </array>
-
 </resources>
