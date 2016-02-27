@@ -36,6 +36,8 @@ import com.android.dialer.R;
 import com.android.dialer.util.DialerUtils;
 import com.android.dialer.util.PhoneNumberUtil;
 
+import android.suda.utils.SudaUtils;
+
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
@@ -188,7 +190,7 @@ public class PhoneCallDetailsHelper {
                 && !PhoneNumberHelper.isUriNumber(details.number.toString())
                 && !mTelecomCallLogCache.isVoicemailNumber(details.accountHandle, details.number)) {
 
-            if (TextUtils.isEmpty(details.name) && !TextUtils.isEmpty(details.geocode)) {
+            if (!TextUtils.isEmpty(details.geocode) && SudaUtils.isSupportLanguage(true)) {
                 numberFormattedLabel = details.geocode;
             } else if (!(details.numberType == Phone.TYPE_CUSTOM
                     && TextUtils.isEmpty(details.numberLabel))) {

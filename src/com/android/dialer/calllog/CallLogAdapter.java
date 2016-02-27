@@ -63,6 +63,7 @@ import com.google.common.annotations.VisibleForTesting;
 
 import java.util.HashMap;
 
+import com.suda.cloud.phone.PhoneUtil;
 /**
  * Adapter class to fill in data for the Call Log.
  */
@@ -503,7 +504,7 @@ public class CallLogAdapter extends GroupingListAdapter
         details.date = c.getLong(CallLogQuery.DATE);
         details.duration = c.getLong(CallLogQuery.DURATION);
         details.features = getCallFeatures(c, count);
-        details.geocode = c.getString(CallLogQuery.GEOCODED_LOCATION);
+        details.geocode = PhoneUtil.getPhoneUtil(mContext).getLocalNumberInfo(number);
         details.transcription = c.getString(CallLogQuery.TRANSCRIPTION);
         if (details.callTypes[0] == CallLog.Calls.VOICEMAIL_TYPE) {
             details.isRead = c.getInt(CallLogQuery.IS_READ) == 1;

@@ -50,6 +50,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     com.android.vcard \
     guava \
     libphonenumber \
+    libSudaPinYin \
+    libSudaLocation \
     org.cyanogenmod.platform.sdk
 
 LOCAL_PACKAGE_NAME := Dialer
