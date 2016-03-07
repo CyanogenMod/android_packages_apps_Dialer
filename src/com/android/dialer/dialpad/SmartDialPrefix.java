@@ -83,6 +83,7 @@ public class SmartDialPrefix {
         languageToSmartDialMap.put("el", new GreekSmartDialMap());
         languageToSmartDialMap.put("ru", new RussianSmartDialMap());
         languageToSmartDialMap.put("uk", new UkrainianSmartDialMap());
+		languageToSmartDialMap.put("bg", new BulgarianSmartDialMap());
         // Per Locale.java documentation:
         // Note that Java uses several deprecated two-letter codes. The Hebrew ("he") language
         // code is rewritten as "iw"
@@ -96,6 +97,7 @@ public class SmartDialPrefix {
         languageToSmartDialMap.put("GR", new GreekSmartDialMap());
         languageToSmartDialMap.put("RU", new RussianSmartDialMap());
         languageToSmartDialMap.put("UA", new UkrainianSmartDialMap());
+		languageToSmartDialMap.put("BG", new BulgarianSmartDialMap())
         languageToSmartDialMap.put("IL", new HebrewSmartDialMap());
         languageToSmartDialMap.put("CN", new ChineseSmartDialMap());
     }
@@ -643,6 +645,7 @@ public class SmartDialPrefix {
         result.add("VI"); // U.S. Virgin Islands
         result.add("RU"); // Russia
         result.add("UA"); // Ukraine
+		result.add("BG"); // Bulgaria
         return result;
     }
 
