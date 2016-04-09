@@ -37,16 +37,21 @@ import com.android.contacts.common.util.PermissionsUtil;
 import com.android.contacts.common.util.PhoneNumberHelper;
 import com.android.contacts.common.util.UriUtils;
 import com.android.dialer.R;
+import com.android.dialer.lookup.ContactBuilder;
 import com.android.dialer.lookup.LookupCache;
 import com.android.dialer.service.CachedNumberLookupService;
 import com.android.dialer.service.CachedNumberLookupService.CachedContactInfo;
+import com.android.dialer.util.MetricsHelper;
 import com.android.dialer.util.TelecomUtil;
 import com.android.dialerbind.ObjectFactory;
 
+import com.cyanogen.lookup.phonenumber.contract.LookupProvider;
+import com.cyanogen.lookup.phonenumber.provider.LookupProviderImpl;
+import com.cyanogen.lookup.phonenumber.request.LookupRequest;
+import com.cyanogen.lookup.phonenumber.response.LookupResponse;
+import com.cyanogen.lookup.phonenumber.response.StatusCode;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.List;
 
 /**
  * Utility class to look up the contact information for a given number.
@@ -56,6 +61,7 @@ public class ContactInfoHelper {
 
     private final Context mContext;
     private final String mCurrentCountryIso;
+    private final LookupProvider mLookupProvider;
 
     private static final CachedNumberLookupService mCachedNumberLookupService =
             ObjectFactory.newCachedNumberLookupService();
@@ -63,6 +69,12 @@ public class ContactInfoHelper {
     public ContactInfoHelper(Context context, String currentCountryIso) {
         mContext = context;
         mCurrentCountryIso = currentCountryIso;
+        LookupProvider lookupProvider = new LookupProviderImpl(context);
+        if (lookupProvider.initialize()) {
+            mLookupProvider = lookupProvider;
+        } else {
+            mLookupProvider = null;
+        }
     }
 
     /**
@@ -175,23 +187,42 @@ public class ContactInfoHelper {
         Cursor phonesCursor =
                 mContext.getContentResolver().query(uri, PhoneQuery._PROJECTION, null, null, null);
 
+        String data = uri.getPathSegments().size() > 1 ? uri.getLastPathSegment() : "";
+
         if (phonesCursor != null) {
             try {
                 if (phonesCursor.moveToFirst()) {
                     info = new ContactInfo();
+                    String lookupKey = null;
                     long contactId = phonesCursor.getLong(PhoneQuery.PERSON_ID);
-                    String lookupKey = phonesCursor.getString(PhoneQuery.LOOKUP_KEY);
-                    info.lookupKey = lookupKey;
-                    info.lookupUri = Contacts.getLookupUri(contactId, lookupKey);
-                    info.name = phonesCursor.getString(PhoneQuery.NAME);
                     info.type = phonesCursor.getInt(PhoneQuery.PHONE_TYPE);
                     info.label = phonesCursor.getString(PhoneQuery.LABEL);
                     info.number = phonesCursor.getString(PhoneQuery.MATCHED_NUMBER);
                     info.normalizedNumber = phonesCursor.getString(PhoneQuery.NORMALIZED_NUMBER);
-                    info.photoId = phonesCursor.getLong(PhoneQuery.PHOTO_ID);
-                    info.photoUri =
-                            UriUtils.parseUriOrNull(phonesCursor.getString(PhoneQuery.PHOTO_URI));
                     info.formattedNumber = null;
+                    if (PhoneNumberUtils.isGlobalPhoneNumber(data)) {
+                        lookupKey = phonesCursor.getString(PhoneQuery.LOOKUP_KEY);
+                        info.name = phonesCursor.getString(PhoneQuery.NAME);
+                        info.photoId = phonesCursor.getLong(PhoneQuery.PHOTO_ID);
+                        info.photoUri = UriUtils.parseUriOrNull(
+                                phonesCursor.getString(PhoneQuery.PHOTO_URI));
+                    } else {
+                        try {
+                            lookupKey = phonesCursor.getString(
+                                    phonesCursor.getColumnIndexOrThrow("lookup"));
+                            info.name = phonesCursor.getString(
+                                    phonesCursor.getColumnIndexOrThrow("display_name"));
+                            info.photoId = phonesCursor.getLong(
+                                    phonesCursor.getColumnIndexOrThrow("photo_id"));
+                            info.photoUri = UriUtils.parseUriOrNull(phonesCursor.getString(
+                                    phonesCursor.getColumnIndexOrThrow("photo_file_id")));
+                        } catch (IllegalArgumentException e) {
+                            Log.e(TAG, "Contact information invalid, cannot find needed column(s)",
+                                    e);
+                        }
+                    }
+                    info.lookupKey = lookupKey;
+                    info.lookupUri = Contacts.getLookupUri(contactId, lookupKey);
                 } else {
                     info = ContactInfo.EMPTY;
                 }
@@ -255,6 +286,7 @@ public class ContactInfoHelper {
         Uri uri = Uri.withAppendedPath(PhoneLookup.ENTERPRISE_CONTENT_FILTER_URI,
                 Uri.encode(contactNumber));
         ContactInfo info = lookupContactFromUri(uri);
+        boolean isLocalContact = info != null && info != ContactInfo.EMPTY;
         if (info != null && info != ContactInfo.EMPTY) {
             info.formattedNumber = formatPhoneNumber(number, null, countryIso);
         } else if (LookupCache.hasCachedContact(mContext, number)) {
@@ -266,6 +298,39 @@ public class ContactInfoHelper {
                 info = cacheInfo.getContactInfo().isBadData ? null : cacheInfo.getContactInfo();
             } else {
                 info = null;
+            }
+        }
+        // always do a LookupProvider search, if available, for a non-contact
+        if (mLookupProvider != null && !isLocalContact) {
+            LookupResponse response = mLookupProvider.blockingFetchInfo(
+                    new LookupRequest(PhoneNumberUtils.formatNumberToE164(number, countryIso),
+                            null, LookupRequest.RequestOrigin.OTHER)
+                    );
+            if (response != null && response.mStatusCode == StatusCode.SUCCESS) {
+                logSuccessfulFetch(mLookupProvider);
+                final String formattedNumber = formatPhoneNumber(response.mNumber, null, countryIso);
+                // map LookupResponse to ContactInfo
+                ContactInfo contactInfo = new ContactInfo();
+                contactInfo.lookupProviderName = response.mProviderName;
+                contactInfo.name = response.mName;
+                contactInfo.number = formatPhoneNumber(response.mNumber, null, countryIso);
+                contactInfo.city = response.mCity;
+                contactInfo.country = response.mCountry;
+                contactInfo.address = response.mAddress;
+                contactInfo.photoUrl = response.mPhotoUrl;
+                contactInfo.isSpam = response.mIsSpam;
+                contactInfo.spamCount = response.mSpamCount;
+                contactInfo.attributionDrawable = response.mAttributionLogo;
+
+                // construct encoded lookup uri
+                ContactBuilder contactBuilder = new ContactBuilder(ContactBuilder.REVERSE_LOOKUP,
+                        response.mNumber, formattedNumber);
+                contactBuilder.setInfoProviderName(response.mProviderName);
+                contactBuilder.setPhotoUrl(response.mPhotoUrl);
+                contactBuilder.setName(ContactBuilder.Name.createDisplayName(response.mName));
+
+                contactInfo.lookupUri = contactBuilder.build().lookupUri;
+                info = contactInfo;
             }
         }
         return info;
@@ -489,6 +554,17 @@ public class ContactInfoHelper {
             String message = mContext.getString(R.string.toast_removed_from_blacklist, number);
             Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void logSuccessfulFetch(LookupProvider mLookupProvider) {
+        MetricsHelper.Field field = new MetricsHelper.Field(
+                MetricsHelper.Fields.PROVIDER_PACKAGE_NAME,
+                mLookupProvider.getUniqueIdentifier());
+        MetricsHelper.sendEvent(
+                MetricsHelper.Categories.PROVIDER_PROVIDED_INFORMATION,
+                MetricsHelper.Actions.PROVIDED_INFORMATION,
+                MetricsHelper.State.CALL_LOG,
+                field);
     }
 
 }

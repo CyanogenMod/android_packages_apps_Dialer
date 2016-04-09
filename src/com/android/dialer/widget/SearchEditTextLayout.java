@@ -18,12 +18,14 @@ package com.android.dialer.widget;
 
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.speech.RecognizerIntent;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -32,10 +34,14 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 
+import android.widget.Spinner;
 import com.android.dialer.R;
+import com.android.dialer.incall.CallMethodSpinnerHelper;
 import com.android.dialer.util.DialerUtils;
 import com.android.phone.common.animation.AnimUtils;
+import com.android.phone.common.incall.CallMethodInfo;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class SearchEditTextLayout extends FrameLayout {
@@ -43,6 +49,7 @@ public class SearchEditTextLayout extends FrameLayout {
     private static final int ANIMATION_DURATION = 200;
 
     private OnKeyListener mPreImeKeyListener;
+    private CallMethodSpinnerHelper.OnCallMethodChangedListener mCallMethodChangedListener;
     private int mTopMargin;
     private int mBottomMargin;
     private int mLeftMargin;
@@ -64,6 +71,7 @@ public class SearchEditTextLayout extends FrameLayout {
     private View mBackButtonView;
     private View mExpandedSearchBox;
     private View mClearButtonView;
+    private Spinner mCallMethodSpinner;
 
     private ValueAnimator mAnimator;
 
@@ -110,6 +118,7 @@ public class SearchEditTextLayout extends FrameLayout {
         mBackButtonView = findViewById(R.id.search_back_button);
         mExpandedSearchBox = findViewById(R.id.search_box_expanded);
         mClearButtonView = findViewById(R.id.search_close_button);
+        mCallMethodSpinner = (Spinner) findViewById(R.id.call_method_spinner);
 
         // Convert a long click into a click to expand the search box, and then long click on the
         // search view. This accelerates the long-press scenario for copy/paste.
@@ -280,7 +289,11 @@ public class SearchEditTextLayout extends FrameLayout {
             mVoiceSearchButtonView.setVisibility(View.GONE);
         }
         mOverflowButtonView.setVisibility(collapsedViewVisibility);
-        mBackButtonView.setVisibility(expandedViewVisibility);
+        if (mCallMethodSpinner != null && mCallMethodSpinner.getVisibility() == View.VISIBLE) {
+            mBackButtonView.setVisibility(View.GONE);
+        } else {
+            mBackButtonView.setVisibility(collapsedViewVisibility);
+        }
         // TODO: Prevents keyboard from jumping up in landscape mode after exiting the
         // SearchFragment when the query string is empty. More elegant fix?
         //mExpandedSearchBox.setVisibility(expandedViewVisibility);
@@ -336,5 +349,26 @@ public class SearchEditTextLayout extends FrameLayout {
         final List<ResolveInfo> resolveInfo = packageManager.queryIntentActivities(voiceIntent,
                 PackageManager.MATCH_DEFAULT_ONLY);
         return resolveInfo != null && resolveInfo.size() > 0;
+    }
+
+    public void setCallMethodChangedListener(
+            CallMethodSpinnerHelper.OnCallMethodChangedListener listener) {
+        mCallMethodChangedListener = listener;
+        CallMethodSpinnerHelper.setupCallMethodSpinner(
+                getContext(),
+                mCallMethodSpinner,
+                mCallMethodChangedListener);
+    }
+
+    public void updateSpinner(String lastKnownCallMethod,  HashMap<ComponentName, CallMethodInfo>
+            availableProviders) {
+        if (mCallMethodChangedListener != null) {
+            CallMethodSpinnerHelper.updateCallMethodUI(getContext(), mCallMethodSpinner,
+                    mCallMethodChangedListener, lastKnownCallMethod, availableProviders);
+        }
+    }
+
+    public void setCurrentCallMethod(CallMethodInfo callMethodInfo) {
+        CallMethodSpinnerHelper.setSelectedCallMethod(mCallMethodSpinner, callMethodInfo);
     }
 }

@@ -26,6 +26,8 @@ import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.cyanogen.ambient.incall.CallLogConstants;
+
 public class TelecomUtil {
     private static final String TAG = "TelecomUtil";
     private static boolean sWarningLogged = false;
@@ -83,6 +85,13 @@ public class TelecomUtil {
                 : Calls.CONTENT_URI;
     }
 
+    // Get extended Call Log Uri, InCallAPI inclusive.
+    // For use without call log id (will not work with specified call log ids)
+    public static Uri getAllCallLogUri(Context context) {
+        return hasReadWriteVoicemailPermissions(context) ?
+                CallLogConstants.CONTENT_ALL_URI_WITH_VOICEMAIL : CallLogConstants.CONTENT_ALL_URI;
+    }
+
     public static boolean hasReadWriteVoicemailPermissions(Context context) {
         return isDefaultDialer(context)
                 || (hasPermission(context, Manifest.permission.READ_VOICEMAIL)
@@ -92,6 +101,10 @@ public class TelecomUtil {
     public static boolean hasModifyPhoneStatePermission(Context context) {
         return isDefaultDialer(context)
                 || hasPermission(context, Manifest.permission.MODIFY_PHONE_STATE);
+    }
+
+    public static boolean hasReadPhoneStatus(Context context) {
+        return hasPermission(context, Manifest.permission.READ_PHONE_STATE);
     }
 
     private static boolean hasPermission(Context context, String permission) {

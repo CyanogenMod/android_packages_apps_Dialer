@@ -118,4 +118,58 @@
     <string name="wb_amr_format" translatable="false">AMR-WB</string>
     <string name="aac_format" translatable="false">AAC</string>
     <string name="call_playback_no_app_found_toast">No app could be found for playback of the selected recording.</string>
+
+    <string name="invalid_number_text">"%1$s could not make this call. Is the number correct?"</string>
+
+    <!-- T9 Search Text -->
+    <string name="empty_dialpad_t9_example">You can dial a phone number or\nsearch for a contact</string>
+    <string name="empty_dialpad_t9_example_subtext" translatable="false">7 + 2 + 6 = SAM</string>
+    <string name="sign_in_hint_text">Sign in to make %1$s calls</string>
+    <string name="wifi_hint_text">Make free %1$s to %1$s calls over Wi-Fi.</string>
+    <string name="roaming_hint_text">%1$s is roaming. Make free %2$s to %2$s calls over Wi-Fi.</string>
+    <string name="emergency_call_hint_text">No SIM. Emergency calls only.</string>
+
+    <string name="extra_call_method_call_option"><xliff:g id="provider">%s</xliff:g> call</string>
+
+    <!-- InCall Plugin Settings -->
+    <string name="incall_plugin_settings"><xliff:g id="name">%1$s</xliff:g> settings</string>
+
+    <!-- Search shortcut for "Call using PluginName" -->
+    <string name="search_shortcut_call_using">Call using <xliff:g id="name">%1$s</xliff:g></string>
+
+    <!-- CallerInfo Provider Settings strings -->
+    <string name="callerinfo_provider_auth_yes">Yes</string>
+    <string name="callerinfo_provider_auth_no">No thanks</string>
+    <string name="callerinfo_provider_auth_access"><xliff:g id="provider_name">%s</xliff:g> will have access to your contacts, Me profile, and Cyanogen OS account, which may include your email address.</string>
+    <string name="callerinfo_provider_auth_learn_more">Learn more</string>
+    <string name="callerinfo_provider_auth_desc">Welcome! Would you like <xliff:g id="provider_name">%s</xliff:g> to identify unknown callers and block unwanted calls?</string>
+    <string name="callerinfo_provider_auth_desc_no_spam">Welcome! Would you like <xliff:g id="provider_name">%s</xliff:g> to identify unknown callers?</string>
+    <string name="callerinfo_provider_summary">Identifies unknown callers and spam</string>
+    <string name="callerinfo_provider_summary_no_spam">Identifies unknown callers</string>
+
+    <string name="silence_spam_title">Silence spam calls</string>
+    <string name="silence_spam_summary">Never let spam calls ring through</string>
+    <string name="block_hidden_title">Block hidden phone numbers</string>
+    <string name="block_hidden_summary">Consider hidden numbers as spam</string>
+    <string name="block_dialog_title">Block this caller?</string>
+    <string name="block_dialog_positive">Block</string>
+    <string name="block_dialog_negative">Cancel</string>
+    <string name="block_dialog_description">You will no longer receive calls or messages from this person.</string>
+    <string name="block_dialog_report_spam">Report as spam to <xliff:g id="provider">%s</xliff:g></string>
+
+    <string name="provider_disable_title">Disable %1$s?</string>
+    <string name="provider_disable_message">By disabling %1$s, you will not have caller ID.</string>
+    <string name="provider_disable_spam_message">By disabling %1$s, you will not have spam protection or caller ID.</string>
+
+    <string name="powered_by_provider">Powered by <xliff:g id="provider">%s</xliff:g></string>
+
+    <string name="provider_help">"Make %1$s calls by\nswitching modes here"</string>
+    <string name="provider_search_help">"Search %1$s contacts by\nswitching modes here"</string>
+    <string name="provider_button_help">"Got it"</string>
+
+    <string name="provider_voice_call">"%1$s voice call"</string>
+    <string name="provider_video_call">"%1$s video call"</string>
+
+    <!-- Shown as a prompt to turn on the phone permission to allow a call to be placed -->
+    <string name="cm_permission_place_call">To place a call, turn on Phone permissions.</string>
 </resources>

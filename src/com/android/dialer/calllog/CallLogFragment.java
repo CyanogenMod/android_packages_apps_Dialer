@@ -18,23 +18,17 @@ package com.android.dialer.calllog;
 
 import static android.Manifest.permission.READ_CALL_LOG;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.KeyguardManager;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.CallLog;
 import android.provider.CallLog.Calls;
 import android.provider.ContactsContract;
 import android.provider.VoicemailContract.Status;
@@ -43,34 +37,33 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.ListView;
-import android.widget.TextView;
 
 import com.android.contacts.common.GeoUtil;
+import com.android.contacts.common.activity.fragment.BlockContactDialogFragment;
+import com.android.contacts.common.util.BlockContactHelper;
 import com.android.contacts.common.util.PermissionsUtil;
-import com.android.contacts.common.util.ViewUtil;
 import com.android.dialer.R;
-import com.android.dialer.list.ListsFragment.HostInterface;
-import com.android.dialer.util.DialerUtils;
 import com.android.dialer.util.EmptyLoader;
 import com.android.dialer.voicemail.VoicemailPlaybackPresenter;
-import com.android.dialer.voicemail.VoicemailStatusHelper;
-import com.android.dialer.voicemail.VoicemailStatusHelper.StatusMessage;
-import com.android.dialer.voicemail.VoicemailStatusHelperImpl;
 import com.android.dialer.widget.EmptyContentView;
 import com.android.dialer.widget.EmptyContentView.OnEmptyViewActionButtonClickedListener;
 import com.android.dialerbind.ObjectFactory;
+import com.android.phone.common.incall.CallMethodHelper;
+import com.android.phone.common.incall.CallMethodInfo;
+import com.cyanogen.ambient.incall.CallLogConstants;
 
-import java.util.List;
+import java.util.HashMap;
+
+import android.util.Log;
+import com.cyanogen.lookup.phonenumber.provider.LookupProviderImpl;
 
 /**
  * Displays a list of call log entries. To filter for a particular kind of call
  * (all, missed or voicemails), specify it in the constructor.
  */
 public class CallLogFragment extends Fragment implements CallLogQueryHandler.Listener,
-        CallLogAdapter.CallFetcher, OnEmptyViewActionButtonClickedListener {
+        CallLogAdapter.CallFetcher, OnEmptyViewActionButtonClickedListener,
+        BlockContactDialogFragment.Callbacks {
     private static final String TAG = "CallLogFragment";
 
     /**
@@ -107,6 +100,8 @@ public class CallLogFragment extends Fragment implements CallLogQueryHandler.Lis
     private boolean mVoicemailStatusFetched;
 
     private final Handler mHandler = new Handler();
+
+    private BlockContactPresenter mBlockContactPresenter;
 
     private class CustomContentObserver extends ContentObserver {
         public CustomContentObserver() {
@@ -145,6 +140,22 @@ public class CallLogFragment extends Fragment implements CallLogQueryHandler.Lis
      * DialtactsActivity.
      */
     private boolean mIsRecentsFragment;
+
+    /* InCall Plugin Listener ID */
+    private static final String AMBIENT_SUBSCRIPTION_ID = "CallLogFragment";
+
+    private CallMethodHelper.CallMethodReceiver pluginsUpdatedReceiver =
+            new CallMethodHelper.CallMethodReceiver() {
+                @Override
+                public void onChanged(HashMap<ComponentName, CallMethodInfo> callMethodInfos) {
+                    // We moved this here because well, getting our call method data takes some time
+                    // we _should_cache this icon somewhere -> load that, then when this updates
+                    // we could update the icons. Currentlly the user has some ugly ugly flash
+                    // as some icons pop up.
+                    refreshData();
+                    mAdapter.startCache();
+                }
+            };
 
     public interface HostInterface {
         public void showDialpad();
@@ -202,7 +213,7 @@ public class CallLogFragment extends Fragment implements CallLogQueryHandler.Lis
         mCallLogQueryHandler = new CallLogQueryHandler(activity, resolver, this, mLogLimit);
         mKeyguardManager =
                 (KeyguardManager) activity.getSystemService(Context.KEYGUARD_SERVICE);
-        resolver.registerContentObserver(CallLog.CONTENT_URI, true, mCallLogObserver);
+        resolver.registerContentObserver(CallLogConstants.CONTENT_ALL_URI, true, mCallLogObserver);
         resolver.registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true,
                 mContactsObserver);
         resolver.registerContentObserver(Status.CONTENT_URI, true, mVoicemailStatusObserver);
@@ -212,6 +223,8 @@ public class CallLogFragment extends Fragment implements CallLogQueryHandler.Lis
             mVoicemailPlaybackPresenter = VoicemailPlaybackPresenter
                     .getInstance(activity, state);
         }
+
+        mBlockContactPresenter = new BlockContactPresenter(activity, this);
     }
 
     /** Called by the CallLogQueryHandler when the list of calls has been fetched or updated. */
@@ -300,6 +313,7 @@ public class CallLogFragment extends Fragment implements CallLogQueryHandler.Lis
                 this,
                 new ContactInfoHelper(getActivity(), currentCountryIso),
                 mVoicemailPlaybackPresenter,
+                mBlockContactPresenter,
                 isShowingRecentsTab);
         mRecyclerView.setAdapter(mAdapter);
 
@@ -337,8 +351,11 @@ public class CallLogFragment extends Fragment implements CallLogQueryHandler.Lis
             updateEmptyMessage(mCallTypeFilter);
         }
         mHasReadCallLogPermission = hasReadCallLogPermission;
-        refreshData();
-        mAdapter.startCache();
+
+        if (CallMethodHelper.subscribe(AMBIENT_SUBSCRIPTION_ID, pluginsUpdatedReceiver)) {
+            refreshData();
+            mAdapter.startCache();
+        }
     }
 
     @Override
@@ -347,6 +364,9 @@ public class CallLogFragment extends Fragment implements CallLogQueryHandler.Lis
             mVoicemailPlaybackPresenter.onPause();
         }
         mAdapter.pauseCache();
+
+        CallMethodHelper.unsubscribe(AMBIENT_SUBSCRIPTION_ID);
+
         super.onPause();
     }
 
@@ -365,7 +385,7 @@ public class CallLogFragment extends Fragment implements CallLogQueryHandler.Lis
         if (mVoicemailPlaybackPresenter != null) {
             mVoicemailPlaybackPresenter.onDestroy();
         }
-
+        mBlockContactPresenter.onDestroy();
         getActivity().getContentResolver().unregisterContentObserver(mCallLogObserver);
         getActivity().getContentResolver().unregisterContentObserver(mContactsObserver);
         getActivity().getContentResolver().unregisterContentObserver(mVoicemailStatusObserver);
@@ -510,5 +530,15 @@ public class CallLogFragment extends Fragment implements CallLogQueryHandler.Lis
                 mRefreshDataRequired = true;
             }
         }
+    }
+
+    @Override
+    public void onBlockSelected(boolean notifyLookupProvider) {
+        mBlockContactPresenter.onBlockSelected(notifyLookupProvider);
+    }
+
+    @Override
+    public void onUnblockSelected (boolean notifyLookupProvider) {
+        mBlockContactPresenter.onUnblockSelected(notifyLookupProvider);
     }
 }

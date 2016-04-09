@@ -22,16 +22,18 @@ import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.telecom.PhoneAccountHandle;
+import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Interpolator;
@@ -48,14 +50,23 @@ import com.android.contacts.common.list.PhoneNumberPickerFragment;
 import com.android.contacts.common.util.PermissionsUtil;
 import com.android.contacts.common.util.ViewUtil;
 import com.android.contacts.commonbind.analytics.AnalyticsUtil;
+import com.android.dialer.DialtactsActivity;
 import com.android.dialer.dialpad.DialpadFragment.ErrorDialogFragment;
 import com.android.dialer.R;
+import com.android.dialer.util.CoachMarkDrawableHelper;
 import com.android.dialer.util.DialerUtils;
 import com.android.dialer.util.IntentUtil;
 import com.android.dialer.widget.EmptyContentView;
 import com.android.phone.common.animation.AnimUtils;
+import com.android.phone.common.incall.CallMethodInfo;
+import com.android.phone.common.incall.CallMethodHelper;
+import com.android.phone.common.incall.CreditBarHelper;
 
-public class SearchFragment extends PhoneNumberPickerFragment {
+import com.cyanogen.ambient.incall.extension.OriginCodes;
+
+public class SearchFragment extends PhoneNumberPickerFragment
+        implements DialerPhoneNumberListAdapter.searchMethodClicked,
+        CreditBarHelper.CreditBarVisibilityListener {
     private static final String TAG  = SearchFragment.class.getSimpleName();
 
     private OnListFragmentScrolledListener mActivityScrollListener;
@@ -83,6 +94,14 @@ public class SearchFragment extends PhoneNumberPickerFragment {
     private HostInterface mActivity;
 
     protected EmptyContentView mEmptyView;
+
+    public CallMethodInfo mCurrentCallMethodInfo;
+
+    @Override
+    public void creditsBarVisibilityChanged(int visibility) {
+        DialtactsActivity da = (DialtactsActivity) getActivity();
+        da.moveFabInSearchUI();
+    }
 
     public interface HostInterface {
         public boolean isActionBarShowing();
@@ -155,6 +174,8 @@ public class SearchFragment extends PhoneNumberPickerFragment {
             listView.setOnTouchListener(mActivityOnTouchListener);
         }
 
+        updateCoachMarkDrawable();
+
         updatePosition(false /* animate */);
     }
 
@@ -198,6 +219,17 @@ public class SearchFragment extends PhoneNumberPickerFragment {
         mAddToContactNumber = addToContactNumber;
     }
 
+    public void updateCoachMarkDrawable() {
+        DialtactsActivity da = (DialtactsActivity) mActivity;
+        if (da != null && da.isInSearchUi()) {
+
+            String unFormattedString = getString(R.string.provider_search_help);
+            CoachMarkDrawableHelper.assignViewTreeObserverWithHeight(getView(), da,
+                    da.getSearchTextLayout(), mActivity.getActionBarHeight(), true,
+                    da.getSearchEditText(), unFormattedString, 0.8f);
+        }
+    }
+
     /**
      * Return true if phone number is prohibited by a value -
      * (R.string.config_prohibited_phone_number_regexp) in the config files. False otherwise.
@@ -229,13 +261,38 @@ public class SearchFragment extends PhoneNumberPickerFragment {
         DialerPhoneNumberListAdapter adapter = new DialerPhoneNumberListAdapter(getActivity());
         adapter.setDisplayPhotos(true);
         adapter.setUseCallableUri(super.usesCallableUri());
+        adapter.setSearchListner(this);
+        adapter.setAvailableCallMethods(CallMethodHelper.getAllEnabledCallMethods());
         return adapter;
     }
 
     @Override
-    protected void onItemClick(int position, long id) {
+    public void onPause() {
+        super.onPause();
+
+        DialtactsActivity da = (DialtactsActivity) getActivity();
+        if (da != null) {
+            CreditBarHelper.clearCallRateInformation(da.getGlobalCreditsBar(), this);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        final DialtactsActivity da = (DialtactsActivity) getActivity();
+        if (mCurrentCallMethodInfo == null && da != null && da.isInSearchUi()) {
+            setCurrentCallMethod(da.getCurrentCallMethod());
+        } else {
+            updateCallCreditInfo();
+        }
+    }
+
+    @Override
+    public void onItemClick(int position, long id) {
         final DialerPhoneNumberListAdapter adapter = (DialerPhoneNumberListAdapter) getAdapter();
-        final int shortcutType = adapter.getShortcutTypeFromPosition(position);
+        final int shortcutType = adapter.getShortcutTypeFromPosition(position, false);
+
         final OnPhoneNumberPickerActionListener listener;
         final Intent intent;
         final String number;
@@ -244,13 +301,22 @@ public class SearchFragment extends PhoneNumberPickerFragment {
 
         switch (shortcutType) {
             case DialerPhoneNumberListAdapter.SHORTCUT_INVALID:
-                super.onItemClick(position, id);
+                number = adapter.getQueryString();
+                if (getCurrentCallMethod().mIsInCallProvider && !PhoneNumberUtils.isEmergencyNumber(number)) {
+                    onProviderClick(position, getCurrentCallMethod());
+                } else {
+                    super.onItemClick(position, id);
+                }
                 break;
             case DialerPhoneNumberListAdapter.SHORTCUT_DIRECT_CALL:
                 number = adapter.getQueryString();
-                listener = getOnPhoneNumberPickerListener();
-                if (listener != null && !checkForProhibitedPhoneNumber(number)) {
-                    listener.onCallNumberDirectly(number);
+                if (getCurrentCallMethod().mIsInCallProvider && !PhoneNumberUtils.isEmergencyNumber(number)) {
+                    placePSTNCall(number, getCurrentCallMethod());
+                } else {
+                    listener = getOnPhoneNumberPickerListener();
+                    if (listener != null && !checkForProhibitedPhoneNumber(number)) {
+                        listener.onCallNumberDirectly(number, false, adapter.getMimeType(position));
+                    }
                 }
                 break;
             case DialerPhoneNumberListAdapter.SHORTCUT_CREATE_NEW_CONTACT:
@@ -276,10 +342,67 @@ public class SearchFragment extends PhoneNumberPickerFragment {
                         adapter.getQueryString() : mAddToContactNumber;
                 listener = getOnPhoneNumberPickerListener();
                 if (listener != null && !checkForProhibitedPhoneNumber(number)) {
-                    listener.onCallNumberDirectly(number, true /* isVideoCall */);
+                    listener.onCallNumberDirectly(number, true /* isVideoCall */,
+                            adapter.getMimeType(position));
+                }
+                break;
+            case DialerPhoneNumberListAdapter.SHORTCUT_PROVIDER_ACTION:
+                int truePosition = adapter.getShortcutTypeFromPosition(position, true);
+                int index = DialerPhoneNumberListAdapter.SHORTCUT_COUNT - truePosition - 1;
+                number = adapter.getQueryString();
+                if (!PhoneNumberUtils.isEmergencyNumber(number)) {
+                    CallMethodInfo cmi = adapter.getProviders().get(index);
+                    cmi.placeCall(OriginCodes.DIALPAD_T9_SEARCH, number, getContext(), false, true);
+                } else {
+                    listener = getOnPhoneNumberPickerListener();
+                    if (listener != null && !checkForProhibitedPhoneNumber(number)) {
+                        listener.onCallNumberDirectly(number);
+                    }
                 }
                 break;
         }
+    }
+
+    private void placePSTNCall(String number, CallMethodInfo cmi) {
+        cmi.placeCall(OriginCodes.DIALPAD_T9_SEARCH, number, getContext(), false, true);
+    }
+
+    protected void onProviderClick(int position, CallMethodInfo cmi) {
+        cmi.placeCall(OriginCodes.DIALPAD_T9_SEARCH, getPhoneNumber(position), getContext(), false,
+                false, getPhoneNumberMimeType(position));
+    }
+
+    public void setCurrentCallMethod(CallMethodInfo cmi) {
+        if (cmi != null && !cmi.equals(mCurrentCallMethodInfo)) {
+            mCurrentCallMethodInfo = cmi;
+            setupEmptyView();
+            setAdditionalMimeTypeSearch(cmi.mMimeType);
+            reloadData();
+        }
+        updateCallCreditInfo();
+    }
+
+    public void updateCallCreditInfo() {
+        DialtactsActivity da = (DialtactsActivity) getActivity();
+        if (da != null) {
+            CallMethodInfo cmi = getCurrentCallMethod();
+            if (cmi != null && cmi.mIsInCallProvider && !da.isDialpadShown()) {
+                CreditBarHelper.callMethodCredits(da.getGlobalCreditsBar(), cmi, getResources(), this);
+            } else {
+                CreditBarHelper.clearCallRateInformation(da.getGlobalCreditsBar(), this);
+            }
+            if (cmi != null) {
+                final DialerPhoneNumberListAdapter adapter
+                        = (DialerPhoneNumberListAdapter) getAdapter();
+                if (adapter != null) {
+                    adapter.setCurrentCallMethod(cmi);
+                }
+            }
+        }
+    }
+
+    public CallMethodInfo getCurrentCallMethod() {
+        return mCurrentCallMethodInfo;
     }
 
     /**
@@ -354,7 +477,7 @@ public class SearchFragment extends PhoneNumberPickerFragment {
 
     @Override
     protected void startLoading() {
-        if (PermissionsUtil.hasPermission(getActivity(), READ_CONTACTS)) {
+        if (isAdded() && PermissionsUtil.hasPermission(getActivity(), READ_CONTACTS)) {
             super.startLoading();
         } else if (TextUtils.isEmpty(getQueryString())) {
             // Clear out any existing call shortcuts.
@@ -375,8 +498,11 @@ public class SearchFragment extends PhoneNumberPickerFragment {
         mActivityOnTouchListener = onTouchListener;
     }
 
+    LayoutInflater mInflateView;
+
     @Override
     protected View inflateView(LayoutInflater inflater, ViewGroup container) {
+        mInflateView = inflater;
         final LinearLayout parent = (LinearLayout) super.inflateView(inflater, container);
         final int orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {

@@ -60,14 +60,11 @@
                 android:nextFocusRight="@+id/call_back_action"
                 android:nextFocusLeft="@+id/quick_contact_photo" >
 
-                <QuickContactBadge
+                <com.android.dialer.widget.DialerQuickContact
                     android:id="@+id/quick_contact_photo"
                     android:layout_width="@dimen/contact_photo_size"
                     android:layout_height="@dimen/contact_photo_size"
-                    android:paddingTop="2dp"
-                    android:nextFocusRight="@id/primary_action_view"
-                    android:layout_gravity="top"
-                    android:focusable="true" />
+                    android:layout_marginEnd="@dimen/contact_list_badge_margin"/>
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -86,6 +83,17 @@
                         android:textColor="?attr/call_log_primary_text_color"
                         android:textSize="@dimen/call_log_primary_text_size"
                         android:singleLine="true" />
+
+                    <TextView
+                        android:id="@+id/spamInfo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/call_log_name_margin_bottom"
+                        android:layout_marginEnd="@dimen/call_log_icon_margin"
+                        android:textColor="@color/spam_contact_color"
+                        android:textSize="@dimen/call_log_spam_info_text_size"
+                        android:singleLine="true"
+                        android:visibility="gone" />
 
                     <TextView
                         android:id="@+id/voicemail_transcription"

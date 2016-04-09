@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- T9 hint color -->
+    <color name="recent_subtitle_color">#a79f9c</color>
+    <color name="hint_image_color">#b1b1b1</color>
+
+    <color name="callerinfo_provider_picker_negative_color">#a8a8a8</color>
+    <color name="callerinfo_provider_picker_description_color">#8a000000</color>
+    <color name="callerinfo_provider_picker_disclaimer_color">#a6a6a6</color>
+
+    <color name="coach_mark_line_color">#48c0ed</color>
+    <color name="coach_mark_text_with_overlay">#FFF</color>
+    <color name="coach_mark_text">#000</color>
+</resources>
