@@ -30,7 +30,7 @@
         <item name="android:listViewStyle">@style/ListViewStyle</item>
         <item name="android:overlapAnchor">true</item>
         <item name="android:alertDialogTheme">@style/AlertDialogTheme</item>
-        <item name="android:colorAccent">@color/dialtacts_theme_color</item>
+		<item name="android:colorAccent">@color/dialtacts_theme_color</item>
         <item name="activated_background">@drawable/list_item_activated_background</item>
         <item name="section_header_background">@drawable/list_title_holo</item>
         <item name="list_section_header_height">32dip</item>
@@ -225,7 +225,7 @@
         <item name="cardBackgroundColor">@color/background_dialer_call_log_list_item</item>
     </style>
 
-    <style name="CallLogSpinnerStyle">
+	<style name="CallLogSpinnerStyle">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@android:color/black</item>

@@ -68,7 +68,7 @@ public class CallLogQueryHandler extends NoNullCursorAsyncQueryHandler {
      */
     public static final int CALL_TYPE_ALL = -1;
 
-    /**
+	 /**
      * To specify all slots.
      */
     public static final int CALL_SIM_ALL = -1;

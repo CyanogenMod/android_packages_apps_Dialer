@@ -43,3 +43,4 @@
         android:textSize="@dimen/call_log_secondary_text_size" />
 
 </LinearLayout>
+

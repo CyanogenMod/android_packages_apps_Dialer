@@ -130,3 +130,4 @@ public class SpinnerContent {
         return values;
     }
 }
+

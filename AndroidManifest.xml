@@ -64,6 +64,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT" />
     <uses-permission android:name="cyanogenmod.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="com.cyanogen.ambient.permission.BIND_DEEPLINK_SERVICE" />
 
     <application
         android:name="DialerApplication"
@@ -175,10 +176,10 @@
         </activity>
 
         <activity android:name=".callstats.CallStatsDetailActivity"
-            android:label="@string/callStatsDetailTitle"
-            android:theme="@style/CallDetailActivityTheme"
-            android:screenOrientation="portrait"
-            android:icon="@mipmap/ic_launcher_phone" >
+                  android:label="@string/callStatsDetailTitle"
+                  android:theme="@style/CallDetailActivityTheme"
+                  android:screenOrientation="portrait"
+                  android:icon="@mipmap/ic_launcher_phone" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
