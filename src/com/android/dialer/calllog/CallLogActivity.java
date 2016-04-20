@@ -39,28 +39,23 @@ import com.android.contacts.common.util.PermissionsUtil;
 import com.android.contacts.commonbind.analytics.AnalyticsUtil;
 import com.android.dialer.DialtactsActivity;
 import com.android.dialer.R;
-import com.android.dialer.callstats.CallStatsFragment;
 import com.android.dialer.util.DialerUtils;
 import com.android.dialer.voicemail.VoicemailStatusHelper;
 import com.android.dialer.voicemail.VoicemailStatusHelperImpl;
-import com.android.dialer.widget.DoubleDatePickerDialog;
 
-public class CallLogActivity extends Activity implements
-        ViewPager.OnPageChangeListener, DoubleDatePickerDialog.OnDateSetListener {
+public class CallLogActivity extends Activity implements ViewPager.OnPageChangeListener {
     private ViewPager mViewPager;
     private ViewPagerTabs mViewPagerTabs;
     private ViewPagerAdapter mViewPagerAdapter;
     private CallLogFragment mAllCallsFragment;
     private CallLogFragment mMissedCallsFragment;
-    private CallStatsFragment mStatsFragment;
 
     private String[] mTabTitles;
 
     private static final int TAB_INDEX_ALL = 0;
     private static final int TAB_INDEX_MISSED = 1;
-    private static final int TAB_INDEX_STATS = 2;
 
-    private static final int TAB_INDEX_COUNT = 3;
+    private static final int TAB_INDEX_COUNT = 2;
 
     private boolean mIsResumed;
 
@@ -81,24 +76,20 @@ public class CallLogActivity extends Activity implements
                     return new CallLogFragment(CallLogQueryHandler.CALL_TYPE_ALL);
                 case TAB_INDEX_MISSED:
                     return new CallLogFragment(Calls.MISSED_TYPE);
-                case TAB_INDEX_STATS:
-                    return new CallStatsFragment();
             }
             throw new IllegalStateException("No fragment at position " + position);
         }
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
-            final Object fragment = super.instantiateItem(container, position);
+            final CallLogFragment fragment =
+                    (CallLogFragment) super.instantiateItem(container, position);
             switch (position) {
                 case TAB_INDEX_ALL:
-                    mAllCallsFragment = (CallLogFragment) fragment;
+                    mAllCallsFragment = fragment;
                     break;
                 case TAB_INDEX_MISSED:
-                    mMissedCallsFragment = (CallLogFragment) fragment;
-                    break;
-                case TAB_INDEX_STATS:
-                    mStatsFragment = (CallStatsFragment) fragment;
+                    mMissedCallsFragment = fragment;
                     break;
             }
             return fragment;
@@ -148,7 +139,6 @@ public class CallLogActivity extends Activity implements
         mTabTitles = new String[TAB_INDEX_COUNT];
         mTabTitles[0] = getString(R.string.call_log_all_title);
         mTabTitles[1] = getString(R.string.call_log_missed_title);
-        mTabTitles[2] = getString(R.string.call_log_stats_title);
 
         mViewPager = (ViewPager) findViewById(R.id.call_log_pager);
 
@@ -207,15 +197,6 @@ public class CallLogActivity extends Activity implements
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onDateSet(long from, long to) {
-        switch (mViewPager.getCurrentItem()) {
-            case TAB_INDEX_STATS:
-                mStatsFragment.onDateSet(from, to);
-                break;
-        }
     }
 
     @Override

@@ -35,11 +35,15 @@ import com.android.dialer.PhoneCallDetails;
 import com.android.dialer.R;
 import com.android.dialer.util.DialerUtils;
 import com.android.dialer.util.PhoneNumberUtil;
+import com.cyanogen.ambient.deeplink.DeepLink;
+import com.cyanogen.ambient.deeplink.DeepLink.DeepLinkResultList;
+import java.util.List;
+import com.cyanogen.ambient.common.api.ResultCallback;
 
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
-
+import android.net.Uri;
 /**
  * Helper class to fill in the views in {@link PhoneCallDetailsViews}.
  */
@@ -75,7 +79,7 @@ public class PhoneCallDetailsHelper {
     }
 
     /** Fills the call details views with content. */
-    public void setPhoneCallDetails(PhoneCallDetailsViews views, PhoneCallDetails details) {
+    public void setPhoneCallDetails(final PhoneCallDetailsViews views, final PhoneCallDetails details) {
         // Display up to a given number of icons.
         views.callTypeIcons.clear();
         int count = details.callTypes.length;
@@ -132,9 +136,12 @@ public class PhoneCallDetailsHelper {
         } else {
             nameText = details.name;
         }
-
+        views.nameWrapper.setVisibility(android.view.View.VISIBLE);
         views.nameView.setText(nameText);
-
+        views.nameView.setVisibility(android.view.View.VISIBLE);
+        if(views.noteIconView.getDrawable() == null) {
+            views.noteIconView.setVisibility(android.view.View.GONE);
+        }
         if (isVoicemail && !TextUtils.isEmpty(details.transcription)) {
             views.voicemailTranscriptionView.setText(details.transcription);
             views.voicemailTranscriptionView.setVisibility(View.VISIBLE);

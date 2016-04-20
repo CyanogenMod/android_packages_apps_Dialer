@@ -224,8 +224,7 @@ public class ContactInfoCache {
     }
 
     /**
-     * After a delay, start the thread to begin processing requests. We perform lookups on a
-     * background thread, but this must be called to indicate the thread should be running.
+     * After a delay, start the thread to begin processing requests.
      */
     public void start() {
         // Schedule a thread-creation message if the thread hasn't been created yet, as an
@@ -249,9 +248,6 @@ public class ContactInfoCache {
      * has already been started.
      */
     private synchronized void startRequestProcessing() {
-        // For unit-testing.
-        if (mRequestProcessingDisabled) return;
-
         // If a thread is already started, don't start another.
         if (mContactInfoQueryThread != null) {
             return;
