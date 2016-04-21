@@ -89,6 +89,7 @@ import com.android.dialer.dialpad.DialpadFragment;
 import com.android.dialer.dialpad.SmartDialNameMatcher;
 import com.android.dialer.dialpad.SmartDialPrefix;
 import com.android.dialer.incall.CallMethodSpinnerHelper;
+import com.android.dialer.incall.InCallMetricsHelper;
 import com.android.dialer.interactions.PhoneNumberInteraction;
 import com.android.dialer.list.DragDropController;
 import com.android.dialer.list.ListsFragment;
@@ -321,6 +322,12 @@ public class DialtactsActivity extends TransactionSafeActivity implements View.O
             } else if (mRegularSearchFragment != null && mRegularSearchFragment.isVisible()) {
                 mRegularSearchFragment.setCurrentCallMethod(mCurrentCallMethod);
             }
+
+            InCallMetricsHelper.increaseCountOfMetric(
+                    mCurrentCallMethod.mComponent,
+                    InCallMetricsHelper.Events.PROVIDER_SELECTED_SPINNER,
+                    InCallMetricsHelper.Categories.INAPP_SELECTIONS,
+                    InCallMetricsHelper.Parameters.COUNT);
         }
     }
 
@@ -452,6 +459,9 @@ public class DialtactsActivity extends TransactionSafeActivity implements View.O
             }
 
             if (mSmartDialSearchFragment != null && mSmartDialSearchFragment.isVisible()) {
+                if (mCurrentCallMethod != null) {
+                    mSmartDialSearchFragment.setCurrentCallMethod(mCurrentCallMethod);
+                }
                 mSmartDialSearchFragment.setQueryString(mSearchQuery, false /* delaySelection */);
             } else if (mRegularSearchFragment != null && mRegularSearchFragment.isVisible()) {
                 if (mCurrentCallMethod != null) {
@@ -493,9 +503,6 @@ public class DialtactsActivity extends TransactionSafeActivity implements View.O
                 if (TextUtils.isEmpty(mSearchView.getText().toString())) {
                     // If the search term is empty, close the search UI.
                     maybeExitSearchUi();
-                } else {
-                    // If the search term is not empty, show the dialpad fab.
-                    showFabInSearchUi();
                 }
             }
             return false;
@@ -554,10 +561,7 @@ public class DialtactsActivity extends TransactionSafeActivity implements View.O
             }
 
             @Override
-            public void onSearchViewClicked() {
-                // Hide FAB, as the keyboard is shown.
-                mFloatingActionButtonController.scaleOut();
-            }
+            public void onSearchViewClicked() {}
         });
 
         mIsLandscape = getResources().getConfiguration().orientation
@@ -1205,6 +1209,7 @@ public class DialtactsActivity extends TransactionSafeActivity implements View.O
         if (animate) {
             mListsFragment.getView().animate().alpha(0).withLayer();
         }
+        moveFabInSearchUI();
 
         mListsFragment.setUserVisibleHint(false);
     }
