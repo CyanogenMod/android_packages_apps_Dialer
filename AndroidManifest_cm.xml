@@ -31,6 +31,8 @@
     <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_PRECISE_PHONE_STATE" />
 
+    <uses-permission android:name="com.cyanogen.ambient.permission.BIND_CALLER_INFO" />
+
     <application>
 
         <meta-data android:name="com.cyanogen.ambient.analytics.key"
@@ -71,6 +73,9 @@
                 <action android:name="cyanogen.ambient.core.incall.action.plugin_status_changed"/>
             </intent-filter>
         </service>
+
+        <service android:name=".callerinfo.ProviderActivationService"
+                 android:exported="false"/>
 
     </application>
 </manifest>
