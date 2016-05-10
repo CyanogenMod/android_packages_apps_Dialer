@@ -126,10 +126,12 @@ public class DeepLinkCache {
                     // Process the request.
                     queryDeepLinks(req);
                 } else {
-                    // only update the UI when there are no more requests
-                    if (needRedraw) {
-                        needRedraw = false;
-                        mHandler.sendEmptyMessage(REDRAW);
+
+                        // only update the UI when there are no more requests
+                        if (needRedraw && mPendingRequests.size() <= 0) {
+                            needRedraw = false;
+                            mHandler.sendEmptyMessage(REDRAW);
+                        }
                     }
                     // Wait until another request is available, or until this
                     // thread is no longer needed (as indicated by being
@@ -141,7 +143,7 @@ public class DeepLinkCache {
                     } catch (InterruptedException ie) {
                         // Ignore, and attempt to continue processing requests.
                     }
-                }
+
             }
         }
     }
@@ -264,19 +266,24 @@ public class DeepLinkCache {
 
     ResultCallback<DeepLink.DeepLinkResultList> mDeepLinkCallback =
             new ResultCallback<DeepLink.DeepLinkResultList>() {
-        @Override
-        public void onResult(DeepLink.DeepLinkResultList result) {
-            if (result.getResults() != null) {
-                handleDeepLinkResults(result.getResults());
-            }
-        }
-    };
+                @Override
+                public void onResult(DeepLink.DeepLinkResultList result) {
+                    List<DeepLink> results = result.getResults();
+                    if (results == null || results.size() == 0) {
+                        return;
+                    }
+                    handleDeepLinkResults(result.getResults());
+                }
+            };
 
     private void handleDeepLinkResults(List<DeepLink> results) {
         for (DeepLink link : results) {
+            if (mPendingRequests.containsKey(link.getUri())) {
+                mPendingRequests.remove(link.getUri());
+            }
             if (shouldPlaceLinkInCache(link)) {
                 mCache.put(link.getUri().toString(), link);
-                if (mDeepLinkQueryThread != null && mPendingRequests.size() <= 0) {
+                if (mDeepLinkQueryThread != null) {
                     mDeepLinkQueryThread.needRedraw = true;
                 }
             }
