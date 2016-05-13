@@ -69,7 +69,7 @@ public class DiscoveryEventHandler {
         getNudgeProvidersWithKey(key, false);
     }
 
-    /* package */ void getNudgeProvidersWithKey(final String key, final boolean isTesting) {
+    public void getNudgeProvidersWithKey(final String key, final boolean isTesting) {
         mKey = key;
         getAvailableNudgesForKey(key, isTesting);
         getInstalledPlugins();

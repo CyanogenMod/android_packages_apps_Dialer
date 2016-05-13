@@ -35,6 +35,16 @@
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_SOCIAL_STREAM" />
 
+    <!-- Connect to AmbientCore to use InCall Plugins -->
+    <uses-permission android:name="com.cyanogen.ambient.permission.BIND_INCALL_SERVICE" />
+    <uses-permission android:name="com.cyanogen.ambient.permission.PLUGIN_STATUS_CHANGED" />
+    <uses-permission android:name="com.cyanogen.ambient.permission.PUBLISH_DISCOVERY_NUDGE" />
+    <uses-permission android:name="com.cyanogen.ambient.permission.BIND_CALLER_INFO" />
+
+    <uses-sdk
+            android:minSdkVersion="23"
+            android:targetSdkVersion="23" />
+
     <application>
         <uses-library android:name="android.test.runner" />
         <meta-data android:name="com.android.dialer.iconset" android:resource="@xml/iconset" />
@@ -42,6 +52,15 @@
         <activity android:name=".calllog.FillCallLogTestActivity"
             android:label="Call log filter test"
             >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".nudges.InCallModTestActivity"
+                  android:label="Nudge Tests" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
