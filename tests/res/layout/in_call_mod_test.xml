@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="left">
+
+    <Button
+            android:id="@+id/ucone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/validate_metrics_roam_nudge"
+    />
+
+    <Button
+            android:id="@+id/uctwo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/validate_metrics_intl_nudge"
+    />
+
+    <Button
+            android:id="@+id/ucthree"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/validate_metrics_wifi_nudge"
+    />
+
+</LinearLayout>

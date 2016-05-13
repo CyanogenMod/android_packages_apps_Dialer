@@ -32,7 +32,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="number"
-        android:text="10"
         />
     <CheckBox
         android:id="@+id/use_random_numbers"
@@ -242,7 +241,6 @@
             android:id="@+id/delta_after_add"
             android:layout_width="90dp"
             android:layout_height="wrap_content"
-            android:text="-1"
             android:inputType="number"
             />
     </LinearLayout>
