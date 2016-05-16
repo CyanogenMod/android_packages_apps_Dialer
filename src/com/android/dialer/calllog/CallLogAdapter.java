@@ -16,6 +16,7 @@
 
 package com.android.dialer.calllog;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -329,7 +330,7 @@ public class CallLogAdapter extends GroupingListAdapter
 
         mContactInfoCache = new ContactInfoCache(
                 mContactInfoHelper, mOnContactInfoChangedListener);
-        mDeepLinkCache = new DeepLinkCache(mDeepLinkListener);
+        mDeepLinkCache = DeepLinkCache.getInstance(mDeepLinkListener);
         if (!PermissionsUtil.hasContactsPermissions(context)) {
             mContactInfoCache.disableRequestProcessing();
         }
