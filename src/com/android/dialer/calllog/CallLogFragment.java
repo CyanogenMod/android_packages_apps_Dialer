@@ -171,7 +171,9 @@ public class CallLogFragment extends Fragment implements CallLogQueryHandler.Lis
                 public void onResult(DeepLink.BooleanResult result) {
                     boolean value = result.getResults();
                     if (isDeepLinkApiEnabled != value) {
-                        mAdapter.mDeepLinkCache.clearCache();
+                        if (!value) {
+                            mAdapter.mDeepLinkCache.clearCache();
+                        }
                         refreshData();
                     }
                     isDeepLinkApiEnabled = value;
@@ -388,7 +390,11 @@ public class CallLogFragment extends Fragment implements CallLogQueryHandler.Lis
             refreshData();
             mAdapter.startCache();
         }
+<<<<<<< 4b717656918860843938a41cf61b6f8a8afe9e42
         areDeepLinksEnabled();
+=======
+        areDeepLinkEnabled();
+>>>>>>> test fix for issue when mod uninstalled
     }
 
     @Override

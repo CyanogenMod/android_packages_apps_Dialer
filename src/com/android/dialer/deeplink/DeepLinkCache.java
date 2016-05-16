@@ -16,6 +16,9 @@
 
 package com.android.dialer.deeplink;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
@@ -59,13 +62,22 @@ public class DeepLinkCache {
 
     }
 
+    public static class DeepLinkStatusChangedReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            clearCache();
+            notifyListener();
+        }
+    };
+
     private static final int START_THREAD = 0;
     private static final int REDRAW = 1;
     private static final int DEEP_LINK_CACHE_SIZE = 100;
     private static final int START_PROCESSING_REQUESTS_DELAY_MS = 1000;
     private static final int PROCESSING_THREAD_THROTTLE_LIMIT = 1000;
-    private DeepLinkListener mDeepLinkListener;
+    private static DeepLinkListener mDeepLinkListener;
     private final LinkedList<DeepLinkRequest> mRequests;
+    private static DeepLinkCache mInstance;
     /**
      * Track queries that have bene issued to AmbientCore so we can cancel them if the user leaves
      * a context where they are relevant.
@@ -74,7 +86,7 @@ public class DeepLinkCache {
     /**
      * Cache for DeepLink queries we've already completed.
      */
-    private ExpirableCache<String, DeepLink> mCache;
+    private static ExpirableCache<String, DeepLink> mCache;
 
     private QueryThread mDeepLinkQueryThread;
     private boolean mRequestProcessingDisabled = false;
@@ -84,7 +96,7 @@ public class DeepLinkCache {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case REDRAW:
-                    mDeepLinkListener.onDeepLinkCacheChanged();
+                    notifyListener();
                     break;
                 case START_THREAD:
                     startRequestProcessing();
@@ -146,11 +158,20 @@ public class DeepLinkCache {
         }
     }
 
-    public DeepLinkCache(DeepLinkListener listener) {
+    public static DeepLinkCache getInstance(DeepLinkListener listener) {
+        if (mInstance == null) {
+            mInstance = new DeepLinkCache();
+        }
+        if (listener != null) {
+            mInstance.setDeepLinkListener(listener);
+        }
+        return mInstance;
+    }
+
+    private DeepLinkCache() {
         mRequests = new LinkedList<DeepLinkRequest>();
         mPendingRequests = new HashMap<Uri, PendingResult<DeepLink.DeepLinkResultList>>();
         mCache = ExpirableCache.create(DEEP_LINK_CACHE_SIZE);
-        mDeepLinkListener = listener;
     }
 
     public DeepLink getValue(String number, long[] times) {
@@ -298,11 +319,14 @@ public class DeepLinkCache {
                                 @Override
                                 public void onResult(DeepLink.DeepLinkResultList result) {
                                     List<DeepLink> results = result.getResults();
-                                    if (results == null || results.size() == 0) {
+                                    if (results == null || results.isEmpty()) {
+                                        return;
+                                    }
+                                    if (mPendingRequests == null || mCache == null) {
                                         return;
                                     }
                                     mPendingRequests.remove(uri);
-                                    handleDeepLinkResults(result.getResults());
+                                    handleDeepLinkResults(results);
                                 }
                             }, DeepLinkContentType.CALL, request.getUris()));
 
@@ -321,7 +345,19 @@ public class DeepLinkCache {
         }
     }
 
-    public void clearCache() {
-        mCache.clearCache();
+    public static void clearCache() {
+        if (mCache != null) {
+            mCache.clearCache();
+        }
+    }
+
+    private static void notifyListener() {
+        if (mDeepLinkListener != null) {
+            mDeepLinkListener.onDeepLinkCacheChanged();
+        }
+    }
+
+    private void setDeepLinkListener(DeepLinkListener listener) {
+        mDeepLinkListener = listener;
     }
 }
