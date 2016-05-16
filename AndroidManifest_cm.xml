@@ -74,6 +74,15 @@
             </intent-filter>
         </service>
 
+        <receiver
+                android:name="com.android.dialer.deeplink.DeepLinkCache$DeepLinkStatusChangedReceiver"
+                android:enabled="true"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="cyanogen.ambient.core.plugin.deeplink.action.note.plugin_status_changed"/>
+            </intent-filter>
+        </receiver>
+
         <service android:name=".callerinfo.ProviderActivationService"
                  android:exported="false"/>
 
