@@ -325,6 +325,11 @@
                   android:screenOrientation="nosensor" >
         </activity>
 
+        <activity
+            android:name=".MiniMarkActivity"
+            android:excludeFromRecents="true"
+            android:theme="@style/MiniMarkActivityStyle" />
+
         <service android:name="com.android.services.callrecorder.CallRecorderService"
                  android:process="com.android.incallui">
         </service>

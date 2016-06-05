@@ -42,7 +42,7 @@ import com.cyanogen.ambient.incall.CallLogConstants;
 import com.cyanogen.lookup.phonenumber.provider.LookupProviderImpl;
 import com.google.common.annotations.VisibleForTesting;
 
-import com.suda.cloud.phone.PhoneUtil;
+import com.sudamod.sdk.phonelocation.PhoneUtil;
 
 public class CallLogAsyncTaskUtil {
     private static String TAG = CallLogAsyncTaskUtil.class.getSimpleName();
