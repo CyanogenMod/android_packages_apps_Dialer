@@ -337,7 +337,7 @@ public class CallLogAdapter extends GroupingListAdapter
 
         mContactInfoCache = new ContactInfoCache(
                 mContactInfoHelper, mOnContactInfoChangedListener);
-        mDeepLinkCache = new DeepLinkCache(mDeepLinkListener);
+        mDeepLinkCache = new DeepLinkCache(context, mDeepLinkListener);
         if (!PermissionsUtil.hasContactsPermissions(context)) {
             mContactInfoCache.disableRequestProcessing();
         }
@@ -442,7 +442,8 @@ public class CallLogAdapter extends GroupingListAdapter
                 mCallLogListItemHelper,
                 mVoicemailPlaybackPresenter,
                 mBlockContactPresenter,
-                mContactInfoHelper);
+                mContactInfoHelper,
+                mDeepLinkCache);
 
         viewHolder.callLogEntryView.setTag(viewHolder);
         viewHolder.callLogEntryView.setAccessibilityDelegate(mAccessibilityDelegate);
