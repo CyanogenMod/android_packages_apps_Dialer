@@ -58,6 +58,7 @@
     <uses-permission android:name="android.permission.CHANGE_PHONE_BLACKLIST" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <!-- This tells the activity manager to not delay any of our activity
      start requests, even if they happen immediately after the user
@@ -323,6 +324,11 @@
                   android:exported="false"
                   android:screenOrientation="nosensor" >
         </activity>
+
+        <activity
+            android:name=".MiniMarkActivity"
+            android:excludeFromRecents="true"
+            android:theme="@style/MiniMarkActivityStyle" />
 
         <service android:name="com.android.services.callrecorder.CallRecorderService"
                  android:process="com.android.incallui">

@@ -42,6 +42,8 @@ import com.cyanogen.ambient.incall.CallLogConstants;
 import com.cyanogen.lookup.phonenumber.provider.LookupProviderImpl;
 import com.google.common.annotations.VisibleForTesting;
 
+import com.sudamod.sdk.phonelocation.PhoneUtil;
+
 public class CallLogAsyncTaskUtil {
     private static String TAG = CallLogAsyncTaskUtil.class.getSimpleName();
 
@@ -195,7 +197,7 @@ public class CallLogAsyncTaskUtil {
             details.date = cursor.getLong(CallDetailQuery.DATE_COLUMN_INDEX);
             details.duration = cursor.getLong(CallDetailQuery.DURATION_COLUMN_INDEX);
             details.features = cursor.getInt(CallDetailQuery.FEATURES);
-            details.geocode = cursor.getString(CallDetailQuery.GEOCODED_LOCATION_COLUMN_INDEX);
+            details.geocode = PhoneUtil.getPhoneUtil(context).getLocalNumberInfo(number);
             details.transcription = cursor.getString(CallDetailQuery.TRANSCRIPTION_COLUMN_INDEX);
 
             details.countryIso = !TextUtils.isEmpty(countryIso) ? countryIso

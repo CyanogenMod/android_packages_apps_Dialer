@@ -65,6 +65,10 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     com.android.vcard \
     guava \
     libphonenumber \
+    libSudaPinYin \
+    libSudaSdk \
+    libOkHttp \
+    libOKIO \
     org.cyanogenmod.platform.sdk \
     picasso-dialer \
     uicommon

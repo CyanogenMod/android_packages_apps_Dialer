@@ -163,4 +163,18 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/user_mark_action"
+        style="@style/CallLogActionStyle">
+
+        <ImageView
+            style="@style/CallLogActionIconStyle"
+            android:src="@drawable/ic_user_mark_24dp" />
+
+        <TextView
+            style="@style/CallLogActionTextStyle"
+            android:text="@string/call_log_action_user_mark" />
+
+    </LinearLayout>
+
 </LinearLayout>

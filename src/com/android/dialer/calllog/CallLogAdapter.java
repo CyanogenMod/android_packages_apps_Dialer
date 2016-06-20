@@ -48,6 +48,7 @@ import com.android.contacts.common.ClipboardUtils;
 import com.android.contacts.common.util.ContactDisplayUtils;
 import com.android.contacts.common.util.PermissionsUtil;
 import com.android.dialer.DialtactsActivity;
+import com.android.dialer.MiniMarkActivity;
 import com.android.dialer.PhoneCallDetails;
 import com.android.dialer.R;
 import com.android.dialer.contactinfo.ContactInfoCache;
@@ -67,12 +68,13 @@ import com.google.common.annotations.VisibleForTesting;
 
 import java.util.HashMap;
 
+import com.sudamod.sdk.phonelocation.PhoneUtil;
 /**
  * Adapter class to fill in data for the Call Log.
  */
 public class CallLogAdapter extends GroupingListAdapter
         implements CallLogGroupBuilder.GroupCreator,
-                VoicemailPlaybackPresenter.OnVoicemailDeletedListener {
+                VoicemailPlaybackPresenter.OnVoicemailDeletedListener, MiniMarkActivity.CallBack  {
 
     /** Interface used to initiate a refresh of the content. */
     public interface CallFetcher {
@@ -301,6 +303,11 @@ public class CallLogAdapter extends GroupingListAdapter
                 }
             };
 
+    @Override
+    public void updateView() {
+        this.notifyDataSetChanged();
+    }
+
     protected final DeepLinkListener mDeepLinkListener = new DeepLinkListener()  {
         @Override
         public void onDeepLinkCacheChanged() {
@@ -317,6 +324,7 @@ public class CallLogAdapter extends GroupingListAdapter
             boolean isShowingRecentsTab) {
         super(context);
 
+        MiniMarkActivity.setCallBack(context.getClass().toString(), CallLogAdapter.this);
         mContext = context;
         mCallFetcher = callFetcher;
         mContactInfoHelper = contactInfoHelper;
@@ -528,7 +536,7 @@ public class CallLogAdapter extends GroupingListAdapter
         details.date = c.getLong(CallLogQuery.DATE);
         details.duration = c.getLong(CallLogQuery.DURATION);
         details.features = getCallFeatures(c, count);
-        details.geocode = c.getString(CallLogQuery.GEOCODED_LOCATION);
+        details.geocode = PhoneUtil.getPhoneUtil(mContext).getLocalNumberInfo(number);
         details.transcription = c.getString(CallLogQuery.TRANSCRIPTION);
         if (details.callTypes[0] == CallLog.Calls.VOICEMAIL_TYPE) {
             details.isRead = c.getInt(CallLogQuery.IS_READ) == 1;

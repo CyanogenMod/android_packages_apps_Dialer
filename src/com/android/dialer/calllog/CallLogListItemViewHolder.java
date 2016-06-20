@@ -52,6 +52,7 @@ import com.android.dialer.util.DialerUtils;
 import com.android.dialer.util.PhoneNumberUtil;
 import com.android.dialer.voicemail.VoicemailPlaybackPresenter;
 import com.android.dialer.voicemail.VoicemailPlaybackLayout;
+import com.android.dialer.MiniMarkActivity;
 
 import com.android.phone.common.incall.CallMethodInfo;
 import com.android.phone.common.incall.DialerDataSubscription;
@@ -100,6 +101,7 @@ public final class CallLogListItemViewHolder extends RecyclerView.ViewHolder
     public View detailsButtonView;
     public View callWithNoteButtonView;
     public View blockCallerButtonView;
+    public View usermarkButtonView;
 
     private ContactInfoHelper mContactInfoHelper;
 
@@ -324,6 +326,9 @@ public final class CallLogListItemViewHolder extends RecyclerView.ViewHolder
             detailsButtonView = actionsView.findViewById(R.id.details_action);
             detailsButtonView.setOnClickListener(this);
 
+            usermarkButtonView = actionsView.findViewById(R.id.user_mark_action);
+            usermarkButtonView.setOnClickListener(this);
+
             callWithNoteButtonView = actionsView.findViewById(R.id.call_with_note_action);
             callWithNoteButtonView.setOnClickListener(this);
 
@@ -434,7 +439,7 @@ public final class CallLogListItemViewHolder extends RecyclerView.ViewHolder
             mVoicemailPlaybackPresenter.setPlaybackView(
                     voicemailPlaybackView, uri, mVoicemailPrimaryActionButtonClicked);
             mVoicemailPrimaryActionButtonClicked = false;
-
+            usermarkButtonView.setVisibility(View.GONE);
             CallLogAsyncTaskUtil.markVoicemailAsRead(mContext, uri);
         } else {
             voicemailPlaybackView.setVisibility(View.GONE);
@@ -582,6 +587,10 @@ public final class CallLogListItemViewHolder extends RecyclerView.ViewHolder
                                                                            view in dialog. */
                     numberType, /* phone number type (e.g. mobile) in second line of contact view */
                     accountHandle);
+        } else if (view.getId() == R.id.user_mark_action) {
+                Intent intent = new Intent(mContext, MiniMarkActivity.class);
+                intent.putExtra("number", number);
+                DialerUtils.startActivityWithErrorToast(mContext, intent);
 
         } else if (view.getId() == R.id.view_note_action) {
             mDeepLinkPresenter.viewNote();

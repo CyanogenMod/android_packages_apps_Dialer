@@ -135,7 +135,7 @@ public class CallDetailActivity extends Activity
 
             if (!TextUtils.isEmpty(firstDetails.name)) {
                 mCallerName.setText(firstDetails.name);
-                mCallerNumber.setText(callLocationOrType + " " + displayNumberStr);
+                mCallerNumber.setText(displayNumberStr + " " + callLocationOrType);
             } else {
                 mCallerName.setText(displayNumberStr);
                 if (!TextUtils.isEmpty(callLocationOrType)) {
@@ -233,7 +233,7 @@ public class CallDetailActivity extends Activity
 
                 return ContactDisplayUtils.getLabelForCall(getApplicationContext(),
                         details.number.toString(), details.numberType,
-                        details.numberLabel, callMethodName);
+                        details.numberLabel, callMethodName) + " " +details.geocode;
             } else {
                 return details.geocode;
             }

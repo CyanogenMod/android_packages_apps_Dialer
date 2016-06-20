@@ -38,6 +38,8 @@ import com.android.dialer.calllog.ContactInfoHelper;
 import com.android.dialer.util.DialerUtils;
 import com.android.dialer.widget.LinearColorBar;
 
+import com.sudamod.sdk.phonelocation.PhoneUtil;
+
 /**
  * This is an object containing references to views contained by the call log list item. This
  * improves performance by reducing the frequency with which we need to find views by IDs.
@@ -128,19 +130,19 @@ public final class CallStatsListItemViewHolder extends RecyclerView.ViewHolder
         final CharSequence nameText;
         final CharSequence numberText;
         final CharSequence labelText;
-
+        String location = PhoneUtil.getPhoneUtil(mContext).getLocalNumberInfo(details.displayNumber);
         if (TextUtils.isEmpty(details.name)) {
             nameText = details.displayNumber;
             if (TextUtils.isEmpty(details.geocode) || details.isVoicemailNumber) {
                 numberText = null;
             } else {
-                numberText = details.geocode;
+                numberText = location;
             }
             labelText = null;
         } else {
             nameText = details.name;
             numberText = details.displayNumber;
-            labelText = numberFormattedLabel;
+            labelText = numberFormattedLabel + " " +location;
         }
 
         float in = 0, out = 0, missed = 0, blacklist = 0;
