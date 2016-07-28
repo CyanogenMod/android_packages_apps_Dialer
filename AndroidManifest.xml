@@ -17,8 +17,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.dialer"
     coreApp="true"
-    android:versionCode="20210"
-    android:versionName="2.21">
+    android:versionCode="2021002"
+    android:versionName="2.2102">
 
     <uses-sdk
         android:minSdkVersion="23"
@@ -81,7 +81,7 @@
         <meta-data android:name="com.google.android.backup.api_key"
             android:value="AEdPqrEAAAAIBXgtCEKQ6W0PXVnW-ZVia2KmlV2AxsTw3GjAeQ" />
 
-        <uses-library android:name="com.qualcomm.qti.smartsearch" />
+        <uses-library android:name="com.qualcomm.qti.smartsearch" android:required="false"/>
 
         <!-- The entrance point for Phone UI.
              stateAlwaysHidden is set to suppress keyboard show up on
