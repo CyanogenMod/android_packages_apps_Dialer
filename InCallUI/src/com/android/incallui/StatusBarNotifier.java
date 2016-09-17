@@ -25,6 +25,8 @@ import static com.android.incallui.NotificationBroadcastReceiver.ACTION_DECLINE_
 import static com.android.incallui.NotificationBroadcastReceiver.ACTION_HANG_UP_ONGOING_CALL;
 
 import com.google.common.base.Preconditions;
+import android.suda.location.PhoneLocation;
+import android.suda.utils.SudaUtils;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -534,6 +536,16 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener,
         if (call.isConferenceCall() || call.hasProperty(Details.PROPERTY_GENERIC_CONFERENCE)) {
             return mContext.getResources().getString(R.string.card_title_conf_call);
         }
+        if (SudaUtils.isSupportLanguage(true)) {
+            String location = PhoneLocation.getCityFromPhone(contactInfo.number.toString());
+        	if (TextUtils.isEmpty(contactInfo.namePrimary)) {
+                return TextUtils.isEmpty(contactInfo.number) ? null
+                        : TextUtils.isEmpty(location) ? BidiFormatter.getInstance().unicodeWrap(
+                            contactInfo.number.toString(), TextDirectionHeuristics.LTR) : BidiFormatter.getInstance().unicodeWrap(
+                                    contactInfo.number.toString() + " " + location, TextDirectionHeuristics.LTR);
+            }
+            return !TextUtils.isEmpty(location) ? contactInfo.namePrimary + " " + location : contactInfo.namePrimary;
+        } else {
         if (TextUtils.isEmpty(contactInfo.namePrimary)) {
             String contactNumberDisplayed = TextUtils.isEmpty(contactInfo.number) ?
                     "" : contactInfo.number.toString();
@@ -547,6 +559,7 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener,
         }
 
         return contactInfo.namePrimary;
+        }
     }
 
     private void addPersonReference(Notification.Builder builder, ContactCacheEntry contactInfo,

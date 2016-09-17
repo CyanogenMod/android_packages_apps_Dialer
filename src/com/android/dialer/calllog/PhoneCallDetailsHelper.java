@@ -41,6 +41,8 @@ import com.android.dialer.PhoneCallDetails;
 import com.android.dialer.R;
 import com.android.dialer.calllog.calllogcache.CallLogCache;
 import com.android.dialer.util.DialerUtils;
+import android.suda.location.PhoneLocation;
+import android.suda.utils.SudaUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -245,13 +247,17 @@ public class PhoneCallDetailsHelper {
                 && !PhoneNumberHelper.isUriNumber(details.number.toString())
                 && !mCallLogCache.isVoicemailNumber(details.accountHandle, details.number)) {
 
+            CharSequence locationLabel = SudaUtils.isSupportLanguage(true) ? PhoneLocation.getCityFromPhone(details.number.toString()) : details.geocode;
             if (TextUtils.isEmpty(details.namePrimary) && !TextUtils.isEmpty(details.geocode)) {
-                numberFormattedLabel = details.geocode;
+                numberFormattedLabel = locationLabel;
             } else if (!(details.numberType == Phone.TYPE_CUSTOM
                     && TextUtils.isEmpty(details.numberLabel))) {
                 // Get type label only if it will not be "Custom" because of an empty number label.
                 numberFormattedLabel = MoreObjects.firstNonNull(mPhoneTypeLabelForTest,
                         Phone.getTypeLabel(mResources, details.numberType, details.numberLabel));
+                if (!TextUtils.isEmpty(locationLabel)) {
+                    numberFormattedLabel = numberFormattedLabel + mResources.getString(R.string.list_delimeter) + locationLabel;               
+                }
             }
         }
 
