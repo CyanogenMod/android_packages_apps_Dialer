@@ -16,6 +16,7 @@
 
 package com.android.dialer.dialpad;
 
+import android.support.annotation.Nullable;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
@@ -51,6 +52,8 @@ public class SmartDialNameMatcher {
 
     private final ArrayList<SmartDialMatchPosition> mMatchPositions = Lists.newArrayList();
 
+    public static final SmartDialMap LATIN_SMART_DIAL_MAP = new LatinSmartDialMap();
+
     private final SmartDialMap mMap;
 
     private String mNameMatchMask = "";
@@ -63,7 +66,7 @@ public class SmartDialNameMatcher {
 
     @VisibleForTesting
     public SmartDialNameMatcher(String query, Context context) {
-        this(query, SmartDialPrefix.getMap(), context);
+        this(query, LATIN_SMART_DIAL_MAP, context);
     }
 
     public SmartDialNameMatcher(String query, SmartDialMap map, Context context) {
@@ -137,7 +140,11 @@ public class SmartDialNameMatcher {
      *         SmartDialMatchPosition with the matching positions otherwise
      */
     @VisibleForTesting
+    @Nullable
     public SmartDialMatchPosition matchesNumber(String phoneNumber, String query, boolean useNanp) {
+        if (TextUtils.isEmpty(phoneNumber)) {
+            return null;
+        }
         StringBuilder builder = new StringBuilder();
         constructEmptyMask(builder, phoneNumber.length());
         mPhoneNumberMatchMask = builder.toString();
@@ -261,11 +268,6 @@ public class SmartDialNameMatcher {
     @VisibleForTesting
     boolean matchesCombination(String displayName, String query,
             ArrayList<SmartDialMatchPosition> matchList) {
-
-        if (displayName == null) {
-            return false;
-        }
-
         StringBuilder builder = new StringBuilder();
         constructEmptyMask(builder, displayName.length());
         mNameMatchMask = builder.toString();
@@ -420,7 +422,7 @@ public class SmartDialNameMatcher {
         if (mMultiMatchObject != null && mMultiMatchMethod != null) {
             return matchesMultiLanguage(displayName, mQuery, mMatchPositions);
         } else {
-            return mMap.matchesCombination(this, displayName, mQuery, mMatchPositions);
+            return matchesCombination(displayName, mQuery, mMatchPositions);
         }
     }
 
@@ -458,26 +460,28 @@ public class SmartDialNameMatcher {
             return false;
         }
         // contains the start, not the end poing
+        int[] indexs = null;
         try {
-            int[] indexs = (int[]) mMultiMatchMethod.invoke(mMultiMatchObject,
+            indexs = (int[]) mMultiMatchMethod.invoke(mMultiMatchObject,
                     query, displayName, 0);
             // mMultimatch.getMatchStringIndex(query, displayName, 0);
             if (indexs == null) {
                 return false;
             }
-            for (int i = 0; i < indexs.length; i = i + 2) {
-                int start = indexs[i];
-                int end = indexs[i + 1];
-                if (start >= 0 && end >= 0) {
-                    matchList.add(new SmartDialMatchPosition(start, end + 1));
-                } else {
-                    Log.d(TAG, "Invalid index, start is:" + start + " end is:"
-                            + end + " for name:" + displayName);
-                }
-            }
         } catch (Exception e) {
             Log.d(TAG, "Exception:" + e);
             return false;
+        }
+
+        for (int i = 0; i < indexs.length; i = i + 2) {
+            int start = indexs[i];
+            int end = indexs[i + 1];
+            if (start >= 0 && end >= 0) {
+                matchList.add(new SmartDialMatchPosition(start, end + 1));
+            } else {
+                Log.d(TAG, "Invalid index, start is:" + start + " end is:"
+                        + end + " for name:" + displayName);
+            }
         }
 
         for (SmartDialMatchPosition match : matchList) {

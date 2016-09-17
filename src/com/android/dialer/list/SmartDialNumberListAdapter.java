@@ -20,19 +20,16 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
-import android .provider.ContactsContract.CommonDataKinds.Phone;
-import android .provider.ContactsContract.CommonDataKinds.SipAddress;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.contacts.common.CallUtil;
 import com.android.contacts.common.list.ContactListItemView;
 import com.android.dialer.dialpad.SmartDialCursorLoader;
 import com.android.dialer.dialpad.SmartDialNameMatcher;
 import com.android.dialer.dialpad.SmartDialPrefix;
 import com.android.dialer.dialpad.SmartDialMatchPosition;
-
-import com.android.phone.common.incall.CallMethodInfo;
 
 import java.util.ArrayList;
 
@@ -44,40 +41,31 @@ public class SmartDialNumberListAdapter extends DialerPhoneNumberListAdapter {
     private static final String TAG = SmartDialNumberListAdapter.class.getSimpleName();
     private static final boolean DEBUG = false;
 
-    private final Context mContext;
-
     private SmartDialNameMatcher mNameMatcher;
-    SmartDialCursorLoader mLoader;
 
     public SmartDialNumberListAdapter(Context context) {
         super(context);
-        mContext = context;
+        mNameMatcher = new SmartDialNameMatcher("", SmartDialPrefix.getMap(), context);
+        setShortcutEnabled(SmartDialNumberListAdapter.SHORTCUT_DIRECT_CALL, false);
 
         if (DEBUG) {
             Log.v(TAG, "Constructing List Adapter");
         }
     }
 
-    public SmartDialCursorLoader getLoader() {
-        return mLoader;
-    }
-
     /**
      * Sets query for the SmartDialCursorLoader.
      */
-    public void configureLoader(SmartDialCursorLoader loader, String mimeType) {
-        mLoader = loader;
+    public void configureLoader(SmartDialCursorLoader loader) {
         if (DEBUG) {
             Log.v(TAG, "Configure Loader with query" + getQueryString());
         }
 
-        mNameMatcher = new SmartDialNameMatcher("", SmartDialPrefix.getMap(), mContext);
-
         if (getQueryString() == null) {
-            mLoader.configureQuery("", mimeType);
+            loader.configureQuery("");
             mNameMatcher.setQuery("");
         } else {
-            mLoader.configureQuery(getQueryString(), mimeType);
+            loader.configureQuery(getQueryString());
             mNameMatcher.setQuery(PhoneNumberUtils.normalizeNumber(getQueryString()));
         }
     }
@@ -102,26 +90,10 @@ public class SmartDialNumberListAdapter extends DialerPhoneNumberListAdapter {
             }
         }
 
-        String mimeType = cursor.getString(PhoneQuery.PHONE_MIME_TYPE);
-        String number = cursor.getString(PhoneQuery.PHONE_NUMBER);
-        if (TextUtils.equals(mimeType, Phone.CONTENT_ITEM_TYPE) ||
-                TextUtils.equals(mimeType, SipAddress.CONTENT_ITEM_TYPE)) {
-            final SmartDialMatchPosition numberMatch = mNameMatcher.matchesNumber(number);
-            if (numberMatch != null) {
-                view.addNumberHighlightSequence(numberMatch.start, numberMatch.end);
-            }
-        } else {
-            if (mNameMatcher.matches(number)) {
-                final ArrayList<SmartDialMatchPosition> nameMatches =
-                        mNameMatcher.getMatchPositions();
-                for (SmartDialMatchPosition match : nameMatches) {
-                    view.addNumberHighlightSequence(match.start, match.end);
-                    if (DEBUG) {
-                        Log.v(TAG, number + " " + mNameMatcher.getQuery() + " " +
-                                String.valueOf(match.start));
-                    }
-                }
-            }
+        final SmartDialMatchPosition numberMatch = mNameMatcher.matchesNumber(cursor.getString(
+                PhoneQuery.PHONE_NUMBER));
+        if (numberMatch != null) {
+            view.addNumberHighlightSequence(numberMatch.start, numberMatch.end);
         }
     }
 
@@ -139,5 +111,20 @@ public class SmartDialNumberListAdapter extends DialerPhoneNumberListAdapter {
             Log.w(TAG, "Cursor was null in getDataUri() call. Returning null instead.");
             return null;
         }
+    }
+
+    @Override
+    public void setQueryString(String queryString) {
+        final boolean showNumberShortcuts = !TextUtils.isEmpty(getFormattedQueryString());
+        boolean changed = false;
+        changed |= setShortcutEnabled(SHORTCUT_CREATE_NEW_CONTACT, showNumberShortcuts);
+        changed |= setShortcutEnabled(SHORTCUT_ADD_TO_EXISTING_CONTACT, showNumberShortcuts);
+        changed |= setShortcutEnabled(SHORTCUT_SEND_SMS_MESSAGE, showNumberShortcuts);
+        changed |= setShortcutEnabled(SHORTCUT_MAKE_VIDEO_CALL,
+                showNumberShortcuts && CallUtil.isVideoEnabled(getContext()));
+        if (changed) {
+            notifyDataSetChanged();
+        }
+        super.setQueryString(queryString);
     }
 }

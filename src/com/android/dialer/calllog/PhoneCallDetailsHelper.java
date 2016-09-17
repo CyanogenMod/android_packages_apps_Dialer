@@ -16,16 +16,22 @@
 
 package com.android.dialer.calllog;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.collect.Lists;
+
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.provider.CallLog;
+import android.graphics.Typeface;
 import android.provider.CallLog.Calls;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.support.v4.content.ContextCompat;
 import android.telecom.PhoneAccount;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.text.style.StyleSpan;
 import android.view.View;
 import android.widget.TextView;
 
@@ -33,19 +39,18 @@ import com.android.contacts.common.testing.NeededForTesting;
 import com.android.contacts.common.util.PhoneNumberHelper;
 import com.android.dialer.PhoneCallDetails;
 import com.android.dialer.R;
+import com.android.dialer.calllog.calllogcache.CallLogCache;
 import com.android.dialer.util.DialerUtils;
-import com.android.dialer.util.PhoneNumberUtil;
-
-import android.suda.utils.SudaUtils;
-
-import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Helper class to fill in the views in {@link PhoneCallDetailsViews}.
  */
 public class PhoneCallDetailsHelper {
+
     /** The maximum number of icons will be shown to represent the call types in a group. */
     private static final int MAX_CALL_TYPE_ICONS = 3;
 
@@ -53,7 +58,13 @@ public class PhoneCallDetailsHelper {
     private final Resources mResources;
     /** The injected current time in milliseconds since the epoch. Used only by tests. */
     private Long mCurrentTimeMillisForTest;
-    private final TelecomCallLogCache mTelecomCallLogCache;
+
+    private CharSequence mPhoneTypeLabelForTest;
+
+    private final CallLogCache mCallLogCache;
+
+    /** Calendar used to construct dates */
+    private final Calendar mCalendar;
 
     /**
      * List of items to be concatenated together for accessibility descriptions
@@ -70,14 +81,19 @@ public class PhoneCallDetailsHelper {
     public PhoneCallDetailsHelper(
             Context context,
             Resources resources,
-            TelecomCallLogCache telecomCallLogCache) {
+            CallLogCache callLogCache) {
         mContext = context;
         mResources = resources;
-        mTelecomCallLogCache = telecomCallLogCache;
+        mCallLogCache = callLogCache;
+        mCalendar = Calendar.getInstance();
     }
 
     /** Fills the call details views with content. */
     public void setPhoneCallDetails(PhoneCallDetailsViews views, PhoneCallDetails details) {
+        setPhoneCallDetails(views, details, null);
+    }
+    public void setPhoneCallDetails(PhoneCallDetailsViews views,
+            PhoneCallDetails details, String filter) {
         // Display up to a given number of icons.
         views.callTypeIcons.clear();
         int count = details.callTypes.length;
@@ -103,18 +119,33 @@ public class PhoneCallDetailsHelper {
             callCount = null;
         }
 
-        CharSequence callLocationAndDate = getCallLocationAndDate(details);
+        // Set the call count, location, date and if voicemail, set the duration.
+        setDetailText(views, callCount, details);
 
-        // Set the call count, location and date.
-        setCallCountAndDate(views, callCount, callLocationAndDate);
+        //set the account icon if it exists.
+        Drawable icon = details.accountIcon;
+        if (icon != null) {
+            views.callAccountIcon.setVisibility(View.VISIBLE);
+            views.callAccountIcon.setImageDrawable(icon);
+        } else {
+            views.callAccountIcon.setVisibility(View.GONE);
+        }
 
         // Set the account label if it exists.
-        String accountLabel = mTelecomCallLogCache.getAccountLabel(details.accountHandle);
-
-        if (accountLabel != null) {
+        String accountLabel = mCallLogCache.getAccountLabel(details.accountHandle);
+        if (!TextUtils.isEmpty(details.viaNumber)) {
+            if (!TextUtils.isEmpty(accountLabel)) {
+                accountLabel = mResources.getString(R.string.call_log_via_number_phone_account,
+                        accountLabel, details.viaNumber);
+            } else {
+                accountLabel = mResources.getString(R.string.call_log_via_number,
+                        details.viaNumber);
+            }
+        }
+        if (!TextUtils.isEmpty(accountLabel)) {
             views.callAccountLabel.setVisibility(View.VISIBLE);
             views.callAccountLabel.setText(accountLabel);
-            int color = PhoneAccountUtils.getAccountColor(mContext, details.accountHandle);
+            int color = mCallLogCache.getAccountColor(details.accountHandle);
             if (color == PhoneAccount.NO_HIGHLIGHT_COLOR) {
                 int defaultColor = R.color.dialtacts_secondary_text_color;
                 views.callAccountLabel.setTextColor(mContext.getResources().getColor(defaultColor));
@@ -125,26 +156,41 @@ public class PhoneCallDetailsHelper {
             views.callAccountLabel.setVisibility(View.GONE);
         }
 
-        final CharSequence nameText;
-        final CharSequence displayNumber = details.displayNumber;
-        if (TextUtils.isEmpty(details.name)) {
+        CharSequence nameText;
+        CharSequence displayNumber = details.displayNumber;
+        String phoneNum = (String) details.number;
+        if (!TextUtils.isEmpty(filter) && phoneNum.contains(filter)) {
+            int start, end;
+            start = phoneNum.indexOf(filter);
+            end = start + filter.length();
+            SpannableString result = new SpannableString(phoneNum);
+            result.setSpan(new StyleSpan(Typeface.BOLD), start, end,
+                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            displayNumber = result;
+        }
+        if (TextUtils.isEmpty(details.getPreferredName())) {
             nameText = displayNumber;
             // We have a real phone number as "nameView" so make it always LTR
             views.nameView.setTextDirection(View.TEXT_DIRECTION_LTR);
         } else {
-            nameText = details.name;
+            nameText = details.getPreferredName();
+            if (!TextUtils.isEmpty(filter) && nameText.toString().toUpperCase()
+                    .contains(filter.toUpperCase())) {
+                int start,end;
+                start = nameText.toString().toUpperCase().indexOf(filter.toUpperCase());
+                end = start + filter.length();
+                SpannableString style = new SpannableString(nameText);
+                style.setSpan(new StyleSpan(Typeface.BOLD), start, end,
+                        Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                nameText = style;
+            }
         }
 
         views.nameView.setText(nameText);
-        if (views.noteIconView.getDrawable() == null) {
-            views.noteIconView.setVisibility(View.GONE);
-        }
-        if (isVoicemail && !TextUtils.isEmpty(details.transcription)) {
-            views.voicemailTranscriptionView.setText(details.transcription);
-            views.voicemailTranscriptionView.setVisibility(View.VISIBLE);
-        } else {
-            views.voicemailTranscriptionView.setText(null);
-            views.voicemailTranscriptionView.setVisibility(View.GONE);
+
+        if (isVoicemail) {
+            views.voicemailTranscriptionView.setText(TextUtils.isEmpty(details.transcription) ? null
+                    : details.transcription);
         }
 
         // Bold if not read
@@ -152,10 +198,13 @@ public class PhoneCallDetailsHelper {
         views.nameView.setTypeface(typeface);
         views.voicemailTranscriptionView.setTypeface(typeface);
         views.callLocationAndDate.setTypeface(typeface);
+        views.callLocationAndDate.setTextColor(ContextCompat.getColor(mContext, details.isRead ?
+                R.color.call_log_detail_color : R.color.call_log_unread_text_color));
     }
 
     /**
-     * Builds a string containing the call location and date.
+     * Builds a string containing the call location and date. For voicemail logs only the call date
+     * is returned because location information is displayed in the call action button
      *
      * @param details The call details.
      * @return The call location and date string.
@@ -163,15 +212,18 @@ public class PhoneCallDetailsHelper {
     private CharSequence getCallLocationAndDate(PhoneCallDetails details) {
         mDescriptionItems.clear();
 
-        // Get type of call (ie mobile, home, etc) if known, or the caller's location.
-        CharSequence callTypeOrLocation = getCallTypeOrLocation(details);
+        if (details.callTypes[0] != Calls.VOICEMAIL_TYPE) {
+            // Get type of call (ie mobile, home, etc) if known, or the caller's location.
+            CharSequence callTypeOrLocation = getCallTypeOrLocation(details);
 
-        // Only add the call type or location if its not empty.  It will be empty for unknown
-        // callers.
-        if (!TextUtils.isEmpty(callTypeOrLocation)) {
-            mDescriptionItems.add(callTypeOrLocation);
+            // Only add the call type or location if its not empty.  It will be empty for unknown
+            // callers.
+            if (!TextUtils.isEmpty(callTypeOrLocation)) {
+                mDescriptionItems.add(callTypeOrLocation);
+            }
         }
-        // The date of this call, relative to the current time.
+
+        // The date of this call
         mDescriptionItems.add(getCallDate(details));
 
         // Create a comma separated list from the call type or location, and call date.
@@ -182,6 +234,7 @@ public class PhoneCallDetailsHelper {
      * For a call, if there is an associated contact for the caller, return the known call type
      * (e.g. mobile, home, work).  If there is no associated contact, attempt to use the caller's
      * location if known.
+     *
      * @param details Call details to use.
      * @return Type of call (mobile/home) if known, or the location of the caller (if known).
      */
@@ -190,43 +243,94 @@ public class PhoneCallDetailsHelper {
         // Only show a label if the number is shown and it is not a SIP address.
         if (!TextUtils.isEmpty(details.number)
                 && !PhoneNumberHelper.isUriNumber(details.number.toString())
-                && !mTelecomCallLogCache.isVoicemailNumber(details.accountHandle, details.number)) {
+                && !mCallLogCache.isVoicemailNumber(details.accountHandle, details.number)) {
 
-            if (!TextUtils.isEmpty(details.geocode) && SudaUtils.isSupportLanguage(true)) {
+            if (TextUtils.isEmpty(details.namePrimary) && !TextUtils.isEmpty(details.geocode)) {
                 numberFormattedLabel = details.geocode;
             } else if (!(details.numberType == Phone.TYPE_CUSTOM
                     && TextUtils.isEmpty(details.numberLabel))) {
                 // Get type label only if it will not be "Custom" because of an empty number label.
-                numberFormattedLabel = Phone.getTypeLabel(
-                        mResources, details.numberType, details.numberLabel);
+                numberFormattedLabel = MoreObjects.firstNonNull(mPhoneTypeLabelForTest,
+                        Phone.getTypeLabel(mResources, details.numberType, details.numberLabel));
             }
         }
 
-        if (!TextUtils.isEmpty(details.name) && TextUtils.isEmpty(numberFormattedLabel)) {
+        if (!TextUtils.isEmpty(details.namePrimary) && TextUtils.isEmpty(numberFormattedLabel)) {
             numberFormattedLabel = details.displayNumber;
         }
         return numberFormattedLabel;
     }
 
+    @NeededForTesting
+    public void setPhoneTypeLabelForTest(CharSequence phoneTypeLabel) {
+        this.mPhoneTypeLabelForTest = phoneTypeLabel;
+    }
+
     /**
-     * Get the call date/time of the call, relative to the current time.
-     * e.g. 3 minutes ago
+     * Get the call date/time of the call. For the call log this is relative to the current time.
+     * e.g. 3 minutes ago. For voicemail, see {@link #getGranularDateTime(PhoneCallDetails)}
+     *
      * @param details Call details to use.
      * @return String representing when the call occurred.
      */
     public CharSequence getCallDate(PhoneCallDetails details) {
-        return DateUtils.getRelativeTimeSpanString(details.date,
-                getCurrentTimeMillis(),
-                DateUtils.MINUTE_IN_MILLIS,
-                DateUtils.FORMAT_ABBREV_RELATIVE);
+        if (details.callTypes[0] == Calls.VOICEMAIL_TYPE) {
+            return getGranularDateTime(details);
+        }
+
+        return DateUtils.getRelativeTimeSpanString(details.date, getCurrentTimeMillis(),
+                DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE);
+    }
+
+    /**
+     * Get the granular version of the call date/time of the call. The result is always in the form
+     * 'DATE at TIME'. The date value changes based on when the call was created.
+     *
+     * If created today, DATE is 'Today'
+     * If created this year, DATE is 'MMM dd'
+     * Otherwise, DATE is 'MMM dd, yyyy'
+     *
+     * TIME is the localized time format, e.g. 'hh:mm a' or 'HH:mm'
+     *
+     * @param details Call details to use
+     * @return String representing when the call occurred
+     */
+    public CharSequence getGranularDateTime(PhoneCallDetails details) {
+        return mResources.getString(R.string.voicemailCallLogDateTimeFormat,
+                getGranularDate(details.date),
+                DateUtils.formatDateTime(mContext, details.date, DateUtils.FORMAT_SHOW_TIME));
+    }
+
+    /**
+     * Get the granular version of the call date. See {@link #getGranularDateTime(PhoneCallDetails)}
+     */
+    private String getGranularDate(long date) {
+        if (DateUtils.isToday(date)) {
+            return mResources.getString(R.string.voicemailCallLogToday);
+        }
+        return DateUtils.formatDateTime(mContext, date, DateUtils.FORMAT_SHOW_DATE
+                | DateUtils.FORMAT_ABBREV_MONTH
+                | (shouldShowYear(date) ? DateUtils.FORMAT_SHOW_YEAR : DateUtils.FORMAT_NO_YEAR));
+    }
+
+    /**
+     * Determines whether the year should be shown for the given date
+     *
+     * @return {@code true} if date is within the current year, {@code false} otherwise
+     */
+    private boolean shouldShowYear(long date) {
+        mCalendar.setTimeInMillis(getCurrentTimeMillis());
+        int currentYear = mCalendar.get(Calendar.YEAR);
+        mCalendar.setTimeInMillis(date);
+        return currentYear != mCalendar.get(Calendar.YEAR);
     }
 
     /** Sets the text of the header view for the details page of a phone call. */
     @NeededForTesting
     public void setCallDetailsHeader(TextView nameView, PhoneCallDetails details) {
         final CharSequence nameText;
-        if (!TextUtils.isEmpty(details.name)) {
-            nameText = details.name;
+        if (!TextUtils.isEmpty(details.namePrimary)) {
+            nameText = details.namePrimary;
         } else if (!TextUtils.isEmpty(details.displayNumber)) {
             nameText = details.displayNumber;
         } else {
@@ -254,10 +358,11 @@ public class PhoneCallDetailsHelper {
         }
     }
 
-    /** Sets the call count and date. */
-    private void setCallCountAndDate(PhoneCallDetailsViews views, Integer callCount,
-            CharSequence dateText) {
+    /** Sets the call count, date, and if it is a voicemail, sets the duration. */
+    private void setDetailText(PhoneCallDetailsViews views, Integer callCount,
+                               PhoneCallDetails details) {
         // Combine the count (if present) and the date.
+        CharSequence dateText = getCallLocationAndDate(details);
         final CharSequence text;
         if (callCount != null) {
             text = mResources.getString(
@@ -266,6 +371,22 @@ public class PhoneCallDetailsHelper {
             text = dateText;
         }
 
-        views.callLocationAndDate.setText(text);
+        if (details.callTypes[0] == Calls.VOICEMAIL_TYPE && details.duration > 0) {
+            views.callLocationAndDate.setText(mResources.getString(
+                    R.string.voicemailCallLogDateTimeFormatWithDuration, text,
+                    getVoicemailDuration(details)));
+        } else {
+            views.callLocationAndDate.setText(text);
+        }
+
+    }
+
+    private String getVoicemailDuration(PhoneCallDetails details) {
+        long minutes = TimeUnit.SECONDS.toMinutes(details.duration);
+        long seconds = details.duration - TimeUnit.MINUTES.toSeconds(minutes);
+        if (minutes > 99) {
+            minutes = 99;
+        }
+        return mResources.getString(R.string.voicemailDurationFormat, minutes, seconds);
     }
 }

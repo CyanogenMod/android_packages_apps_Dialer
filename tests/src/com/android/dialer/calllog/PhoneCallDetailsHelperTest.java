@@ -16,10 +16,13 @@
 
 package com.android.dialer.calllog;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
 import android.provider.CallLog.Calls;
+import android.telecom.PhoneAccountHandle;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.MediumTest;
 import android.text.Html;
 import android.text.Spanned;
 import android.view.View;
@@ -27,20 +30,27 @@ import android.widget.TextView;
 
 import com.android.dialer.PhoneCallDetails;
 import com.android.dialer.R;
+import com.android.dialer.calllog.calllogcache.TestTelecomCallLogCache;
+import com.android.dialer.util.AppCompatConstants;
 import com.android.dialer.util.LocaleTestUtils;
 
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * Unit tests for {@link PhoneCallDetailsHelper}.m
+ * Unit tests for {@link PhoneCallDetailsHelper}.
  */
+@MediumTest
 public class PhoneCallDetailsHelperTest extends AndroidTestCase {
     /** The number to be used to access the voicemail. */
     private static final String TEST_VOICEMAIL_NUMBER = "125";
     /** The date of the call log entry. */
     private static final long TEST_DATE =
         new GregorianCalendar(2011, 5, 3, 13, 0, 0).getTimeInMillis();
+    private static final long INJECTED_CURRENT_DATE =
+        new GregorianCalendar(2011, 5, 4, 13, 0, 0).getTimeInMillis();
     /** A test duration value for phone calls. */
     private static final long TEST_DURATION = 62300;
     /** The number of the caller/callee in the log entry. */
@@ -53,6 +63,12 @@ public class PhoneCallDetailsHelperTest extends AndroidTestCase {
     private static final String TEST_GEOCODE = "United States";
     /** Empty geocode label */
     private static final String EMPTY_GEOCODE = "";
+    /** Empty post-dial digits label */
+    private static final String EMPTY_POSTDIAL = "";
+    /** The number that the call was received via */
+    private static final String TEST_VIA_NUMBER = "+16505551234";
+    /** The Phone Account name that the Call was received on */
+    private static final String TEST_ACCOUNT_LABEL = "T-Stationary";
 
     /** The object under test. */
     private PhoneCallDetailsHelper mHelper;
@@ -69,12 +85,10 @@ public class PhoneCallDetailsHelperTest extends AndroidTestCase {
         super.setUp();
         mContext = getContext();
         Resources resources = mContext.getResources();
-        mPhoneUtils = new TestTelecomCallLogCache(mContext, TEST_VOICEMAIL_NUMBER);
-        final TestTelecomCallLogCache phoneUtils = new TestTelecomCallLogCache(
-                mContext, TEST_VOICEMAIL_NUMBER);
-        mHelper = new PhoneCallDetailsHelper(mContext, resources, phoneUtils);
-        mHelper.setCurrentTimeForTest(
-                new GregorianCalendar(2011, 5, 4, 13, 0, 0).getTimeInMillis());
+        mPhoneUtils = new TestTelecomCallLogCache(mContext, TEST_VOICEMAIL_NUMBER,
+                TEST_ACCOUNT_LABEL);
+        mHelper = new PhoneCallDetailsHelper(mContext, resources, mPhoneUtils);
+        mHelper.setCurrentTimeForTest(INJECTED_CURRENT_DATE);
         mViews = PhoneCallDetailsViews.createForTest(mContext);
         mNameView = new TextView(mContext);
         mLocaleTestUtils = new LocaleTestUtils(mContext);
@@ -111,10 +125,70 @@ public class PhoneCallDetailsHelperTest extends AndroidTestCase {
         assertNameEqualsResource(R.string.voicemail);
     }
 
-    public void testSetPhoneCallDetails_Normal() {
-        setPhoneCallDetailsWithNumber("14125551212",
-                Calls.PRESENTATION_ALLOWED, "1-412-555-1212");
-        assertTrue(mViews.callLocationAndDate.getText().toString().contains("Yesterday"));
+    public void testSetPhoneCallDetails_ViaNumber() {
+        setPhoneCallDetailsWithViaNumber(TEST_VIA_NUMBER);
+        assertViaNumberEquals(TEST_VIA_NUMBER);
+    }
+
+    public void testSetPhoneCallDetails_NoViaNumber() {
+        setDefaultPhoneCallDetailsNoViaNumber();
+        assertCallAccountInvisible();
+    }
+
+    public void testSetPhoneCallDetails_AccountLabel() {
+        setPhoneCallDetailsWithAccountHandle();
+        assertAccountLabelEquals(TEST_ACCOUNT_LABEL);
+    }
+
+    public void testSetPhoneCallDetails_AccountHandleViaNumber() {
+        setPhoneCallDetailsWithAccountLabelViaNumber(TEST_VIA_NUMBER);
+        assertAccountLabelEquals(TEST_VIA_NUMBER, TEST_ACCOUNT_LABEL);
+    }
+
+    // Voicemail date string has 3 different formats depending on how long ago the call was placed
+    public void testSetVoicemailPhoneCallDetails_Today() {
+        setVoicemailPhoneCallDetailsWithDate(System.currentTimeMillis());
+        assertLocationAndDateContains("Today at");
+    }
+
+    public void testSetVoicemailPhoneCallDetails_WithinCurrentYear() {
+        mHelper.setCurrentTimeForTest(INJECTED_CURRENT_DATE);
+        String formattedTestDate = "Jun 3 at 1:00 PM";
+        setVoicemailPhoneCallDetailsWithDate(TEST_DATE);
+        assertLocationAndDateContains(formattedTestDate);
+    }
+
+    public void testSetVoicemailPhoneCallDetails_OutsideCurrentYear() {
+        mHelper.setCurrentTimeForTest(INJECTED_CURRENT_DATE);
+        long testDate = new GregorianCalendar(2009, 5, 3, 13, 0, 0).getTimeInMillis();
+        String formattedTestDate = "Jun 3, 2009 at 1:00 PM";
+        setVoicemailPhoneCallDetailsWithDate(testDate);
+        assertLocationAndDateContains(formattedTestDate);
+    }
+
+    public void testVoicemailLocationNotShownWithDate() {
+        setVoicemailPhoneCallDetailsWithDate(TEST_DATE);
+        assertLocationAndDateExactEquals("Jun 3 at 1:00 PM • 99:20");
+    }
+
+    public void testVoicemailDuration() {
+        setVoicemailPhoneCallDetailsWithDuration(100);
+        assertDurationExactEquals("01:40");
+    }
+
+    public void testVoicemailDuration_Capped() {
+        setVoicemailPhoneCallDetailsWithDuration(TEST_DURATION);
+        assertDurationExactEquals("99:20");
+    }
+
+    public void testVoicemailDuration_Zero() {
+        setVoicemailPhoneCallDetailsWithDuration(0);
+        assertLocationAndDateExactEquals("Jun 3 at 1:00 PM");
+    }
+
+    public void testVoicemailDuration_EvenMinute() {
+        setVoicemailPhoneCallDetailsWithDuration(60);
+        assertDurationExactEquals("01:00");
     }
 
     /** Asserts that a char sequence is actually a Spanned corresponding to the expected HTML. */
@@ -133,33 +207,33 @@ public class PhoneCallDetailsHelperTest extends AndroidTestCase {
 
         setPhoneCallDetailsWithDate(
                 new GregorianCalendar(2011, 5, 3, 13, 0, 0).getTimeInMillis());
-        assertDateEquals("0 min. ago");
+        assertLocationAndDateContains("0 min. ago");
 
         setPhoneCallDetailsWithDate(
                 new GregorianCalendar(2011, 5, 3, 12, 0, 0).getTimeInMillis());
-        assertDateEquals("1 hr. ago");
+        assertLocationAndDateContains("1 hr. ago");
 
         setPhoneCallDetailsWithDate(
                 new GregorianCalendar(2011, 5, 2, 13, 0, 0).getTimeInMillis());
-        assertDateEquals("Yesterday");
+        assertLocationAndDateContains("Yesterday");
 
         setPhoneCallDetailsWithDate(
                 new GregorianCalendar(2011, 5, 1, 13, 0, 0).getTimeInMillis());
-        assertDateEquals("2 days ago");
+        assertLocationAndDateContains("2 days ago");
     }
 
     public void testSetPhoneCallDetails_CallTypeIcons() {
-        setPhoneCallDetailsWithCallTypeIcons(Calls.INCOMING_TYPE);
-        assertCallTypeIconsEquals(Calls.INCOMING_TYPE);
+        setPhoneCallDetailsWithCallTypeIcons(AppCompatConstants.CALLS_INCOMING_TYPE);
+        assertCallTypeIconsEquals(AppCompatConstants.CALLS_INCOMING_TYPE);
 
-        setPhoneCallDetailsWithCallTypeIcons(Calls.OUTGOING_TYPE);
-        assertCallTypeIconsEquals(Calls.OUTGOING_TYPE);
+        setPhoneCallDetailsWithCallTypeIcons(AppCompatConstants.CALLS_OUTGOING_TYPE);
+        assertCallTypeIconsEquals(AppCompatConstants.CALLS_OUTGOING_TYPE);
 
-        setPhoneCallDetailsWithCallTypeIcons(Calls.MISSED_TYPE);
-        assertCallTypeIconsEquals(Calls.MISSED_TYPE);
+        setPhoneCallDetailsWithCallTypeIcons(AppCompatConstants.CALLS_MISSED_TYPE);
+        assertCallTypeIconsEquals(AppCompatConstants.CALLS_MISSED_TYPE);
 
-        setPhoneCallDetailsWithCallTypeIcons(Calls.VOICEMAIL_TYPE);
-        assertCallTypeIconsEquals(Calls.VOICEMAIL_TYPE);
+        setPhoneCallDetailsWithCallTypeIcons(AppCompatConstants.CALLS_VOICEMAIL_TYPE);
+        assertCallTypeIconsEquals(AppCompatConstants.CALLS_VOICEMAIL_TYPE);
     }
 
     /**
@@ -185,41 +259,54 @@ public class PhoneCallDetailsHelperTest extends AndroidTestCase {
     }
 
     public void testSetPhoneCallDetails_MultipleCallTypeIcons() {
-        setPhoneCallDetailsWithCallTypeIcons(Calls.INCOMING_TYPE, Calls.OUTGOING_TYPE);
-        assertCallTypeIconsEquals(Calls.INCOMING_TYPE, Calls.OUTGOING_TYPE);
+        setPhoneCallDetailsWithCallTypeIcons(
+                AppCompatConstants.CALLS_INCOMING_TYPE,
+                AppCompatConstants.CALLS_OUTGOING_TYPE);
+        assertCallTypeIconsEquals(
+                AppCompatConstants.CALLS_INCOMING_TYPE,
+                AppCompatConstants.CALLS_OUTGOING_TYPE);
 
-        setPhoneCallDetailsWithCallTypeIcons(Calls.MISSED_TYPE, Calls.MISSED_TYPE);
-        assertCallTypeIconsEquals(Calls.MISSED_TYPE, Calls.MISSED_TYPE);
+        setPhoneCallDetailsWithCallTypeIcons(
+                AppCompatConstants.CALLS_MISSED_TYPE,
+                AppCompatConstants.CALLS_MISSED_TYPE);
+        assertCallTypeIconsEquals(
+                AppCompatConstants.CALLS_MISSED_TYPE,
+                AppCompatConstants.CALLS_MISSED_TYPE);
     }
 
     public void testSetPhoneCallDetails_MultipleCallTypeIconsLastOneDropped() {
-        setPhoneCallDetailsWithCallTypeIcons(Calls.MISSED_TYPE, Calls.MISSED_TYPE,
-                Calls.INCOMING_TYPE, Calls.OUTGOING_TYPE);
+        setPhoneCallDetailsWithCallTypeIcons(
+                AppCompatConstants.CALLS_MISSED_TYPE,
+                AppCompatConstants.CALLS_MISSED_TYPE,
+                AppCompatConstants.CALLS_INCOMING_TYPE,
+                AppCompatConstants.CALLS_OUTGOING_TYPE);
         assertCallTypeIconsEqualsPlusOverflow("(4)",
-                Calls.MISSED_TYPE, Calls.MISSED_TYPE, Calls.INCOMING_TYPE);
+                AppCompatConstants.CALLS_MISSED_TYPE,
+                AppCompatConstants.CALLS_MISSED_TYPE,
+                AppCompatConstants.CALLS_INCOMING_TYPE);
     }
 
     public void testSetPhoneCallDetails_Geocode() {
         setPhoneCallDetailsWithNumberAndGeocode("+14125555555", "1-412-555-5555", "Pennsylvania");
         assertNameEquals("1-412-555-5555");  // The phone number is shown as the name.
-        assertLabelEquals("Pennsylvania"); // The geocode is shown as the label.
+        assertLocationAndDateContains("Pennsylvania"); // The geocode is shown as the label.
     }
 
     public void testSetPhoneCallDetails_NoGeocode() {
         setPhoneCallDetailsWithNumberAndGeocode("+14125555555", "1-412-555-5555", null);
         assertNameEquals("1-412-555-5555");  // The phone number is shown as the name.
-        assertLabelEquals(EMPTY_GEOCODE); // The empty geocode is shown as the label.
+        assertLocationAndDateContains(EMPTY_GEOCODE); // The empty geocode is shown as the label.
     }
 
     public void testSetPhoneCallDetails_EmptyGeocode() {
         setPhoneCallDetailsWithNumberAndGeocode("+14125555555", "1-412-555-5555", "");
         assertNameEquals("1-412-555-5555");  // The phone number is shown as the name.
-        assertLabelEquals(EMPTY_GEOCODE); // The empty geocode is shown as the label.
+        assertLocationAndDateContains(EMPTY_GEOCODE); // The empty geocode is shown as the label.
     }
 
     public void testSetPhoneCallDetails_NoGeocodeForVoicemail() {
         setPhoneCallDetailsWithNumberAndGeocode(TEST_VOICEMAIL_NUMBER, "", "United States");
-        assertLabelEquals(EMPTY_GEOCODE); // The empty geocode is shown as the label.
+        assertLocationAndDateContains(EMPTY_GEOCODE); // The empty geocode is shown as the label.
     }
 
     public void testSetPhoneCallDetails_Highlighted() {
@@ -267,6 +354,25 @@ public class PhoneCallDetailsHelperTest extends AndroidTestCase {
         assertEquals("John Doe", mNameView.getText().toString());
     }
 
+    public void testGetCallTypeOrLocation_Geocode() {
+        assertEquals(TEST_GEOCODE, mHelper.getCallTypeOrLocation(getPhoneCallDetails()));
+    }
+
+    public void testGetCallTypeOrLocation_CallType() {
+        PhoneCallDetails details = getPhoneCallDetails();
+        details.geocode = null;
+        details.numberType = Calls.INCOMING_TYPE;
+        mHelper.setPhoneTypeLabelForTest("mobile");
+        assertEquals("mobile", mHelper.getCallTypeOrLocation(details));
+    }
+
+    public void testGetCallTypeOrLocation_DisplayNumber() {
+        PhoneCallDetails details = getPhoneCallDetails("", Calls.PRESENTATION_ALLOWED,
+                TEST_FORMATTED_NUMBER);
+        details.namePrimary = "name";
+        assertEquals(TEST_FORMATTED_NUMBER, mHelper.getCallTypeOrLocation(details));
+    }
+
     /** Asserts that the name text field contains the value of the given string resource. */
     private void assertNameEqualsResource(int resId) {
         assertNameEquals(getContext().getString(resId));
@@ -277,14 +383,46 @@ public class PhoneCallDetailsHelperTest extends AndroidTestCase {
         assertEquals(text, mViews.nameView.getText().toString());
     }
 
-    /** Asserts that the label text field contains the given string value. */
-    private void assertLabelEquals(String text) {
+    /** Asserts that the location and date text field contains the given string value. */
+    private void assertLocationAndDateContains(String text) {
         assertTrue(mViews.callLocationAndDate.getText().toString().contains(text));
     }
 
-    /** Asserts that the date text field contains the given string value. */
-    private void assertDateEquals(String text) {
-        assertTrue(mViews.callLocationAndDate.getText().toString().contains(text));
+    /** Asserts that the location and date text field exactly equals the given string value. */
+    private void assertLocationAndDateExactEquals(String text) {
+        assertEquals(text, mViews.callLocationAndDate.getText());
+    }
+
+    /** Asserts that the via number is correct. */
+    private void assertViaNumberEquals(String text) {
+        final String callAccountText =
+                mContext.getResources().getString(R.string.description_via_number, text);
+        assertEquals(callAccountText, mViews.callAccountLabel.getText());
+    }
+
+    /** Asserts that the account label is correct. */
+    private void assertAccountLabelEquals(String text) {
+        assertEquals(text, mViews.callAccountLabel.getText());
+    }
+
+    /** Asserts that the account label is correct when also showing the via number. */
+    private void assertAccountLabelEquals(String viaNumber, String accountLabel) {
+        final String viaNumberText =
+                mContext.getResources().getString(R.string.description_via_number, viaNumber);
+        assertEquals(accountLabel + " " + viaNumberText, mViews.callAccountLabel.getText());
+    }
+
+    /** Asserts that the call account label is invisible. */
+    private void assertCallAccountInvisible() {
+        assertEquals(mViews.callAccountLabel.getVisibility(), View.GONE);
+    }
+
+    /** Asserts that the duration is exactly as included in the location and date text field. */
+    private void assertDurationExactEquals(String text) {
+        Matcher matcher = Pattern.compile("(.*) (\\u2022) (\\d{2}:\\d{2})").matcher(
+                mViews.callLocationAndDate.getText());
+        assertEquals(true, matcher.matches());
+        assertEquals(text, matcher.group(3));
     }
 
     /** Asserts that the video icon is shown. */
@@ -300,7 +438,6 @@ public class PhoneCallDetailsHelperTest extends AndroidTestCase {
             assertEquals(id, mViews.callTypeIcons.getCallType(index));
         }
         assertEquals(View.VISIBLE, mViews.callTypeIcons.getVisibility());
-        assertTrue(mViews.callLocationAndDate.getText().toString().contains("Yesterday"));
     }
 
     /**
@@ -322,7 +459,37 @@ public class PhoneCallDetailsHelperTest extends AndroidTestCase {
     private void setPhoneCallDetailsWithNumber(String number, int presentation,
             String formattedNumber) {
         PhoneCallDetails details = getPhoneCallDetails(number, presentation, formattedNumber);
-        details.callTypes = new int[]{ Calls.VOICEMAIL_TYPE };
+        details.callTypes = new int[]{ AppCompatConstants.CALLS_VOICEMAIL_TYPE };
+        mHelper.setPhoneCallDetails(mViews, details);
+    }
+
+    /** Sets the phone call details with default values and the given via number. */
+    private void setPhoneCallDetailsWithViaNumber(String viaNumber) {
+        PhoneCallDetails details = getPhoneCallDetails();
+        mPhoneUtils.setAccountLabel("");
+        details.viaNumber = viaNumber;
+        mHelper.setPhoneCallDetails(mViews, details);
+    }
+
+    /** Sets the phone call details with an account handle. */
+    private void setPhoneCallDetailsWithAccountHandle() {
+        PhoneCallDetails details = getPhoneCallDetails();
+        details.accountHandle = new PhoneAccountHandle(new ComponentName("",""), "");
+        mHelper.setPhoneCallDetails(mViews, details);
+    }
+
+    /** Sets the phone call details with an account handle and via number */
+    private void setPhoneCallDetailsWithAccountLabelViaNumber(String viaNumber) {
+        PhoneCallDetails details = getPhoneCallDetails();
+        details.viaNumber = viaNumber;
+        details.accountHandle = new PhoneAccountHandle(new ComponentName("",""), "");
+        mHelper.setPhoneCallDetails(mViews, details);
+    }
+
+    /** Populates the phone call details with the Defaults. */
+    private void setDefaultPhoneCallDetailsNoViaNumber() {
+        PhoneCallDetails details = getPhoneCallDetails();
+        mPhoneUtils.setAccountLabel("");
         mHelper.setPhoneCallDetails(mViews, details);
     }
 
@@ -342,6 +509,21 @@ public class PhoneCallDetailsHelperTest extends AndroidTestCase {
         mHelper.setPhoneCallDetails(mViews, details);
     }
 
+    private void setVoicemailPhoneCallDetailsWithDate(long date) {
+        PhoneCallDetails details = getPhoneCallDetails();
+        details.date = date;
+        details.callTypes = new int[] {Calls.VOICEMAIL_TYPE};
+        mHelper.setPhoneCallDetails(mViews, details);
+    }
+
+    /** Sets the voice mail details with default values and the given duration. */
+    private void setVoicemailPhoneCallDetailsWithDuration(long duration) {
+        PhoneCallDetails details = getPhoneCallDetails();
+        details.duration = duration;
+        details.callTypes = new int[] {Calls.VOICEMAIL_TYPE};
+        mHelper.setPhoneCallDetails(mViews, details);
+    }
+
     /** Sets the phone call details with default values and the given call types using icons. */
     private void setPhoneCallDetailsWithCallTypeIcons(int... callTypes) {
         PhoneCallDetails details = getPhoneCallDetails();
@@ -356,7 +538,7 @@ public class PhoneCallDetailsHelperTest extends AndroidTestCase {
 
     private void setCallDetailsHeader(String name) {
         PhoneCallDetails details = getPhoneCallDetails();
-        details.name = name;
+        details.namePrimary = name;
         mHelper.setCallDetailsHeader(mNameView, details);
     }
 
@@ -366,6 +548,7 @@ public class PhoneCallDetailsHelperTest extends AndroidTestCase {
                 TEST_NUMBER,
                 Calls.PRESENTATION_ALLOWED,
                 TEST_FORMATTED_NUMBER,
+                EMPTY_POSTDIAL,
                 false /* isVoicemail */);
         setDefaultDetails(details);
         return details;
@@ -378,13 +561,14 @@ public class PhoneCallDetailsHelperTest extends AndroidTestCase {
                 number,
                 presentation,
                 formattedNumber,
+                EMPTY_POSTDIAL,
                 isVoicemail(number));
         setDefaultDetails(details);
         return details;
     }
 
     private void setDefaultDetails(PhoneCallDetails details) {
-        details.callTypes = new int[]{ Calls.INCOMING_TYPE };
+        details.callTypes = new int[]{ AppCompatConstants.CALLS_INCOMING_TYPE };
         details.countryIso = TEST_COUNTRY_ISO;
         details.date = TEST_DATE;
         details.duration = TEST_DURATION;

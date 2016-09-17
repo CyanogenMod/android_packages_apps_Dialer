@@ -31,7 +31,6 @@ import android.os.Bundle;
 import android.provider.CallLog.Calls;
 
 import com.android.dialer.R;
-import com.android.dialer.lookup.LookupCache;
 import com.android.dialer.service.CachedNumberLookupService;
 import com.android.dialerbind.ObjectFactory;
 
@@ -66,7 +65,6 @@ public class ClearCallLogDialog extends DialogFragment {
                         if (mCachedNumberLookupService != null) {
                             mCachedNumberLookupService.clearAllCacheEntries(context);
                         }
-                        LookupCache.deleteCachedContacts(context);
                         return null;
                     }
                     @Override
@@ -90,10 +88,9 @@ public class ClearCallLogDialog extends DialogFragment {
         };
         return new AlertDialog.Builder(getActivity())
             .setTitle(R.string.clearCallLogConfirmation_title)
-            .setIconAttribute(android.R.attr.alertDialogIcon)
             .setMessage(R.string.clearCallLogConfirmation)
             .setNegativeButton(android.R.string.cancel, null)
-            .setPositiveButton(android.R.string.ok, okListener)
+            .setPositiveButton(R.string.clear, okListener)
             .setCancelable(true)
             .create();
     }

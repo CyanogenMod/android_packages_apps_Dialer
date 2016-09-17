@@ -16,7 +16,6 @@
 package com.android.dialer.list;
 
 import static android.Manifest.permission.READ_CONTACTS;
-import static com.cyanogen.ambient.incall.CallableConstants.ADDITIONAL_CALLABLE_MIMETYPES_PARAM_KEY;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
@@ -24,7 +23,6 @@ import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.LoaderManager;
-import android.content.ComponentName;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.content.pm.PackageManager;
@@ -33,6 +31,7 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Trace;
+import android.support.v13.app.FragmentCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,9 +54,7 @@ import com.android.contacts.common.list.OnPhoneNumberPickerActionListener;
 import com.android.contacts.common.util.PermissionsUtil;
 import com.android.dialer.R;
 import com.android.dialer.widget.EmptyContentView;
-import com.android.phone.common.incall.DialerDataSubscription;
-import com.android.phone.common.incall.CallMethodInfo;
-import com.android.phone.common.incall.utils.MimeTypeUtils;
+import com.android.incallui.Call.LogState;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,7 +64,8 @@ import java.util.HashMap;
  */
 public class SpeedDialFragment extends Fragment implements OnItemClickListener,
         PhoneFavoritesTileAdapter.OnDataSetChangedForAnimationListener,
-        EmptyContentView.OnEmptyViewActionButtonClickedListener {
+        EmptyContentView.OnEmptyViewActionButtonClickedListener,
+        FragmentCompat.OnRequestPermissionsResultCallback {
 
     private static final int READ_CONTACTS_PERMISSION_REQUEST_CODE = 1;
 
@@ -90,13 +88,6 @@ public class SpeedDialFragment extends Fragment implements OnItemClickListener,
      */
     private static int LOADER_ID_CONTACT_TILE = 1;
 
-    /**
-     * Available Mime Types for favorites
-     */
-    private String mCallableMimeTypes;
-
-    private static final String AMBIENT_SUBSCRIPTION_ID = "SpeedDialFragment";
-
     public interface HostInterface {
         public void setDragDropController(DragDropController controller);
         public void showAllContactsTab();
@@ -106,11 +97,7 @@ public class SpeedDialFragment extends Fragment implements OnItemClickListener,
         @Override
         public CursorLoader onCreateLoader(int id, Bundle args) {
             if (DEBUG) Log.d(TAG, "ContactTileLoaderListener#onCreateLoader.");
-            String mimeTypes = (args != null) ?
-                    args.getString(ADDITIONAL_CALLABLE_MIMETYPES_PARAM_KEY, null) : null;
-            return ContactTileLoaderFactory
-                    .createStrequentCallableExtendedLoader(getActivity(),
-                            ADDITIONAL_CALLABLE_MIMETYPES_PARAM_KEY, mimeTypes);
+            return ContactTileLoaderFactory.createStrequentPhoneOnlyLoader(getActivity());
         }
 
         @Override
@@ -130,14 +117,16 @@ public class SpeedDialFragment extends Fragment implements OnItemClickListener,
         @Override
         public void onContactSelected(Uri contactUri, Rect targetRect) {
             if (mPhoneNumberPickerActionListener != null) {
-                mPhoneNumberPickerActionListener.onPickPhoneNumberAction(contactUri);
+                mPhoneNumberPickerActionListener.onPickDataUri(contactUri,
+                        false /* isVideoCall */, LogState.INITIATION_SPEED_DIAL);
             }
         }
 
         @Override
-        public void onCallNumberDirectly(String phoneNumber, String mimeType) {
+        public void onCallNumberDirectly(String phoneNumber) {
             if (mPhoneNumberPickerActionListener != null) {
-                mPhoneNumberPickerActionListener.onCallNumberDirectly(phoneNumber, false, mimeType);
+                mPhoneNumberPickerActionListener.onPickPhoneNumber(phoneNumber,
+                        false /* isVideoCall */, LogState.INITIATION_SPEED_DIAL);
             }
         }
 
@@ -211,40 +200,20 @@ public class SpeedDialFragment extends Fragment implements OnItemClickListener,
         Trace.endSection();
     }
 
-    private void providersUpdated(HashMap<ComponentName, CallMethodInfo> callMethodInfos) {
-        mCallableMimeTypes = MimeTypeUtils.getAllEnabledMimeTypes(
-                DialerDataSubscription.get(getContext()));
-        loadSpeedDialFavorites();
-    }
-
-    DialerDataSubscription.PluginChanged<CallMethodInfo> pluginsUpdatedReceiver =
-            new DialerDataSubscription.PluginChanged<CallMethodInfo>() {
-                @Override
-                public void onChanged(HashMap<ComponentName, CallMethodInfo> pluginInfos) {
-                    providersUpdated(pluginInfos);
-                }
-            };
-
-    private void loadSpeedDialFavorites() {
-        if (mCallableMimeTypes != null) {
-            Bundle bundle = new Bundle();
-            bundle.putString(ADDITIONAL_CALLABLE_MIMETYPES_PARAM_KEY, mCallableMimeTypes);
-            getLoaderManager().destroyLoader(LOADER_ID_CONTACT_TILE);
-            getLoaderManager().initLoader(LOADER_ID_CONTACT_TILE, bundle,
-                    mContactTileLoaderListener);
-        }
-    }
-
     @Override
     public void onResume() {
         Trace.beginSection(TAG + " onResume");
         super.onResume();
-
+        if (mContactTileAdapter != null) {
+            mContactTileAdapter.refreshContactsPreferences();
+        }
         if (PermissionsUtil.hasContactsPermissions(getActivity())) {
-            DialerDataSubscription subscription = DialerDataSubscription.get(getContext());
-            if(subscription.subscribe(AMBIENT_SUBSCRIPTION_ID, pluginsUpdatedReceiver)) {
-                providersUpdated(subscription.getPluginInfo());
-                subscription.refreshDynamicItems();
+            if (getLoaderManager().getLoader(LOADER_ID_CONTACT_TILE) == null) {
+                getLoaderManager().initLoader(LOADER_ID_CONTACT_TILE, null,
+                        mContactTileLoaderListener);
+
+            } else {
+                getLoaderManager().getLoader(LOADER_ID_CONTACT_TILE).forceLoad();
             }
 
             mEmptyView.setDescription(R.string.speed_dial_empty);
@@ -288,6 +257,11 @@ public class SpeedDialFragment extends Fragment implements OnItemClickListener,
         mListView.setOnScrollListener(mScrollListener);
         mListView.setFastScrollEnabled(false);
         mListView.setFastScrollAlwaysVisible(false);
+
+        //prevent content changes of the list from firing accessibility events.
+        mListView.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_NONE);
+        ContentChangedFilter.addToParent(mListView);
+
         Trace.endSection();
         return mParentView;
     }
@@ -349,12 +323,6 @@ public class SpeedDialFragment extends Fragment implements OnItemClickListener,
         } else {
             setEmptyViewVisibility(true);
         }
-    }
-
-    @Override
-    public void onPause() {
-        DialerDataSubscription.get(getContext()).unsubscribe(AMBIENT_SUBSCRIPTION_ID);
-        super.onPause();
     }
 
     /**
@@ -516,7 +484,8 @@ public class SpeedDialFragment extends Fragment implements OnItemClickListener,
         }
 
         if (!PermissionsUtil.hasPermission(activity, READ_CONTACTS)) {
-            requestPermissions(new String[] {READ_CONTACTS}, READ_CONTACTS_PERMISSION_REQUEST_CODE);
+          FragmentCompat.requestPermissions(this, new String[] {READ_CONTACTS},
+              READ_CONTACTS_PERMISSION_REQUEST_CODE);
         } else {
             // Switch tabs
             ((HostInterface) activity).showAllContactsTab();

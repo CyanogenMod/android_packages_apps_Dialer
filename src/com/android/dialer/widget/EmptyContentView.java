@@ -17,14 +17,10 @@
 package com.android.dialer.widget;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -37,9 +33,7 @@ public class EmptyContentView extends LinearLayout implements View.OnClickListen
     public static final int NO_IMAGE = 0;
 
     private ImageView mImageView;
-    private ImageView mImageViewSide;
     private TextView mDescriptionView;
-    private TextView mSubView;
     private TextView mActionView;
     private OnEmptyViewActionButtonClickedListener mOnActionButtonClickedListener;
 
@@ -70,9 +64,7 @@ public class EmptyContentView extends LinearLayout implements View.OnClickListen
         // Don't let touches fall through the empty view.
         setClickable(true);
         mImageView = (ImageView) findViewById(R.id.emptyListViewImage);
-        mImageViewSide = (ImageView) findViewById(R.id.emptyListViewImageSide);
         mDescriptionView = (TextView) findViewById(R.id.emptyListViewMessage);
-        mSubView = (TextView) findViewById(R.id.emptyListViewSubMessage);
         mActionView = (TextView) findViewById(R.id.emptyListViewAction);
         mActionView.setOnClickListener(this);
     }
@@ -82,94 +74,23 @@ public class EmptyContentView extends LinearLayout implements View.OnClickListen
             mDescriptionView.setText(null);
             mDescriptionView.setVisibility(View.GONE);
         } else {
+            if (resourceId == R.string.no_call_log) {
+                mDescriptionView.setText(resourceId);
+                mDescriptionView.setVisibility(View.VISIBLE);
+                mDescriptionView.setPadding(0, 0, 0, 700);
+            }
             mDescriptionView.setText(resourceId);
             mDescriptionView.setVisibility(View.VISIBLE);
         }
     }
 
-    public void setDescription(String string) {
-        if (TextUtils.isEmpty(string)) {
-            mDescriptionView.setText(null);
-            mDescriptionView.setVisibility(View.GONE);
-        } else {
-            mDescriptionView.setText(string);
-            mDescriptionView.setVisibility(View.VISIBLE);
-        }
-    }
-
-    public void setSubMessage(int resourceId) {
-        if (resourceId == NO_LABEL) {
-            mSubView.setText(null);
-            mSubView.setVisibility(View.GONE);
-        } else {
-            mSubView.setText(resourceId);
-            mSubView.setVisibility(View.VISIBLE);
-        }
-    }
-
-    public void setSubMessage(String string) {
-        if (TextUtils.isEmpty(string)) {
-            mSubView.setText(null);
-            mSubView.setVisibility(View.GONE);
-        } else {
-            mSubView.setText(string);
-            mSubView.setVisibility(View.VISIBLE);
-        }
-    }
-
     public void setImage(int resourceId) {
-        setImage(resourceId, false);
-    }
-
-    public void setImage(Drawable drawable) {
-        setImage(drawable, false);
-    }
-
-    public void setImage(int resourceId, boolean side) {
-        mImageView.setImageResource(resourceId);
-        mImageViewSide.setImageResource(resourceId);
-
         if (resourceId == NO_LABEL) {
+            mImageView.setImageDrawable(null);
             mImageView.setVisibility(View.GONE);
-            mImageViewSide.setVisibility(View.GONE);
         } else {
-            if (side) {
-                mImageView.setVisibility(View.GONE);
-                mImageViewSide.setVisibility(View.VISIBLE);
-            } else {
-                mImageView.setVisibility(View.VISIBLE);
-                mImageViewSide.setVisibility(View.GONE);
-            }
-        }
-
-        if (side) {
-            mDescriptionView.setGravity(Gravity.LEFT|Gravity.TOP);
-        } else {
-            mDescriptionView.setGravity(Gravity.CENTER_HORIZONTAL|Gravity.TOP);
-        }
-    }
-
-    public void setImage(Drawable drawable, boolean side) {
-        mImageView.setImageDrawable(drawable);
-        mImageViewSide.setImageDrawable(drawable);
-
-        if (drawable == null) {
-            mImageView.setVisibility(View.GONE);
-            mImageViewSide.setVisibility(View.GONE);
-        } else {
-            if (side) {
-                mImageView.setVisibility(View.GONE);
-                mImageViewSide.setVisibility(View.VISIBLE);
-            } else {
-                mImageView.setVisibility(View.VISIBLE);
-                mImageViewSide.setVisibility(View.GONE);
-            }
-        }
-
-        if (side) {
-            mDescriptionView.setGravity(Gravity.LEFT | Gravity.TOP);
-        } else {
-            mDescriptionView.setGravity(Gravity.CENTER_HORIZONTAL|Gravity.TOP);
+            mImageView.setImageResource(resourceId);
+            mImageView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -183,16 +104,8 @@ public class EmptyContentView extends LinearLayout implements View.OnClickListen
         }
     }
 
-    public void setWidth(int width) {
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
-        lp.width = width;
-        lp.gravity = Gravity.LEFT;
-        requestLayout();
-    }
-
     public boolean isShowingContent() {
         return mImageView.getVisibility() == View.VISIBLE
-                || mImageViewSide.getVisibility() == View.VISIBLE
                 || mDescriptionView.getVisibility() == View.VISIBLE
                 || mActionView.getVisibility() == View.VISIBLE;
     }

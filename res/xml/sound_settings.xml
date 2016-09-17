@@ -43,7 +43,7 @@
         android:entries="@array/dtmf_tone_length_entries"
         android:entryValues="@array/dtmf_tone_length_entry_values" />
 
-     <PreferenceCategory
+    <PreferenceCategory
         android:key="@string/incall_vibration_category_key"
         android:title="@string/incall_vibration_category_title">
 
@@ -63,20 +63,6 @@
             android:key="incall_vibrate_45secs"
             android:title="@string/incall_vibrate_45_title"
             android:summary="@string/incall_vibrate_45_summary" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="@string/call_recording_category_key"
-        android:title="@string/call_recording_category_title">
-
-        <ListPreference
-            android:key="@string/call_recording_format_key"
-            android:title="@string/call_recording_format"
-            android:summary="%s"
-            android:entries="@array/call_recording_encoder_entries"
-            android:entryValues="@array/call_recording_encoder_values"
-            android:defaultValue="0" />
 
     </PreferenceCategory>
 

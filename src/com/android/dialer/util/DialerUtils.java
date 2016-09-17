@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
@@ -33,20 +34,12 @@ import android.text.TextDirectionHeuristics;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.contacts.common.ContactsUtils;
 import com.android.contacts.common.interactions.TouchPointManager;
 import com.android.dialer.R;
-import com.android.dialer.widget.EmptyContentView;
-import com.android.incallui.CallCardFragment;
-import com.android.incallui.Log;
 
-import com.android.phone.common.PhoneConstants;
-
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -56,6 +49,8 @@ import java.util.Locale;
  */
 public class DialerUtils {
 
+    private static final String PREFS_MESSAGE = "video_call_welcome";
+    private static final String KEY_STATE = "message-repeat";
     /**
      * Attempts to start an activity and displays a toast with the default error message if the
      * activity is not found, instead of throwing an exception.
@@ -64,19 +59,7 @@ public class DialerUtils {
      * @param intent to start the activity with.
      */
     public static void startActivityWithErrorToast(Context context, Intent intent) {
-        startActivityWithErrorToast(context, intent, R.string.activity_not_available, null);
-    }
-
-    /**
-     * Attempts to start an activity and displays a toast with the default error message if the
-     * activity is not found, instead of throwing an exception.
-     *
-     * @param context to start the activity with.
-     * @param intent to start the activity with.
-     * @param origin that started the call
-     */
-    public static void startActivityWithErrorToast(Context context, Intent intent, String origin) {
-        startActivityWithErrorToast(context, intent, R.string.activity_not_available, origin);
+        startActivityWithErrorToast(context, intent, R.string.activity_not_available);
     }
 
     /**
@@ -89,37 +72,31 @@ public class DialerUtils {
      *              not found.
      */
     public static void startActivityWithErrorToast(Context context, Intent intent, int msgId) {
-        startActivityWithErrorToast(context, intent, msgId, null);
-    }
-
-    /**
-     * Attempts to start an activity and displays a toast with a provided error message if the
-     * activity is not found, instead of throwing an exception.
-     *
-     * @param context to start the activity with.
-     * @param intent to start the activity with.
-     * @param msgId Resource ID of the string to display in an error message if the activity is
-     *              not found.
-     * @param origin Area of the dialer app where the activity was started.
-     */
-    public static void startActivityWithErrorToast(Context context, Intent intent, int msgId,
-                                                   String origin) {
         try {
             if ((IntentUtil.CALL_ACTION.equals(intent.getAction())
                             && context instanceof Activity)) {
                 // All dialer-initiated calls should pass the touch point to the InCallUI
                 Point touchPoint = TouchPointManager.getInstance().getPoint();
                 if (touchPoint.x != 0 || touchPoint.y != 0) {
-                    Bundle extras = new Bundle();
+                    Bundle extras;
+                    // Make sure to not accidentally clobber any existing extras
+                    if (intent.hasExtra(TelecomManager.EXTRA_OUTGOING_CALL_EXTRAS)) {
+                        extras = intent.getParcelableExtra(
+                                TelecomManager.EXTRA_OUTGOING_CALL_EXTRAS);
+                    } else {
+                        extras = new Bundle();
+                    }
                     extras.putParcelable(TouchPointManager.TOUCH_POINT, touchPoint);
                     intent.putExtra(TelecomManager.EXTRA_OUTGOING_CALL_EXTRAS, extras);
                 }
-                if (origin != null) {
-                    intent.putExtra(PhoneConstants.EXTRA_CALL_ORIGIN, origin);
+
+                final boolean hasCallPermission = TelecomUtil.placeCall((Activity) context, intent);
+                if (!hasCallPermission) {
+                    // TODO: Make calling activity show request permission dialog and handle
+                    // callback results appropriately.
+                    Toast.makeText(context, "Cannot place call without Phone permission",
+                            Toast.LENGTH_SHORT);
                 }
-                final TelecomManager tm =
-                        (TelecomManager) context.getSystemService(Context.TELECOM_SERVICE);
-                tm.placeCall(intent.getData(), intent.getExtras());
             } else {
                 context.startActivity(intent);
             }
@@ -217,5 +194,28 @@ public class DialerUtils {
         if (imm != null) {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+
+    /**
+     * @return true if the Welcome Screen shall be presented to the user, false otherwise.
+     */
+    public static boolean canShowWelcomeScreen(Context context) {
+        final SharedPreferences prefs = context.getSharedPreferences(
+                PREFS_MESSAGE, Context.MODE_PRIVATE);
+        return prefs.getBoolean(KEY_STATE, false);
+    }
+
+
+    /**
+     * Save the state of Welcome Screen.
+     *
+     *@param context
+     *@param show if the Welcome Screen should be presented
+     */
+    public static void setShowingState(Context context, boolean show) {
+        final SharedPreferences prefs = context.getSharedPreferences(
+                PREFS_MESSAGE, Context.MODE_PRIVATE);
+        prefs.edit().putBoolean(KEY_STATE, show).apply();
     }
 }

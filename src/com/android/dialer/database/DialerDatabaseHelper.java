@@ -33,17 +33,18 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.Directory;
+import android.provider.ContactsContract.RawContacts;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.contacts.common.util.PermissionsUtil;
 import com.android.contacts.common.util.StopWatch;
+import com.android.dialer.database.FilteredNumberContract.FilteredNumberColumns;
+import com.android.dialer.database.VoicemailArchiveContract.VoicemailArchive;
 import com.android.dialer.R;
 import com.android.dialer.dialpad.SmartDialNameMatcher;
 import com.android.dialer.dialpad.SmartDialPrefix;
 
-import com.android.phone.common.incall.DialerDataSubscription;
-import com.android.phone.common.incall.utils.MimeTypeUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -51,9 +52,9 @@ import com.google.common.collect.Lists;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static com.cyanogen.ambient.incall.CallableConstants.ADDITIONAL_CALLABLE_MIMETYPES_PARAM_KEY;
 
 /**
  * Database helper for smart dial. Designed as a singleton to make sure there is
@@ -63,6 +64,7 @@ import static com.cyanogen.ambient.incall.CallableConstants.ADDITIONAL_CALLABLE_
 public class DialerDatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "DialerDatabaseHelper";
     private static final boolean DEBUG = false;
+    private boolean mIsTestInstance = false;
 
     private static DialerDatabaseHelper sSingleton = null;
 
@@ -73,6 +75,7 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
     private Class mMultiMatchClass;
     private Object mMultiMatchObject;
     private Method mMultiMatchMethod;
+    private Method mMultiGetNameNumberMethod;
 
     /**
      * SmartDial DB version ranges:
@@ -80,7 +83,7 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
      *   0-98   KitKat
      * </pre>
      */
-    public static final int DATABASE_VERSION = 70007;
+    public static final int DATABASE_VERSION = 9;
     public static final String DATABASE_NAME = "dialer.db";
 
     /**
@@ -93,10 +96,14 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
     private static final int MAX_ENTRIES = 40;
 
     public interface Tables {
+        /** Saves a list of numbers to be blocked.*/
+        static final String FILTERED_NUMBER_TABLE = "filtered_numbers_table";
         /** Saves the necessary smart dial information of all contacts. */
         static final String SMARTDIAL_TABLE = "smartdial_table";
         /** Saves all possible prefixes to refer to a contacts.*/
         static final String PREFIX_TABLE = "prefix_table";
+        /** Saves all archived voicemail information. */
+        static final String VOICEMAIL_ARCHIVE_TABLE = "voicemail_archive_table";
         /** Database properties for internal use */
         static final String PROPERTIES = "properties";
     }
@@ -118,10 +125,10 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
         static final String IS_SUPER_PRIMARY = "is_super_primary";
         static final String IN_VISIBLE_GROUP = "in_visible_group";
         static final String IS_PRIMARY = "is_primary";
+        static final String CARRIER_PRESENCE = "carrier_presence";
         static final String LAST_SMARTDIAL_UPDATE_TIME = "last_smartdial_update_time";
-        static final String MIMETYPE = "mimetype";
-        static final String PHONE_TYPE = "phone_type";
-        static final String PHONE_LABEL = "phone_label";
+        static final String ACCOUNT_TYPE = "account_type";
+        static final String ACCOUNT_NAME = "account_name";
     }
 
     public static interface PrefixColumns extends BaseColumns {
@@ -135,8 +142,8 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
     }
 
     /** Query options for querying the contact database.*/
-    public static class PhoneQuery {
-       static final Uri URI = ContactsContract.CommonDataKinds.Callable.CONTENT_URI.buildUpon().
+    public static interface PhoneQuery {
+       static final Uri URI = Phone.CONTENT_URI.buildUpon().
                appendQueryParameter(ContactsContract.DIRECTORY_PARAM_KEY,
                        String.valueOf(Directory.DEFAULT)).
                appendQueryParameter(ContactsContract.REMOVE_DUPLICATE_ENTRIES, "true").
@@ -157,8 +164,10 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
             Data.IS_SUPER_PRIMARY,              // 11
             Contacts.IN_VISIBLE_GROUP,          // 12
             Data.IS_PRIMARY,                    // 13
-            Data.MIMETYPE,                      // 14
-       };
+            Data.CARRIER_PRESENCE,              // 14
+            RawContacts.ACCOUNT_TYPE,           // 15
+            RawContacts.ACCOUNT_NAME,           // 16
+        };
 
         static final int PHONE_ID = 0;
         static final int PHONE_TYPE = 1;
@@ -174,7 +183,9 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
         static final int PHONE_IS_SUPER_PRIMARY = 11;
         static final int PHONE_IN_VISIBLE_GROUP = 12;
         static final int PHONE_IS_PRIMARY = 13;
-        static final int PHONE_NUMBER_MIMETYPE = 14;
+        static final int PHONE_CARRIER_PRESENCE = 14;
+        static final int PHONE_ACCOUNT_TYPE = 15;
+        static final int PHONE_ACCOUNT_NAME = 16;
 
         /** Selects only rows that have been updated after a certain time stamp.*/
         static final String SELECT_UPDATED_CLAUSE =
@@ -190,12 +201,23 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
 
         static final String SELECTION = SELECT_UPDATED_CLAUSE + " AND " +
                 SELECT_IGNORE_LOOKUP_KEY_TOO_LONG_CLAUSE;
+    }
 
-        public static Uri constructExtendedUri(String mimeTypes) {
-            return (TextUtils.isEmpty(mimeTypes)) ? URI : URI.buildUpon()
-                    .appendQueryParameter(ADDITIONAL_CALLABLE_MIMETYPES_PARAM_KEY, mimeTypes)
-                    .build();
-        }
+    /**
+     * Query for all contacts that have been updated since the last time the smart dial database
+     * was updated.
+     */
+    public static interface UpdatedContactQuery {
+        static final Uri URI = ContactsContract.Contacts.CONTENT_URI;
+
+        static final String[] PROJECTION = new String[] {
+                ContactsContract.Contacts._ID  // 0
+        };
+
+        static final int UPDATED_CONTACT_ID = 0;
+
+        static final String SELECT_UPDATED_CLAUSE =
+                ContactsContract.Contacts.CONTACT_LAST_UPDATED_TIMESTAMP + " > ?";
     }
 
     /** Query options for querying the deleted contact database.*/
@@ -226,7 +248,7 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
         static final long LAST_TIME_USED_RECENT_MS = 30L * 24 * 60 * 60 * 1000;
 
         /** Time since last contact. */
-        static final String TIME_SINCE_LAST_USED_MS = "( ? - " +
+        static final String TIME_SINCE_LAST_USED_MS = "( ?1 - " +
                 Tables.SMARTDIAL_TABLE + "." + SmartDialDbColumns.LAST_TIME_USED + ")";
 
         /** Contacts that have been used in the past 3 days rank higher than contacts that have
@@ -244,14 +266,13 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
          * of frequently called contacts.
          */
         static final String SORT_ORDER =
-                Tables.SMARTDIAL_TABLE + "." + SmartDialDbColumns.CONTACT_ID + ", "
-                + Tables.SMARTDIAL_TABLE + "." + SmartDialDbColumns.PHONE_TYPE + " DESC, "
-                + Tables.SMARTDIAL_TABLE + "." + SmartDialDbColumns.STARRED + " DESC, "
+                Tables.SMARTDIAL_TABLE + "." + SmartDialDbColumns.STARRED + " DESC, "
                 + Tables.SMARTDIAL_TABLE + "." + SmartDialDbColumns.IS_SUPER_PRIMARY + " DESC, "
                 + SORT_BY_DATA_USAGE + ", "
                 + Tables.SMARTDIAL_TABLE + "." + SmartDialDbColumns.TIMES_USED + " DESC, "
                 + Tables.SMARTDIAL_TABLE + "." + SmartDialDbColumns.IN_VISIBLE_GROUP + " DESC, "
                 + Tables.SMARTDIAL_TABLE + "." + SmartDialDbColumns.DISPLAY_NAME_PRIMARY + ", "
+                + Tables.SMARTDIAL_TABLE + "." + SmartDialDbColumns.CONTACT_ID + ", "
                 + Tables.SMARTDIAL_TABLE + "." + SmartDialDbColumns.IS_PRIMARY + " DESC";
     }
 
@@ -266,27 +287,41 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
         public final String phoneNumber;
         public final String lookupKey;
         public final long photoId;
-        public final String mimeType;
-        public final int phoneType;
-        public final String phoneLabel;
+        public final int carrierPresence;
+        public final String accountType;
+        public final String accountName;
 
         public ContactNumber(long id, long dataID, String displayName, String phoneNumber,
-                String lookupKey, long photoId, String mimeType, int phoneType, String phoneLabel) {
+                String lookupKey, long photoId, int carrierPresence) {
             this.dataId = dataID;
             this.id = id;
             this.displayName = displayName;
             this.phoneNumber = phoneNumber;
             this.lookupKey = lookupKey;
             this.photoId = photoId;
-            this.mimeType = mimeType;
-            this.phoneType = phoneType;
-            this.phoneLabel = phoneLabel;
+            this.carrierPresence = carrierPresence;
+            this.accountType = null;
+            this.accountName = null;
+        }
+
+        public ContactNumber(long id, long dataID, String displayName, String phoneNumber,
+                String lookupKey, long photoId, int carrierPresence,
+                        String accountType, String accountName) {
+            this.dataId = dataID;
+            this.id = id;
+            this.displayName = displayName;
+            this.phoneNumber = phoneNumber;
+            this.lookupKey = lookupKey;
+            this.photoId = photoId;
+            this.carrierPresence = carrierPresence;
+            this.accountType = accountType;
+            this.accountName = accountName;
         }
 
         @Override
         public int hashCode() {
             return Objects.hashCode(id, dataId, displayName, phoneNumber, lookupKey, photoId,
-                    mimeType, phoneType, phoneLabel);
+                    carrierPresence);
         }
 
         @Override
@@ -302,9 +337,9 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
                         && Objects.equal(this.phoneNumber, that.phoneNumber)
                         && Objects.equal(this.lookupKey, that.lookupKey)
                         && Objects.equal(this.photoId, that.photoId)
-                        && Objects.equal(this.mimeType, that.mimeType)
-                        && Objects.equal(this.phoneType, that.phoneType)
-                        && Objects.equal(this.phoneLabel, that.phoneLabel);
+                        && Objects.equal(this.carrierPresence, that.carrierPresence)
+                        && Objects.equal(this.accountType, that.accountType)
+                        && Objects.equal(this.accountName, that.accountName);
 
             }
             return false;
@@ -364,7 +399,12 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
      */
     @VisibleForTesting
     static DialerDatabaseHelper getNewInstanceForTest(Context context) {
-        return new DialerDatabaseHelper(context, null);
+        return new DialerDatabaseHelper(context, null, true);
+    }
+
+    protected DialerDatabaseHelper(Context context, String databaseName, boolean isTestInstance) {
+        this(context, databaseName, DATABASE_VERSION);
+        mIsTestInstance = isTestInstance;
     }
 
     protected DialerDatabaseHelper(Context context, String databaseName) {
@@ -379,19 +419,25 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
     private void initMultiLanguageSearch() {
         try {
             if (mMultiMatchClass == null) {
-                mMultiMatchClass = Class
-                        .forName("com.qualcomm.qti.smartsearch.SmartMatch");
+                mMultiMatchClass = Class.forName("com.qualcomm.qti.smartsearch.SmartMatch");
                 Log.d(TAG, "create multi match success");
             }
-            if (mMultiMatchObject == null && mMultiMatchClass != null) {
-                mMultiMatchObject = mMultiMatchClass.newInstance();
-            }
-            if (mMultiMatchMethod == null && mMultiMatchClass != null) {
-                mMultiMatchMethod = mMultiMatchClass.getDeclaredMethod(
-                        "getMatchStringIndex", String.class, String.class,
-                        int.class);
+            if (mMultiMatchClass != null) {
+                if (mMultiMatchObject == null) {
+                    mMultiMatchObject = mMultiMatchClass.newInstance();
+                }
+                if (mMultiMatchMethod == null) {
+                    mMultiMatchMethod = mMultiMatchClass.getDeclaredMethod(
+                            "getMatchStringIndex", String.class, String.class,
+                            int.class);
+                }
+                if (mMultiGetNameNumberMethod == null) {
+                    mMultiGetNameNumberMethod = mMultiMatchClass.getDeclaredMethod(
+                            "getNameNumber", String.class, int.class);
+                }
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -415,45 +461,65 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
 
     private void setupTables(SQLiteDatabase db) {
         dropTables(db);
-        db.execSQL("CREATE TABLE " + Tables.SMARTDIAL_TABLE + " (" +
-                SmartDialDbColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                SmartDialDbColumns.DATA_ID + " INTEGER, " +
-                SmartDialDbColumns.NUMBER + " TEXT," +
-                SmartDialDbColumns.CONTACT_ID + " INTEGER," +
-                SmartDialDbColumns.LOOKUP_KEY + " TEXT," +
-                SmartDialDbColumns.DISPLAY_NAME_PRIMARY + " TEXT, " +
-                SmartDialDbColumns.PHOTO_ID + " INTEGER, " +
-                SmartDialDbColumns.LAST_SMARTDIAL_UPDATE_TIME + " LONG, " +
-                SmartDialDbColumns.LAST_TIME_USED + " LONG, " +
-                SmartDialDbColumns.TIMES_USED + " INTEGER, " +
-                SmartDialDbColumns.STARRED + " INTEGER, " +
-                SmartDialDbColumns.IS_SUPER_PRIMARY + " INTEGER, " +
-                SmartDialDbColumns.IN_VISIBLE_GROUP + " INTEGER, " +
-                SmartDialDbColumns.IS_PRIMARY + " INTEGER, " +
-                SmartDialDbColumns.MIMETYPE + " TEXT, " +
-                SmartDialDbColumns.PHONE_TYPE + " INTEGER, " +
-                SmartDialDbColumns.PHONE_LABEL + " Text" +
-                ");");
+        db.execSQL("CREATE TABLE " + Tables.SMARTDIAL_TABLE + " ("
+                + SmartDialDbColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + SmartDialDbColumns.DATA_ID + " INTEGER, "
+                + SmartDialDbColumns.NUMBER + " TEXT,"
+                + SmartDialDbColumns.CONTACT_ID + " INTEGER,"
+                + SmartDialDbColumns.LOOKUP_KEY + " TEXT,"
+                + SmartDialDbColumns.DISPLAY_NAME_PRIMARY + " TEXT, "
+                + SmartDialDbColumns.PHOTO_ID + " INTEGER, "
+                + SmartDialDbColumns.LAST_SMARTDIAL_UPDATE_TIME + " LONG, "
+                + SmartDialDbColumns.LAST_TIME_USED + " LONG, "
+                + SmartDialDbColumns.TIMES_USED + " INTEGER, "
+                + SmartDialDbColumns.STARRED + " INTEGER, "
+                + SmartDialDbColumns.IS_SUPER_PRIMARY + " INTEGER, "
+                + SmartDialDbColumns.IN_VISIBLE_GROUP + " INTEGER, "
+                + SmartDialDbColumns.IS_PRIMARY + " INTEGER, "
+                + SmartDialDbColumns.CARRIER_PRESENCE + " INTEGER NOT NULL DEFAULT 0,"
+                + SmartDialDbColumns.ACCOUNT_TYPE + " TEXT, "
+                + SmartDialDbColumns.ACCOUNT_NAME + " TEXT "
+                + ");");
 
-        db.execSQL("CREATE TABLE " + Tables.PREFIX_TABLE + " (" +
-                PrefixColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                PrefixColumns.PREFIX + " TEXT COLLATE NOCASE, " +
-                PrefixColumns.CONTACT_ID + " INTEGER" +
-                ");");
+        db.execSQL("CREATE TABLE " + Tables.PREFIX_TABLE + " ("
+                + PrefixColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + PrefixColumns.PREFIX + " TEXT COLLATE NOCASE, "
+                + PrefixColumns.CONTACT_ID + " INTEGER"
+                + ");");
 
-        db.execSQL("CREATE TABLE " + Tables.PROPERTIES + " (" +
-                PropertiesColumns.PROPERTY_KEY + " TEXT PRIMARY KEY, " +
-                PropertiesColumns.PROPERTY_VALUE + " TEXT " +
-                ");");
+        db.execSQL("CREATE TABLE " + Tables.PROPERTIES + " ("
+                + PropertiesColumns.PROPERTY_KEY + " TEXT PRIMARY KEY, "
+                + PropertiesColumns.PROPERTY_VALUE + " TEXT "
+                + ");");
 
+        // This will need to also be updated in setupTablesForFilteredNumberTest and onUpgrade.
+        // Hardcoded so we know on glance what columns are updated in setupTables,
+        // and to be able to guarantee the state of the DB at each upgrade step.
+        db.execSQL("CREATE TABLE " + Tables.FILTERED_NUMBER_TABLE + " ("
+                + FilteredNumberColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + FilteredNumberColumns.NORMALIZED_NUMBER + " TEXT UNIQUE,"
+                + FilteredNumberColumns.NUMBER + " TEXT,"
+                + FilteredNumberColumns.COUNTRY_ISO + " TEXT,"
+                + FilteredNumberColumns.TIMES_FILTERED + " INTEGER,"
+                + FilteredNumberColumns.LAST_TIME_FILTERED + " LONG,"
+                + FilteredNumberColumns.CREATION_TIME + " LONG,"
+                + FilteredNumberColumns.TYPE + " INTEGER,"
+                + FilteredNumberColumns.SOURCE + " INTEGER"
+                + ");");
+
+        createVoicemailArchiveTable(db);
         setProperty(db, DATABASE_VERSION_PROPERTY, String.valueOf(DATABASE_VERSION));
-        resetSmartDialLastUpdatedTime();
+        if (!mIsTestInstance) {
+            resetSmartDialLastUpdatedTime();
+        }
     }
 
     public void dropTables(SQLiteDatabase db) {
         db.execSQL("DROP TABLE IF EXISTS " + Tables.PREFIX_TABLE);
         db.execSQL("DROP TABLE IF EXISTS " + Tables.SMARTDIAL_TABLE);
         db.execSQL("DROP TABLE IF EXISTS " + Tables.PROPERTIES);
+        db.execSQL("DROP TABLE IF EXISTS " + Tables.FILTERED_NUMBER_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + Tables.VOICEMAIL_ARCHIVE_TABLE);
     }
 
     @Override
@@ -469,12 +535,36 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
             Log.e(TAG, "Malformed database version..recreating database");
         }
 
-        int base = 70000;
-        db.execSQL("DROP TABLE IF EXISTS " + "cached_number_contacts");
-        if (oldVersion <= (DATABASE_VERSION - base)
-                || (oldVersion >= base && oldVersion < DATABASE_VERSION)) {
+        if (oldVersion < 4) {
             setupTables(db);
             return;
+        }
+
+        if (oldVersion < 7) {
+            db.execSQL("DROP TABLE IF EXISTS " + Tables.FILTERED_NUMBER_TABLE);
+            db.execSQL("CREATE TABLE " + Tables.FILTERED_NUMBER_TABLE + " ("
+                    + FilteredNumberColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + FilteredNumberColumns.NORMALIZED_NUMBER + " TEXT UNIQUE,"
+                    + FilteredNumberColumns.NUMBER + " TEXT,"
+                    + FilteredNumberColumns.COUNTRY_ISO + " TEXT,"
+                    + FilteredNumberColumns.TIMES_FILTERED + " INTEGER,"
+                    + FilteredNumberColumns.LAST_TIME_FILTERED + " LONG,"
+                    + FilteredNumberColumns.CREATION_TIME + " LONG,"
+                    + FilteredNumberColumns.TYPE + " INTEGER,"
+                    + FilteredNumberColumns.SOURCE + " INTEGER"
+                    + ");");
+            oldVersion = 7;
+        }
+
+        if (oldVersion < 8) {
+            upgradeToVersion8(db);
+            oldVersion = 8;
+        }
+
+        if (oldVersion < 9) {
+            db.execSQL("DROP TABLE IF EXISTS " + Tables.VOICEMAIL_ARCHIVE_TABLE);
+            createVoicemailArchiveTable(db);
+            oldVersion = 9;
         }
 
         if (oldVersion != DATABASE_VERSION) {
@@ -483,6 +573,10 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
         }
 
         setProperty(db, DATABASE_VERSION_PROPERTY, String.valueOf(DATABASE_VERSION));
+    }
+
+    public void upgradeToVersion8(SQLiteDatabase db) {
+        db.execSQL("ALTER TABLE smartdial_table ADD carrier_presence INTEGER NOT NULL DEFAULT 0");
     }
 
     /**
@@ -577,78 +671,18 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
             if (DEBUG) {
                 Log.v(TAG, "Updating Finished");
             }
-            /** Gets the last update time on the database. */
-            final SharedPreferences databaseLastUpdateSharedPref = mContext.getSharedPreferences(
-                    DATABASE_LAST_CREATED_SHARED_PREF, Context.MODE_PRIVATE);
-            final SharedPreferences.Editor editor = databaseLastUpdateSharedPref.edit();
-            editor.putLong(LAST_UPDATED_MILLIS, System.currentTimeMillis());
-            editor.apply();
-
-            // Notify content observers that smart dial database has been updated.
-            mContext.getContentResolver().notifyChange(SMART_DIAL_UPDATED_URI, null, false);
-
             super.onPostExecute(o);
         }
     }
-
-    /**
-     * Deletes all smart dial data and recreates it from contacts
-     */
-    public void recreateSmartDialDatabaseInBackground() {
-        if (PermissionsUtil.hasContactsPermissions(mContext)) {
-            new SmartDialRecreateAsyncTask().execute();
-        }
-    }
-
-    private class SmartDialRecreateAsyncTask extends AsyncTask {
-        @Override
-        protected Object doInBackground(Object[] objects) {
-            if (DEBUG) {
-                Log.v(TAG, "Recreating database");
-            }
-
-            // reset last updated so that we query for all contacts
-            resetSmartDialLastUpdatedTime();
-
-            // clear all contacts
-            final SQLiteDatabase db = getWritableDatabase();
-            removeAllContacts(db);
-
-            // repopulate
-            updateSmartDialDatabase();
-            return null;
-        }
-
-        @Override
-        protected void onCancelled() {
-            if (DEBUG) {
-                Log.v(TAG, "Recreate Cancelled");
-            }
-            super.onCancelled();
-        }
-
-        @Override
-        protected void onPostExecute(Object o) {
-            if (DEBUG) {
-                Log.v(TAG, "Recreate Finished");
-            }
-            super.onPostExecute(o);
-        }
-    }
-
     /**
      * Removes rows in the smartdial database that matches the contacts that have been deleted
      * by other apps since last update.
      *
-     * @param db Database pointer to the dialer database.
-     * @param last_update_time Time stamp of last update on the smartdial database
+     * @param db Database to operate on.
+     * @param deletedContactCursor Cursor containing rows of deleted contacts
      */
-    private void removeDeletedContacts(SQLiteDatabase db, String last_update_time) {
-        final Cursor deletedContactCursor = mContext.getContentResolver().query(
-                DeleteContactQuery.URI,
-                DeleteContactQuery.PROJECTION,
-                DeleteContactQuery.SELECT_UPDATED_CLAUSE,
-                new String[] {last_update_time}, null);
+    @VisibleForTesting
+    void removeDeletedContacts(SQLiteDatabase db, Cursor deletedContactCursor) {
         if (deletedContactCursor == null) {
             return;
         }
@@ -671,6 +705,15 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    private Cursor getDeletedContactCursor(String lastUpdateMillis) {
+        return mContext.getContentResolver().query(
+                DeleteContactQuery.URI,
+                DeleteContactQuery.PROJECTION,
+                DeleteContactQuery.SELECT_UPDATED_CLAUSE,
+                new String[] {lastUpdateMillis},
+                null);
+    }
+
     /**
      * Removes potentially corrupted entries in the database. These contacts may be added before
      * the previous instance of the dialer was destroyed for some reason. For data integrity, we
@@ -688,6 +731,41 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
                 null);
         db.delete(Tables.SMARTDIAL_TABLE,
                 SmartDialDbColumns.LAST_SMARTDIAL_UPDATE_TIME + " > " + last_update_time, null);
+    }
+
+    /**
+     * All columns excluding MIME_TYPE, _DATA, ARCHIVED, SERVER_ID, are the same as
+     *  the columns in the {@link android.provider.CallLog.Calls} table.
+     *
+     *  @param db Database pointer to the dialer database.
+     */
+    private void createVoicemailArchiveTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE " + Tables.VOICEMAIL_ARCHIVE_TABLE + " ("
+                + VoicemailArchive._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + VoicemailArchive.NUMBER + " TEXT,"
+                + VoicemailArchive.DATE + " LONG,"
+                + VoicemailArchive.DURATION + " LONG,"
+                + VoicemailArchive.MIME_TYPE + " TEXT,"
+                + VoicemailArchive.COUNTRY_ISO + " TEXT,"
+                + VoicemailArchive._DATA + " TEXT,"
+                + VoicemailArchive.GEOCODED_LOCATION + " TEXT,"
+                + VoicemailArchive.CACHED_NAME + " TEXT,"
+                + VoicemailArchive.CACHED_NUMBER_TYPE + " INTEGER,"
+                + VoicemailArchive.CACHED_NUMBER_LABEL + " TEXT,"
+                + VoicemailArchive.CACHED_LOOKUP_URI + " TEXT,"
+                + VoicemailArchive.CACHED_MATCHED_NUMBER + " TEXT,"
+                + VoicemailArchive.CACHED_NORMALIZED_NUMBER + " TEXT,"
+                + VoicemailArchive.CACHED_PHOTO_ID + " LONG,"
+                + VoicemailArchive.CACHED_FORMATTED_NUMBER + " TEXT,"
+                + VoicemailArchive.ARCHIVED + " INTEGER,"
+                + VoicemailArchive.NUMBER_PRESENTATION + " INTEGER,"
+                + VoicemailArchive.ACCOUNT_COMPONENT_NAME + " TEXT,"
+                + VoicemailArchive.ACCOUNT_ID + " TEXT,"
+                + VoicemailArchive.FEATURES + " INTEGER,"
+                + VoicemailArchive.SERVER_ID + " INTEGER,"
+                + VoicemailArchive.TRANSCRIPTION + " TEXT,"
+                + VoicemailArchive.CACHED_PHOTO_URI + " TEXT"
+                + ");");
     }
 
     /**
@@ -714,11 +792,14 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
      * @param db Database pointer to the smartdial database
      * @param updatedContactCursor Cursor pointing to the list of recently updated contacts.
      */
-    private void removeUpdatedContacts(SQLiteDatabase db, Cursor updatedContactCursor) {
+    @VisibleForTesting
+    void removeUpdatedContacts(SQLiteDatabase db, Cursor updatedContactCursor) {
         db.beginTransaction();
         try {
+            updatedContactCursor.moveToPosition(-1);
             while (updatedContactCursor.moveToNext()) {
-                final Long contactId = updatedContactCursor.getLong(PhoneQuery.PHONE_CONTACT_ID);
+                final Long contactId =
+                        updatedContactCursor.getLong(UpdatedContactQuery.UPDATED_CONTACT_ID);
 
                 db.delete(Tables.SMARTDIAL_TABLE, SmartDialDbColumns.CONTACT_ID + "=" +
                         contactId, null);
@@ -757,10 +838,10 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
                     SmartDialDbColumns.IS_SUPER_PRIMARY + ", " +
                     SmartDialDbColumns.IN_VISIBLE_GROUP+ ", " +
                     SmartDialDbColumns.IS_PRIMARY + ", " +
+                    SmartDialDbColumns.CARRIER_PRESENCE + ", " +
                     SmartDialDbColumns.LAST_SMARTDIAL_UPDATE_TIME + ", " +
-                    SmartDialDbColumns.MIMETYPE + ", " +
-                    SmartDialDbColumns.PHONE_TYPE + ", " +
-                    SmartDialDbColumns.PHONE_LABEL + ") " +
+                    SmartDialDbColumns.ACCOUNT_TYPE + ", " +
+                    SmartDialDbColumns.ACCOUNT_NAME + ") " +
                     " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             final SQLiteStatement insert = db.compileStatement(sqlInsert);
 
@@ -808,25 +889,17 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
                 insert.bindLong(10, updatedContactCursor.getInt(PhoneQuery.PHONE_IS_SUPER_PRIMARY));
                 insert.bindLong(11, updatedContactCursor.getInt(PhoneQuery.PHONE_IN_VISIBLE_GROUP));
                 insert.bindLong(12, updatedContactCursor.getInt(PhoneQuery.PHONE_IS_PRIMARY));
-                insert.bindLong(13, currentMillis);
-                insert.bindLong(15, updatedContactCursor.getInt(PhoneQuery.PHONE_TYPE));
-
-                final String mimetype =
-                        updatedContactCursor.getString(PhoneQuery.PHONE_NUMBER_MIMETYPE);
-                insert.bindString(14, mimetype);
-
-                final String label = updatedContactCursor.getString(PhoneQuery.PHONE_LABEL);
-                if (label != null) {
-                    insert.bindString(16, label);
-                }
-
+                insert.bindLong(13, updatedContactCursor.getInt(PhoneQuery.PHONE_CARRIER_PRESENCE));
+                insert.bindLong(14, currentMillis);
+                insert.bindString(15, updatedContactCursor
+                        .getString(PhoneQuery.PHONE_ACCOUNT_TYPE));
+                insert.bindString(16, updatedContactCursor
+                        .getString(PhoneQuery.PHONE_ACCOUNT_NAME));
                 insert.executeInsert();
                 final String contactPhoneNumber =
                         updatedContactCursor.getString(PhoneQuery.PHONE_NUMBER);
                 final ArrayList<String> numberPrefixes =
-                        (TextUtils.equals(mimetype, Phone.CONTENT_ITEM_TYPE)) ?
-                                SmartDialPrefix.parseToNumberTokens(contactPhoneNumber) :
-                                SmartDialPrefix.generateNamePrefixes(contactPhoneNumber);
+                        SmartDialPrefix.parseToNumberTokens(contactPhoneNumber);
 
                 for (String numberPrefix : numberPrefixes) {
                     numberInsert.bindLong(1, updatedContactCursor.getLong(
@@ -865,14 +938,27 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
 
             while (nameCursor.moveToNext()) {
                 /** Computes a list of prefixes of a given contact name. */
-                final ArrayList<String> namePrefixes =
-                        SmartDialPrefix.generateNamePrefixes(nameCursor.getString(columnIndexName));
-
-                for (String namePrefix : namePrefixes) {
-                    insert.bindLong(1, nameCursor.getLong(columnIndexContactId));
-                    insert.bindString(2, namePrefix);
-                    insert.executeInsert();
-                    insert.clearBindings();
+                if (mMultiGetNameNumberMethod != null) {
+                    try {
+                        String nameNumber = (String) mMultiGetNameNumberMethod.invoke(
+                                mMultiMatchObject,nameCursor.getString(columnIndexName), 0);
+                        nameNumber = nameNumber.replaceAll("[\\[\\.\\]]", "");
+                        insert.bindLong(1,nameCursor.getLong(columnIndexContactId));
+                        insert.bindString(2, nameNumber);
+                        insert.executeInsert();
+                        insert.clearBindings();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    final ArrayList<String> namePrefixes = SmartDialPrefix
+                            .generateNamePrefixes(nameCursor.getString(columnIndexName));
+                    for (String namePrefix : namePrefixes) {
+                        insert.bindLong(1, nameCursor.getLong(columnIndexContactId));
+                        insert.bindString(2, namePrefix);
+                        insert.executeInsert();
+                        insert.clearBindings();
+                    }
                 }
             }
 
@@ -910,63 +996,74 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
                 Log.v(TAG, "Last updated at " + lastUpdateMillis);
             }
 
-            // Get callable mimetypes from incall api, modify query uri accordingly
-            String mimeTypes = MimeTypeUtils.getAllMimeTypes(DialerDataSubscription.get(mContext));
-            Uri uri = PhoneQuery.constructExtendedUri(mimeTypes);
-
-            /** Queries the contact database to get contacts that have been updated since the last
-             * update time.
-             */
-            final Cursor updatedContactCursor = mContext.getContentResolver().query(uri,
-                    PhoneQuery.PROJECTION, PhoneQuery.SELECTION,
-                    new String[]{lastUpdateMillis}, null);
-            if (updatedContactCursor == null) {
-                if (DEBUG) {
-                    Log.e(TAG, "SmartDial query received null for cursor");
-                }
-                return;
-            }
-
             /** Sets the time after querying the database as the current update time. */
             final Long currentMillis = System.currentTimeMillis();
 
-            try {
-                if (DEBUG) {
-                    stopWatch.lap("Queried the Contacts database");
-                }
+            if (DEBUG) {
+                stopWatch.lap("Queried the Contacts database");
+            }
 
-                /** Prevents the app from reading the dialer database when updating. */
-                sInUpdate.getAndSet(true);
+            /** Prevents the app from reading the dialer database when updating. */
+            sInUpdate.getAndSet(true);
 
-                /** Removes contacts that have been deleted. */
-                removeDeletedContacts(db, lastUpdateMillis);
-                removePotentiallyCorruptedContacts(db, lastUpdateMillis);
+            /** Removes contacts that have been deleted. */
+            removeDeletedContacts(db, getDeletedContactCursor(lastUpdateMillis));
+            removePotentiallyCorruptedContacts(db, lastUpdateMillis);
 
-                if (DEBUG) {
-                    stopWatch.lap("Finished deleting deleted entries");
-                }
+            if (DEBUG) {
+                stopWatch.lap("Finished deleting deleted entries");
+            }
 
-                /** If the database did not exist before, jump through deletion as there is nothing
-                 * to delete.
+            /** If the database did not exist before, jump through deletion as there is nothing
+             * to delete.
+             */
+            if (!lastUpdateMillis.equals("0")) {
+                /** Removes contacts that have been updated. Updated contact information will be
+                 * inserted later. Note that this has to use a separate result set from
+                 * updatePhoneCursor, since it is possible for a contact to be updated (e.g.
+                 * phone number deleted), but have no results show up in updatedPhoneCursor (since
+                 * all of its phone numbers have been deleted).
                  */
-                if (!lastUpdateMillis.equals("0")) {
-                    /** Removes contacts that have been updated. Updated contact information will be
-                     * inserted later.
-                     */
-                    removeUpdatedContacts(db, updatedContactCursor);
-                    if (DEBUG) {
-                        stopWatch.lap("Finished deleting updated entries");
-                    }
+                final Cursor updatedContactCursor = mContext.getContentResolver().query(
+                        UpdatedContactQuery.URI,
+                        UpdatedContactQuery.PROJECTION,
+                        UpdatedContactQuery.SELECT_UPDATED_CLAUSE,
+                        new String[] {lastUpdateMillis},
+                        null
+                        );
+                if (updatedContactCursor == null) {
+                    Log.e(TAG, "SmartDial query received null for cursor");
+                    return;
                 }
+                try {
+                    removeUpdatedContacts(db, updatedContactCursor);
+                } finally {
+                    updatedContactCursor.close();
+                }
+                if (DEBUG) {
+                    stopWatch.lap("Finished deleting entries belonging to updated contacts");
+                }
+            }
 
-                /** Inserts recently updated contacts to the smartdial database.*/
-                insertUpdatedContactsAndNumberPrefix(db, updatedContactCursor, currentMillis);
+            /** Queries the contact database to get all phone numbers that have been updated since the last
+             * update time.
+             */
+            final Cursor updatedPhoneCursor = mContext.getContentResolver().query(PhoneQuery.URI,
+                    PhoneQuery.PROJECTION, PhoneQuery.SELECTION,
+                    new String[]{lastUpdateMillis}, null);
+            if (updatedPhoneCursor == null) {
+                Log.e(TAG, "SmartDial query received null for cursor");
+                return;
+            }
+
+            try {
+                /** Inserts recently updated phone numbers to the smartdial database.*/
+                insertUpdatedContactsAndNumberPrefix(db, updatedPhoneCursor, currentMillis);
                 if (DEBUG) {
                     stopWatch.lap("Finished building the smart dial table");
                 }
             } finally {
-                /** Inserts prefixes of phone numbers into the prefix table.*/
-                updatedContactCursor.close();
+                updatedPhoneCursor.close();
             }
 
             /** Gets a list of distinct contacts which have been updated, and adds the name prefixes
@@ -1037,39 +1134,13 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
             }
 
             sInUpdate.getAndSet(false);
-        }
-    }
 
-    /**
-     * Helper method for creating the where and param entries for mimetypes
-     * @param builder our string builder
-     * @param listOfMimes a list of mimes
-     * @param params a String[] of params for the where string we are building
-     * @param isCustomMimes are these mimes from our InCallPlugins?
-     * @param selectMime CallMethod currently selected in the filter
-     * @param paramPos position to start writing our params, zero if initial.
-     */
-    private void buildWhereString(StringBuilder builder, String[] listOfMimes, String[] params,
-                                  boolean isCustomMimes, String selectMime, int paramPos) {
+            final SharedPreferences.Editor editor = databaseLastUpdateSharedPref.edit();
+            editor.putLong(LAST_UPDATED_MILLIS, currentMillis);
+            editor.commit();
 
-        for (int i = 0; i < listOfMimes.length; i++) {
-            params[paramPos + i] = listOfMimes[i];
-
-            if (isCustomMimes) {
-                if (selectMime != null
-                        && MimeTypeUtils.getAllEnabledMimeTypes(
-                        DialerDataSubscription.get(mContext)).contains(selectMime)) {
-                    builder.append(SmartDialDbColumns.MIMETYPE + " = ?");
-                } else {
-                    builder.append(SmartDialDbColumns.MIMETYPE + " != ?");
-                }
-            } else {
-                builder.append(SmartDialDbColumns.MIMETYPE + " = ?");
-            }
-
-            if (i != listOfMimes.length - 1) {
-                builder.append(" OR ");
-            }
+            // Notify content observers that smart dial database has been updated.
+            mContext.getContentResolver().notifyChange(SMART_DIAL_UPDATED_URI, null, false);
         }
     }
 
@@ -1081,44 +1152,27 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
      * @return A list of top candidate contacts that will be suggested to user to match their input.
      */
     public ArrayList<ContactNumber>  getLooseMatches(String query,
-            SmartDialNameMatcher nameMatcher, String usernameMimeType) {
+            SmartDialNameMatcher nameMatcher) {
         final boolean inUpdate = sInUpdate.get();
-        if (inUpdate) {
+        if (inUpdate || query.length() == 0) {
             return Lists.newArrayList();
         }
 
         final SQLiteDatabase db = getReadableDatabase();
 
         /** Uses SQL query wildcard '%' to represent prefix matching.*/
-        //final String looseQuery = query + "%";
+        StringBuilder looseQuery = new StringBuilder(query);
+        for (int i = 0; i < looseQuery.toString().length();) {
+            looseQuery.insert(i, "%");
+            i = i + 2;
+        }
+        looseQuery.append("%");
 
         final ArrayList<ContactNumber> result = Lists.newArrayList();
 
         final StopWatch stopWatch = DEBUG ? StopWatch.start(":Name Prefix query") : null;
 
         final String currentTimeStamp = Long.toString(System.currentTimeMillis());
-
-        String[] defaultMimes = new String[] {
-                ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
-                ContactsContract.CommonDataKinds.SipAddress.CONTENT_ITEM_TYPE
-        };
-        String[] customMimes = MimeTypeUtils.getAllEnabledMimeTypes(
-                DialerDataSubscription.get(mContext)).split(",");
-        String[] finalizedParams = new String[customMimes.length + defaultMimes.length + 1];
-
-        StringBuilder where = new StringBuilder();
-
-        if (customMimes.length > 0) {
-            buildWhereString(where, customMimes, finalizedParams, true, usernameMimeType, 0);
-
-            // Append an OR in between our custom mimes and our default mimes
-            where.append(" OR ");
-        }
-
-        buildWhereString(where, defaultMimes, finalizedParams, false, null, customMimes.length);
-
-        // setup currentTypeStamp param for our order by
-        finalizedParams[finalizedParams.length - 1] = currentTimeStamp;
 
         /** Queries the database to find contacts that have an index matching the query prefix. */
         final Cursor cursor = db.rawQuery("SELECT " +
@@ -1128,13 +1182,17 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
                 SmartDialDbColumns.NUMBER + ", " +
                 SmartDialDbColumns.CONTACT_ID + ", " +
                 SmartDialDbColumns.LOOKUP_KEY + ", " +
-                SmartDialDbColumns.PHONE_TYPE + ", " +
-                SmartDialDbColumns.MIMETYPE + ", " +
-                SmartDialDbColumns.PHONE_LABEL +
+                SmartDialDbColumns.CARRIER_PRESENCE + ", " +
+                SmartDialDbColumns.ACCOUNT_TYPE + ", " +
+                SmartDialDbColumns.ACCOUNT_NAME +
                 " FROM " + Tables.SMARTDIAL_TABLE +
-                " WHERE " + where.toString() +
+                " WHERE " + SmartDialDbColumns.CONTACT_ID + " IN " +
+                " (SELECT " + PrefixColumns.CONTACT_ID +
+                    " FROM " + Tables.PREFIX_TABLE +
+                    " WHERE " + Tables.PREFIX_TABLE + "." + PrefixColumns.PREFIX +
+                    " LIKE '" + looseQuery + "')" +
                 " ORDER BY " + SmartDialSortingOrder.SORT_ORDER,
-                finalizedParams);
+                new String[] {currentTimeStamp});
         if (cursor == null) {
             return result;
         }
@@ -1150,14 +1208,14 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
             final int columnNumber = 3;
             final int columnId = 4;
             final int columnLookupKey = 5;
-            final int columnPhoneType = 6;
-            final int columnMimetype = 7;
-            final int columnPhoneLabel = 8;
-
+            final int columnCarrierPresence = 6;
+            final int columnAccountType = 7;
+            final int columnAccountName = 8;
             if (DEBUG) {
                 stopWatch.lap("Found column IDs");
             }
 
+            final Set<ContactMatch> duplicates = new HashSet<ContactMatch>();
             int counter = 0;
             if (DEBUG) {
                 stopWatch.lap("Moved cursor to start");
@@ -1170,22 +1228,30 @@ public class DialerDatabaseHelper extends SQLiteOpenHelper {
                 final long id = cursor.getLong(columnId);
                 final long photoId = cursor.getLong(columnPhotoId);
                 final String lookupKey = cursor.getString(columnLookupKey);
-                final int phoneType = cursor.getInt(columnPhoneType);
-                final String mimeType = cursor.getString(columnMimetype);
-                final String phoneLabel = cursor.getString(columnPhoneLabel);
+                final int carrierPresence = cursor.getInt(columnCarrierPresence);
+                final String accountType = cursor.getString(columnAccountType);
+                final String accountName = cursor.getString(columnAccountName);
+
+                /** If a contact already exists and another phone number of the contact is being
+                 * processed, skip the second instance.
+                 */
+                final ContactMatch contactMatch = new ContactMatch(lookupKey, id);
+                if (duplicates.contains(contactMatch)) {
+                    continue;
+                }
 
                 /**
-                 * If the contact has either the name or number OR a username
-                 * that matches the query, add to the result.
+                 * If the contact has either the name or number that matches the query, add to the
+                 * result.
                  */
                 final boolean nameMatches = nameMatcher.matches(displayName);
-                final boolean numberMatches = TextUtils.equals(mimeType, usernameMimeType) ?
-                        nameMatcher.matches(phoneNumber) :
+                final boolean numberMatches =
                         (nameMatcher.matchesNumber(phoneNumber, query) != null);
                 if (nameMatches || numberMatches) {
                     /** If a contact has not been added, add it to the result and the hash set.*/
+                    duplicates.add(contactMatch);
                     result.add(new ContactNumber(id, dataID, displayName, phoneNumber, lookupKey,
-                            photoId, mimeType, phoneType, phoneLabel));
+                            photoId, carrierPresence, accountType, accountName));
                     counter++;
                     if (DEBUG) {
                         stopWatch.lap("Added one result: Name: " + displayName);

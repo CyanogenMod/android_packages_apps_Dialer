@@ -16,49 +16,30 @@
 
 package com.android.dialer.calllog;
 
-import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.provider.CallLog.Calls;
-import android.text.TextUtils;
-import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.text.format.Formatter;
+import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.MimeTypeMap;
 import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.contacts.common.CallUtil;
 import com.android.dialer.PhoneCallDetails;
 import com.android.dialer.R;
 import com.android.dialer.util.DialerUtils;
-import com.android.services.callrecorder.common.CallRecording;
-import com.android.services.callrecorder.CallRecorderService;
-import com.android.services.callrecorder.CallRecordingDataStore;
+import com.android.dialer.util.AppCompatConstants;
 import com.google.common.collect.Lists;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * Adapter for a ListView containing history items from the details of a call.
  */
-public class CallDetailHistoryAdapter extends BaseAdapter implements View.OnClickListener {
-    /** The top element is a blank header, which is hidden under the rest of the UI. */
-    private static final int VIEW_TYPE_HEADER = 0;
+public class CallDetailHistoryAdapter extends BaseAdapter {
     /** Each history item shows the detail of a call. */
     private static final int VIEW_TYPE_HISTORY_ITEM = 1;
 
@@ -67,21 +48,17 @@ public class CallDetailHistoryAdapter extends BaseAdapter implements View.OnClic
     private final CallTypeHelper mCallTypeHelper;
     private final PhoneCallDetails[] mPhoneCallDetails;
 
-    private CallRecordingDataStore mCallRecordingDataStore;
-
     /**
      * List of items to be concatenated together for duration strings.
      */
     private ArrayList<CharSequence> mDurationItems = Lists.newArrayList();
 
     public CallDetailHistoryAdapter(Context context, LayoutInflater layoutInflater,
-            CallTypeHelper callTypeHelper, PhoneCallDetails[] phoneCallDetails,
-            CallRecordingDataStore callRecordingDataStore) {
+            CallTypeHelper callTypeHelper, PhoneCallDetails[] phoneCallDetails) {
         mContext = context;
         mLayoutInflater = layoutInflater;
         mCallTypeHelper = callTypeHelper;
         mPhoneCallDetails = phoneCallDetails;
-        mCallRecordingDataStore = callRecordingDataStore;
     }
 
     @Override
@@ -92,67 +69,70 @@ public class CallDetailHistoryAdapter extends BaseAdapter implements View.OnClic
 
     @Override
     public int getCount() {
-        return mPhoneCallDetails.length + 1;
+        return mPhoneCallDetails.length;
     }
 
     @Override
     public Object getItem(int position) {
-        if (position == 0) {
-            return null;
-        }
-        return mPhoneCallDetails[position - 1];
+        return mPhoneCallDetails[position];
     }
 
     @Override
     public long getItemId(int position) {
-        if (position == 0) {
-            return -1;
-        }
-        return position - 1;
+        return position;
     }
 
     @Override
     public int getViewTypeCount() {
-        return 2;
+        return 1;
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (position == 0) {
-            return VIEW_TYPE_HEADER;
-        }
         return VIEW_TYPE_HISTORY_ITEM;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (position == 0) {
-            final View header = convertView == null
-                    ? mLayoutInflater.inflate(R.layout.call_detail_history_header, parent, false)
-                    : convertView;
-            return header;
-        }
-
         // Make sure we have a valid convertView to start with
         final View result  = convertView == null
                 ? mLayoutInflater.inflate(R.layout.call_detail_history_item, parent, false)
                 : convertView;
 
-        PhoneCallDetails details = mPhoneCallDetails[position - 1];
+        PhoneCallDetails details = mPhoneCallDetails[position];
         CallTypeIconsView callTypeIconView =
                 (CallTypeIconsView) result.findViewById(R.id.call_type_icon);
         TextView callTypeTextView = (TextView) result.findViewById(R.id.call_type_text);
         TextView dateView = (TextView) result.findViewById(R.id.date);
         TextView durationView = (TextView) result.findViewById(R.id.duration);
-        View playbackButton = result.findViewById(R.id.recording_playback_button);
 
         int callType = details.callTypes[0];
         boolean isVideoCall = (details.features & Calls.FEATURES_VIDEO) == Calls.FEATURES_VIDEO
                 && CallUtil.isVideoEnabled(mContext);
-
+        boolean isVoLTE = (callType == AppCompatConstants.INCOMING_IMS_TYPE) ||
+                          (callType == AppCompatConstants.OUTGOING_IMS_TYPE) ||
+                          (callType == AppCompatConstants.MISSED_IMS_TYPE);
+        Log.d("CallDetailHistoryAdapter", "isVideoCall = " + isVideoCall
+                    + ", isVoLTE = " + isVoLTE);
         callTypeIconView.clear();
         callTypeIconView.add(callType);
         callTypeIconView.setShowVideo(isVideoCall);
+        boolean imsCallLogEnabled = mContext.getResources()
+                .getBoolean(R.bool.ims_call_type_enabled);
+        if (!imsCallLogEnabled && isVoLTE) {
+            switch (callType) {
+                case AppCompatConstants.INCOMING_IMS_TYPE:
+                    callType = Calls.INCOMING_TYPE;
+                    break;
+                case AppCompatConstants.OUTGOING_IMS_TYPE:
+                    callType = Calls.OUTGOING_TYPE;
+                    break;
+                case AppCompatConstants.MISSED_IMS_TYPE:
+                    callType = Calls.MISSED_TYPE;
+                    break;
+                default:
+            }
+        }
         callTypeTextView.setText(mCallTypeHelper.getCallTypeText(callType, isVideoCall));
         // Set the date.
         CharSequence dateValue = DateUtils.formatDateRange(mContext, details.date, details.date,
@@ -160,75 +140,17 @@ public class CallDetailHistoryAdapter extends BaseAdapter implements View.OnClic
                 DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_YEAR);
         dateView.setText(dateValue);
         // Set the duration
-        if (Calls.VOICEMAIL_TYPE == callType || CallTypeHelper.isMissedCallType(callType)) {
+        boolean callDurationEnabled = mContext.getResources()
+                .getBoolean(R.bool.call_duration_enabled);
+        if (Calls.VOICEMAIL_TYPE == callType || CallTypeHelper.isMissedCallType(callType) ||
+                !callDurationEnabled) {
             durationView.setVisibility(View.GONE);
         } else {
             durationView.setVisibility(View.VISIBLE);
             durationView.setText(formatDurationAndDataUsage(details.duration, details.dataUsage));
         }
 
-        // do this synchronously to prevent recordings from "popping in"
-        // after detail item is displayed
-        List<CallRecording> recordings = null;
-        if (CallRecorderService.isEnabled(mContext)) {
-            mCallRecordingDataStore.open(mContext); // opens unless already open
-            recordings = mCallRecordingDataStore.getRecordings(
-                    details.number.toString(), details.date);
-        }
-        playbackButton.setTag(recordings);
-        playbackButton.setOnClickListener(this);
-        playbackButton.setVisibility(recordings != null && !recordings.isEmpty()
-                ? View.VISIBLE : View.INVISIBLE);
-
         return result;
-    }
-
-    @Override
-    public void onClick(View view) {
-        if (view.getId() == R.id.recording_playback_button) {
-            final List<CallRecording> recordings = (List<CallRecording>) view.getTag();
-            if (recordings.size() == 1) {
-                launchMediaPlayer(recordings.get(0).getFile());
-            } else {
-                PopupMenu menu = new PopupMenu(mContext, view);
-                SimpleDateFormat format = getTimeWithSecondsFormat();
-                for (int i = 0; i < recordings.size(); i++) {
-                    final long startTime = recordings.get(i).startRecordingTime;
-                    final String formattedDate = format.format(new Date(startTime));
-                    menu.getMenu().add(Menu.NONE, i, i, formattedDate);
-                }
-                menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        CallRecording recording = recordings.get(item.getItemId());
-                        launchMediaPlayer(recording.getFile());
-                        return true;
-                    }
-                });
-                menu.show();
-            }
-        }
-    }
-
-    private SimpleDateFormat getTimeWithSecondsFormat() {
-        String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(),
-                DateFormat.is24HourFormat(mContext) ? "Hmss" : "hmssa");
-        return new SimpleDateFormat(pattern);
-    }
-
-    private void launchMediaPlayer(File file) {
-        Uri uri = Uri.fromFile(file);
-        String extension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
-        String mime = !TextUtils.isEmpty(extension)
-                ? MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) : "audio/*";
-        try {
-            Intent intent = new Intent(Intent.ACTION_VIEW).setDataAndType(uri, mime);
-            mContext.startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(mContext,
-                    R.string.call_playback_no_app_found_toast,
-                    Toast.LENGTH_LONG).show();
-        }
     }
 
     private CharSequence formatDuration(long elapsedSeconds) {

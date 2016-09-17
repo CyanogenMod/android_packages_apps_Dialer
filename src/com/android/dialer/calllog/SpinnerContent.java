@@ -1,4 +1,6 @@
 /*
+ * Copyright (c) 2016, The Linux Foundation. All rights reserved
+ * Not a Contribution.
  * Copyright (C) 2014 The CyanogenMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +23,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Spinner;
+import android.telecom.PhoneAccountHandle;
 
 import com.android.contacts.common.MoreContactUtils;
 import com.android.dialer.R;
@@ -32,18 +35,15 @@ import java.util.List;
  * To save the spinner content.
  */
 public class SpinnerContent {
-    private static String TAG = SpinnerContent.class.getSimpleName();
+    private static String TAG = "SpinnerContent";
 
     public final int value;
-    public final String label;
-
+    private final String label;
     // The index for call type spinner.
     private static final int INDEX_CALL_TYPE_ALL = 0;
     private static final int INDEX_CALL_TYPE_INCOMING = 1;
     private static final int INDEX_CALL_TYPE_OUTGOING = 2;
     private static final int INDEX_CALL_TYPE_MISSED = 3;
-    private static final int INDEX_CALL_TYPE_BLACKLIST = 4;
-    private static final int INDEX_CALL_TYPE_VOICEMAIL = 5;
 
     public static void setSpinnerContentValue(Spinner spinner, int value) {
         for (int i = 0, count = spinner.getCount(); i < count; i++) {
@@ -75,12 +75,15 @@ public class SpinnerContent {
         int count = telephonyManager.getPhoneCount();
         // Update the filter sub content.
         ArrayList<SpinnerContent> values = new ArrayList<SpinnerContent>(count + 1);
-        values.add(new SpinnerContent(CallLogQueryHandler.CALL_SIM_ALL,
+        values.add(new SpinnerContent(CallLogQueryHandler.CALL_SUB_ALL,
                 context.getString(R.string.call_log_show_all_slots)));
-        for (int i = 0; i < count; i++) {
+
+        List<PhoneAccountHandle>  mPhoneAccountHandle =
+                PhoneAccountUtils.getSubscriptionPhoneAccounts(context);
+        for (int i = 0; i < mPhoneAccountHandle.size(); i++) {
             String subDisplayName = PhoneAccountUtils.getAccountLabel(context,
-                    MoreContactUtils.getAccount(i));
-            if (!TextUtils.isEmpty(subDisplayName)) {
+                    mPhoneAccountHandle.get(i));
+            if (!TextUtils.isEmpty(subDisplayName) && subDisplayName.indexOf("Unknown") == -1) {
                 values.add(new SpinnerContent(i, subDisplayName));
             }
         }
@@ -88,13 +91,10 @@ public class SpinnerContent {
     }
 
     /**
-     * @param voicemailAvailable true if voicemail should be included in the return values
      * @return the spinner contents for the different call types (incoming, outgoing etc)
      */
-    public static List<SpinnerContent> setupStatusFilterContent(Context context,
-            boolean voicemailAvailable) {
-        // Didn't show the voice mail item if not available.
-        int statusCount = voicemailAvailable ? 6 : 5;
+    public static List<SpinnerContent> setupStatusFilterContent(Context context) {
+        int statusCount = 4;
         ArrayList<SpinnerContent> values = new ArrayList<SpinnerContent>(statusCount);
         for (int i = 0; i < statusCount; i++) {
             int value = CallLogQueryHandler.CALL_TYPE_ALL;
@@ -115,14 +115,6 @@ public class SpinnerContent {
                 case INDEX_CALL_TYPE_MISSED:
                     value = CallLog.Calls.MISSED_TYPE;
                     label = context.getString(R.string.call_log_missed_header);
-                    break;
-                case INDEX_CALL_TYPE_BLACKLIST:
-                    value = CallLog.Calls.BLACKLIST_TYPE;
-                    label = context.getString(R.string.call_log_blacklist_header);
-                    break;
-                case INDEX_CALL_TYPE_VOICEMAIL:
-                    value = CallLog.Calls.VOICEMAIL_TYPE;
-                    label = context.getString(R.string.call_log_voicemail_header);
                     break;
             }
             values.add(new SpinnerContent(value, label));

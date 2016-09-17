@@ -15,56 +15,47 @@
  */
 package com.android.dialer.list;
 
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.READ_CONTACTS;
 
+import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.support.v13.app.FragmentCompat;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.android.contacts.common.list.ContactEntryListAdapter;
 import com.android.contacts.common.list.PinnedHeaderListView;
+import com.android.contacts.common.util.PermissionsUtil;
 import com.android.contacts.commonbind.analytics.AnalyticsUtil;
 import com.android.dialerbind.ObjectFactory;
+import com.android.incallui.Call.LogState;
 
 import com.android.dialer.R;
-import com.android.dialer.lookup.LookupCache;
-import com.android.dialer.lookup.LookupSettings;
+import com.android.dialer.logging.Logger;
+import com.android.dialer.logging.ScreenEvent;
 import com.android.dialer.service.CachedNumberLookupService;
+import com.android.dialer.widget.EmptyContentView;
 import com.android.dialer.widget.EmptyContentView.OnEmptyViewActionButtonClickedListener;
-
-import com.android.phone.common.incall.CreditBarHelper;
-import com.android.phone.common.incall.DialerDataSubscription;
-import com.android.phone.common.incall.utils.CallMethodFilters;
 
 public class RegularSearchFragment extends SearchFragment
         implements OnEmptyViewActionButtonClickedListener,
-        CreditBarHelper.CreditBarVisibilityListener {
+        FragmentCompat.OnRequestPermissionsResultCallback {
 
-    private static final int READ_CONTACTS_PERMISSION_REQUEST_CODE = 1;
-    private static final int ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE = 2;
+    public static final int PERMISSION_REQUEST_CODE = 1;
 
     private static final int SEARCH_DIRECTORY_RESULT_LIMIT = 5;
 
     private static final CachedNumberLookupService mCachedNumberLookupService =
         ObjectFactory.newCachedNumberLookupService();
 
-    public RegularSearchFragment() {
-        configureDirectorySearch();
+    public interface CapabilityChecker {
+        public boolean isNearbyPlacesSearchEnabled();
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        AnalyticsUtil.sendScreenView(this);
+    protected String mPermissionToRequest;
 
-        if (LookupSettings.isForwardLookupEnabled(getActivity())
-                || LookupSettings.isPeopleLookupEnabled(getActivity())) {
-            if (getActivity().checkSelfPermission(ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{ACCESS_FINE_LOCATION},
-                        ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE);
-            }
-        }
+    public RegularSearchFragment() {
+        configureDirectorySearch();
     }
 
     public void configureDirectorySearch() {
@@ -73,29 +64,88 @@ public class RegularSearchFragment extends SearchFragment
     }
 
     @Override
-    protected void onCreateView(LayoutInflater inflater, final ViewGroup container) {
+    protected void onCreateView(LayoutInflater inflater, ViewGroup container) {
         super.onCreateView(inflater, container);
         ((PinnedHeaderListView) getListView()).setScrollToSectionOnHeaderTouch(true);
     }
 
+    @Override
     protected ContactEntryListAdapter createListAdapter() {
         RegularSearchListAdapter adapter = new RegularSearchListAdapter(getActivity());
         adapter.setDisplayPhotos(true);
         adapter.setUseCallableUri(usesCallableUri());
-        adapter.setAvailableCallMethods(CallMethodFilters.getAllEnabledCallMethods(
-                DialerDataSubscription.get(getActivity())));
+        adapter.setListener(this);
         return adapter;
     }
 
     @Override
     protected void cacheContactInfo(int position) {
-        final RegularSearchListAdapter adapter =
-                (RegularSearchListAdapter) getAdapter();
         if (mCachedNumberLookupService != null) {
+            final RegularSearchListAdapter adapter =
+                (RegularSearchListAdapter) getAdapter();
             mCachedNumberLookupService.addContact(getContext(),
                     adapter.getContactInfo(mCachedNumberLookupService, position));
         }
-        LookupCache.cacheContact(getActivity(),
-                adapter.getLookupContactInfo(position));
+    }
+
+    @Override
+    protected void setupEmptyView() {
+        if (mEmptyView != null && getActivity() != null) {
+            final int imageResource;
+            final int actionLabelResource;
+            final int descriptionResource;
+            final OnEmptyViewActionButtonClickedListener listener;
+            if (!PermissionsUtil.hasPermission(getActivity(), READ_CONTACTS)) {
+                imageResource = R.drawable.empty_contacts;
+                actionLabelResource = R.string.permission_single_turn_on;
+                descriptionResource = R.string.permission_no_search;
+                listener = this;
+                mPermissionToRequest = READ_CONTACTS;
+            } else {
+                imageResource = EmptyContentView.NO_IMAGE;
+                actionLabelResource = EmptyContentView.NO_LABEL;
+                descriptionResource = EmptyContentView.NO_LABEL;
+                listener = null;
+                mPermissionToRequest = null;
+            }
+
+            mEmptyView.setImage(imageResource);
+            mEmptyView.setActionLabel(actionLabelResource);
+            mEmptyView.setDescription(descriptionResource);
+            if (listener != null) {
+                mEmptyView.setActionClickedListener(listener);
+            }
+        }
+    }
+
+    @Override
+    public void onEmptyViewActionButtonClicked() {
+        final Activity activity = getActivity();
+        if (activity == null) {
+            return;
+        }
+
+        if (READ_CONTACTS.equals(mPermissionToRequest)) {
+          FragmentCompat.requestPermissions(this, new String[] {mPermissionToRequest},
+              PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            int[] grantResults) {
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            setupEmptyView();
+            if (grantResults != null && grantResults.length == 1
+                    && PackageManager.PERMISSION_GRANTED == grantResults[0]) {
+                PermissionsUtil.notifyPermissionGranted(getActivity(), mPermissionToRequest);
+            }
+        }
+    }
+
+    @Override
+    protected int getCallInitiationType(boolean isRemoteDirectory) {
+        return isRemoteDirectory ? LogState.INITIATION_REMOTE_DIRECTORY
+                : LogState.INITIATION_REGULAR_SEARCH;
     }
 }

@@ -5,6 +5,8 @@
   public void *(android.view.MenuItem);
 }
 
+-keep class com.android.contacts.common.** { *;}
+
 # Any class or method annotated with NeededForTesting or NeededForReflection.
 -keep @com.android.contacts.common.testing.NeededForTesting class *
 -keepclassmembers class * {
@@ -12,23 +14,9 @@
 @com.android.dialer.NeededForReflection *;
 }
 
-# Keep ExtendedLookupDirectories for assets/contacts_extensions.properties
--keep class com.android.dialer.lookup.ExtendedLookupDirectories { *; }
-
-# Keep behavior class needed by design library
--keep class android.support.design.widget.AppBarLayout$ScrollingViewBehavior { *; }
+# For design libraries
+-keep public class * extends android.support.design.widget.CoordinatorLayout$Behavior {
+    public <init>(android.content.Context, android.util.AttributeSet);
+}
 
 -verbose
-
-
--dontwarn org.apache.http.**
--dontwarn com.android.volley.toolbox.**
--dontwarn android.net.http.**
--dontwarn java.nio.file.**
--dontwarn org.codehaus.mojo.**
-
--keep public class cyanogenmod.app.StatusBarPanelCustomTile
--keep public class cyanogenmod.app.CustomTile
-
--dontwarn cyanogenmod.app.*
--dontwarn com.squareup.okhttp.*

@@ -16,40 +16,45 @@
 
 package com.android.dialer.calllog;
 
+import com.google.common.collect.Lists;
+
 import android.provider.CallLog.Calls;
-import com.cyanogen.ambient.incall.CallLogConstants;
+
+import com.android.contacts.common.compat.CompatUtils;
+import com.android.dialer.compat.CallsSdkCompat;
+import com.android.dialer.compat.DialerCompatUtils;
+
+import java.util.List;
 
 /**
  * The query for the call log table.
  */
 public final class CallLogQuery {
-    public static final String[] _PROJECTION = new String[] {
-            Calls._ID,                             // 0
-            Calls.NUMBER,                          // 1
-            Calls.DATE,                            // 2
-            Calls.DURATION,                        // 3
-            Calls.TYPE,                            // 4
-            Calls.COUNTRY_ISO,                     // 5
-            Calls.VOICEMAIL_URI,                   // 6
-            Calls.GEOCODED_LOCATION,               // 7
-            Calls.CACHED_NAME,                     // 8
-            Calls.CACHED_NUMBER_TYPE,              // 9
-            Calls.CACHED_NUMBER_LABEL,             // 10
-            Calls.CACHED_LOOKUP_URI,               // 11
-            Calls.CACHED_MATCHED_NUMBER,           // 12
-            Calls.CACHED_NORMALIZED_NUMBER,        // 13
-            Calls.CACHED_PHOTO_ID,                 // 14
-            Calls.CACHED_FORMATTED_NUMBER,         // 15
-            Calls.IS_READ,                         // 16
-            Calls.NUMBER_PRESENTATION,             // 17
-            Calls.PHONE_ACCOUNT_COMPONENT_NAME,    // 18
-            Calls.PHONE_ACCOUNT_ID,                // 19
-            Calls.FEATURES,                        // 20
-            Calls.DATA_USAGE,                      // 21
-            Calls.TRANSCRIPTION,                   // 22
-            Calls.CACHED_PHOTO_URI,                // 23
-            CallLogConstants.PLUGIN_PACKAGE_NAME,  // 24
-            CallLogConstants.PLUGIN_USER_HANDLE    // 25
+
+    private static final String[] _PROJECTION_INTERNAL = new String[] {
+            Calls._ID,                          // 0
+            Calls.NUMBER,                       // 1
+            Calls.DATE,                         // 2
+            Calls.DURATION,                     // 3
+            Calls.TYPE,                         // 4
+            Calls.COUNTRY_ISO,                  // 5
+            Calls.VOICEMAIL_URI,                // 6
+            Calls.GEOCODED_LOCATION,            // 7
+            Calls.CACHED_NAME,                  // 8
+            Calls.CACHED_NUMBER_TYPE,           // 9
+            Calls.CACHED_NUMBER_LABEL,          // 10
+            Calls.CACHED_LOOKUP_URI,            // 11
+            Calls.CACHED_MATCHED_NUMBER,        // 12
+            Calls.CACHED_NORMALIZED_NUMBER,     // 13
+            Calls.CACHED_PHOTO_ID,              // 14
+            Calls.CACHED_FORMATTED_NUMBER,      // 15
+            Calls.IS_READ,                      // 16
+            Calls.NUMBER_PRESENTATION,          // 17
+            Calls.PHONE_ACCOUNT_COMPONENT_NAME, // 18
+            Calls.PHONE_ACCOUNT_ID,             // 19
+            Calls.FEATURES,                     // 20
+            Calls.DATA_USAGE,                   // 21
+            Calls.TRANSCRIPTION,                // 22
     };
 
     public static final int ID = 0;
@@ -75,7 +80,36 @@ public final class CallLogQuery {
     public static final int FEATURES = 20;
     public static final int DATA_USAGE = 21;
     public static final int TRANSCRIPTION = 22;
-    public static final int CACHED_PHOTO_URI = 23;
-    public static final int PLUGIN_PACKAGE_NAME = 24;
-    public static final int PLUGIN_USER_HANDLE = 25;
+
+    // Indices for columns that may not be available, depending on the Sdk Version
+    /**
+     * Only available in versions >= M
+     * Call {@link DialerCompatUtils#isCallsCachedPhotoUriCompatible()} prior to use
+     */
+    public static int CACHED_PHOTO_URI = -1;
+
+    /**
+     * Only available in versions > M
+     * Call {@link CompatUtils#isNCompatible()} prior to use
+     */
+    public static int POST_DIAL_DIGITS = -1;
+    public static int VIA_NUMBER = -1;
+
+    public static final String[] _PROJECTION;
+
+    static {
+        List<String> projectionList = Lists.newArrayList(_PROJECTION_INTERNAL);
+        if (DialerCompatUtils.isCallsCachedPhotoUriCompatible()) {
+            projectionList.add(Calls.CACHED_PHOTO_URI);
+            CACHED_PHOTO_URI = projectionList.size() - 1;
+        }
+        if (CompatUtils.isNCompatible()) {
+            projectionList.add(CallsSdkCompat.POST_DIAL_DIGITS);
+            POST_DIAL_DIGITS = projectionList.size() - 1;
+            projectionList.add(CallsSdkCompat.VIA_NUMBER);
+            VIA_NUMBER = projectionList.size() - 1;
+        }
+        _PROJECTION = projectionList.toArray(new String[projectionList.size()]);
+    }
+
 }

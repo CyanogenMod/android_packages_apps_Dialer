@@ -20,7 +20,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
@@ -38,8 +37,6 @@ import android.provider.ContactsContract.CommonDataKinds.SipAddress;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
-import android.telecom.PhoneAccountHandle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,21 +48,18 @@ import android.widget.TextView;
 import com.android.contacts.common.Collapser;
 import com.android.contacts.common.Collapser.Collapsible;
 import com.android.contacts.common.MoreContactUtils;
-import com.android.contacts.common.activity.TransactionSafeActivity;
 import com.android.contacts.common.util.ContactDisplayUtils;
 import com.android.dialer.R;
+import com.android.dialer.TransactionSafeActivity;
 import com.android.dialer.contact.ContactUpdateService;
 import com.android.dialer.util.IntentUtil;
+import com.android.dialer.util.IntentUtil.CallIntentBuilder;
+import com.android.incallui.Call.LogState;
 import com.android.dialer.util.DialerUtils;
 
-import com.android.phone.common.incall.DialerDataSubscription;
-import com.android.phone.common.incall.utils.MimeTypeUtils;
-import com.cyanogen.ambient.incall.extension.OriginCodes;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Joiner;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -196,28 +190,29 @@ public class PhoneNumberInteraction implements OnLoadCompleteListener<Cursor> {
 
         private static final String ARG_PHONE_LIST = "phoneList";
         private static final String ARG_INTERACTION_TYPE = "interactionType";
-        private static final String ARG_CALL_ORIGIN = "callOrigin";
-        private static final String ARG_ACCOUNT_HANDLE = "accountHandle";
+        private static final String ARG_CALL_INITIATION_TYPE = "callInitiation";
+        private static final String ARG_IS_VIDEO_CALL = "is_video_call";
 
         private int mInteractionType;
         private ListAdapter mPhonesAdapter;
         private List<PhoneItem> mPhoneList;
-        private String mCallOrigin;
-        private PhoneAccountHandle mAccountHandle;
+        private int mCallInitiationType;
+        private boolean mIsVideoCall;
 
-        public static void show(FragmentManager fragmentManager,
-                ArrayList<PhoneItem> phoneList, int interactionType,
-                String callOrigin, PhoneAccountHandle accountHandle) {
+        public static void show(FragmentManager fragmentManager, ArrayList<PhoneItem> phoneList,
+                int interactionType, boolean isVideoCall, int callInitiationType) {
             PhoneDisambiguationDialogFragment fragment = new PhoneDisambiguationDialogFragment();
             Bundle bundle = new Bundle();
             bundle.putParcelableArrayList(ARG_PHONE_LIST, phoneList);
-            bundle.putSerializable(ARG_INTERACTION_TYPE, interactionType);
-            bundle.putString(ARG_CALL_ORIGIN, callOrigin);
-            if (accountHandle != null) {
-                bundle.putParcelable(ARG_ACCOUNT_HANDLE, accountHandle);
-            }
+            bundle.putInt(ARG_INTERACTION_TYPE, interactionType);
+            bundle.putInt(ARG_CALL_INITIATION_TYPE, callInitiationType);
+            bundle.putBoolean(ARG_IS_VIDEO_CALL, isVideoCall);
             fragment.setArguments(bundle);
             fragment.show(fragmentManager, TAG);
+        }
+
+        public PhoneDisambiguationDialogFragment() {
+            super();
         }
 
         @Override
@@ -225,8 +220,8 @@ public class PhoneNumberInteraction implements OnLoadCompleteListener<Cursor> {
             final Activity activity = getActivity();
             mPhoneList = getArguments().getParcelableArrayList(ARG_PHONE_LIST);
             mInteractionType = getArguments().getInt(ARG_INTERACTION_TYPE);
-            mCallOrigin = getArguments().getString(ARG_CALL_ORIGIN);
-            mAccountHandle = (PhoneAccountHandle) getArguments().getParcelable(ARG_ACCOUNT_HANDLE);
+            mCallInitiationType = getArguments().getInt(ARG_CALL_INITIATION_TYPE);
+            mIsVideoCall = getArguments().getBoolean(ARG_IS_VIDEO_CALL);
 
             mPhonesAdapter = new PhoneItemAdapter(activity, mPhoneList, mInteractionType);
             final LayoutInflater inflater = activity.getLayoutInflater();
@@ -255,8 +250,7 @@ public class PhoneNumberInteraction implements OnLoadCompleteListener<Cursor> {
                 }
 
                 PhoneNumberInteraction.performAction(activity, phoneItem.phoneNumber,
-                        mInteractionType, mCallOrigin, mAccountHandle, phoneItem.mimeType,
-                        phoneItem.id);
+                        mInteractionType, mIsVideoCall, mCallInitiationType);
             } else {
                 dialog.dismiss();
             }
@@ -294,14 +288,15 @@ public class PhoneNumberInteraction implements OnLoadCompleteListener<Cursor> {
     private final Context mContext;
     private final OnDismissListener mDismissListener;
     private final int mInteractionType;
-    private final String mCallOrigin;
-    private final PhoneAccountHandle mAccountHandle;
+
+    private final int mCallInitiationType;
     private boolean mUseDefault;
 
     private static final int UNKNOWN_CONTACT_ID = -1;
     private long mContactId = UNKNOWN_CONTACT_ID;
 
     private CursorLoader mLoader;
+    private boolean mIsVideoCall;
 
     /**
      * Constructs a new {@link PhoneNumberInteraction}. The constructor takes in a {@link Context}
@@ -312,33 +307,28 @@ public class PhoneNumberInteraction implements OnLoadCompleteListener<Cursor> {
     @VisibleForTesting
     /* package */ PhoneNumberInteraction(Context context, int interactionType,
             DialogInterface.OnDismissListener dismissListener) {
-        this(context, interactionType, dismissListener, null);
+        this(context, interactionType, dismissListener, false /*isVideoCall*/,
+                LogState.INITIATION_UNKNOWN);
     }
 
     private PhoneNumberInteraction(Context context, int interactionType,
-            DialogInterface.OnDismissListener dismissListener, String callOrigin) {
-        this(context, interactionType, dismissListener, null, null);
-    }
-
-    private PhoneNumberInteraction(Context context, int interactionType,
-            DialogInterface.OnDismissListener dismissListener, String callOrigin,
-            PhoneAccountHandle accountHandle) {
+            DialogInterface.OnDismissListener dismissListener, boolean isVideoCall, 
+            int callInitiationType) {
         mContext = context;
         mInteractionType = interactionType;
         mDismissListener = dismissListener;
-        mCallOrigin = callOrigin;
-        mAccountHandle = accountHandle;
+        mCallInitiationType = callInitiationType;
+        mIsVideoCall = isVideoCall;
     }
 
-
-    private void performAction(String phoneNumber, String mimeType, long id) {
-        PhoneNumberInteraction.performAction(mContext, phoneNumber, mInteractionType, mCallOrigin,
-                mAccountHandle, mimeType, id);
+    private void performAction(String phoneNumber) {
+        PhoneNumberInteraction.performAction(mContext, phoneNumber, mInteractionType, mIsVideoCall,
+                mCallInitiationType);
     }
 
     private static void performAction(
             Context context, String phoneNumber, int interactionType,
-            String callOrigin, PhoneAccountHandle accountHandle, String mimeType, long id) {
+            boolean isVideoCall, int callInitiationType) {
         Intent intent;
         switch (interactionType) {
             case ContactDisplayUtils.INTERACTION_SMS:
@@ -346,21 +336,13 @@ public class PhoneNumberInteraction implements OnLoadCompleteListener<Cursor> {
                         Intent.ACTION_SENDTO, Uri.fromParts("sms", phoneNumber, null));
                 break;
             default:
-                if (TextUtils.isEmpty(mimeType) ||
-                        TextUtils.equals(mimeType, Phone.CONTENT_ITEM_TYPE) ||
-                        TextUtils.equals(mimeType, SipAddress.CONTENT_ITEM_TYPE)) {
-                    intent = IntentUtil.getCallIntent(phoneNumber, callOrigin, accountHandle);
-                } else {
-                    intent = new Intent(Intent.ACTION_VIEW);
-                    final Uri uri = ContentUris.withAppendedId(Data.CONTENT_URI, id);
-                    intent.setDataAndType(uri, mimeType);
-                }
+                intent = new CallIntentBuilder(phoneNumber)
+                        .setCallInitiationType(callInitiationType)
+                        .setIsVideoCall(isVideoCall)
+                        .build();
                 break;
         }
-        if (callOrigin == null) {
-            callOrigin = OriginCodes.CONTACTS_TAB;
-        }
-        DialerUtils.startActivityWithErrorToast(context, intent, callOrigin);
+        DialerUtils.startActivityWithErrorToast(context, intent);
     }
 
     /**
@@ -371,7 +353,7 @@ public class PhoneNumberInteraction implements OnLoadCompleteListener<Cursor> {
      */
     @VisibleForTesting
     /* package */ void startInteraction(Uri uri) {
-        startInteraction(uri, true, null);
+        startInteraction(uri, true);
     }
 
     /**
@@ -383,8 +365,7 @@ public class PhoneNumberInteraction implements OnLoadCompleteListener<Cursor> {
      * is available.
      */
     @VisibleForTesting
-    /* package */ void startInteraction(Uri uri, boolean useDefault,
-                                        String additionalCallableMimeTypes) {
+    /* package */ void startInteraction(Uri uri, boolean useDefault) {
         if (mLoader != null) {
             mLoader.reset();
         }
@@ -407,30 +388,11 @@ public class PhoneNumberInteraction implements OnLoadCompleteListener<Cursor> {
         mLoader = new CursorLoader(mContext,
                 queryUri,
                 PHONE_NUMBER_PROJECTION,
-                constructSelection(additionalCallableMimeTypes),
+                PHONE_NUMBER_SELECTION,
                 null,
                 null);
         mLoader.registerListener(0, this);
         mLoader.startLoading();
-    }
-
-    private String constructSelection(String additionalCallableMimeTypes) {
-        StringBuilder selection = new StringBuilder();
-        if (TextUtils.isEmpty(additionalCallableMimeTypes)) {
-            selection.append(PHONE_NUMBER_SELECTION);
-        } else {
-            selection.append(Data.MIMETYPE + " IN ('" + Phone.CONTENT_ITEM_TYPE + "', " +
-                    "'" + SipAddress.CONTENT_ITEM_TYPE + "'");
-            List<String> mimeTypesList =
-                    Arrays.asList(additionalCallableMimeTypes.split("\\s*,\\s*"));
-            if (mimeTypesList != null && !mimeTypesList.isEmpty()) {
-                selection.append(", '");
-                selection.append(Joiner.on("', '").skipNulls().join(mimeTypesList));
-                selection.append("'");
-            }
-            selection.append(") AND " + Data.DATA1 + " NOT NULL");
-        }
-        return selection.toString();
     }
 
     @Override
@@ -442,8 +404,6 @@ public class PhoneNumberInteraction implements OnLoadCompleteListener<Cursor> {
         try {
             ArrayList<PhoneItem> phoneList = new ArrayList<PhoneItem>();
             String primaryPhone = null;
-            String primaryMime = null;
-            long primaryId = 0;
             if (!isSafeToCommitTransactions()) {
                 onDismiss();
                 return;
@@ -456,8 +416,6 @@ public class PhoneNumberInteraction implements OnLoadCompleteListener<Cursor> {
                 if (mUseDefault && cursor.getInt(IS_SUPER_PRIMARY) != 0) {
                     // Found super primary, call it.
                     primaryPhone = cursor.getString(NUMBER);
-                    primaryMime = cursor.getString(MIMETYPE);
-                    primaryId = cursor.getLong(_ID);
                 }
 
                 PhoneItem item = new PhoneItem();
@@ -473,7 +431,7 @@ public class PhoneNumberInteraction implements OnLoadCompleteListener<Cursor> {
             }
 
             if (mUseDefault && primaryPhone != null) {
-                performAction(primaryPhone, primaryMime, primaryId);
+                performAction(primaryPhone);
                 onDismiss();
                 return;
             }
@@ -484,7 +442,7 @@ public class PhoneNumberInteraction implements OnLoadCompleteListener<Cursor> {
             } else if (phoneList.size() == 1) {
                 PhoneItem item = phoneList.get(0);
                 onDismiss();
-                performAction(item.phoneNumber, item.mimeType, item.id);
+                performAction(item.phoneNumber);
             } else {
                 // There are multiple candidates. Let the user choose one.
                 showDisambiguationDialog(phoneList);
@@ -506,63 +464,16 @@ public class PhoneNumberInteraction implements OnLoadCompleteListener<Cursor> {
     }
 
     /**
-     * Start call action using given contact Uri. If there are multiple candidates for the phone
-     * call, dialog is automatically shown and the user is asked to choose one.
-     *
      * @param activity that is calling this interaction. This must be of type
      * {@link TransactionSafeActivity} because we need to check on the activity state after the
      * phone numbers have been queried for.
-     * @param uri contact Uri (built from {@link Contacts#CONTENT_URI}) or data Uri
-     * (built from {@link Data#CONTENT_URI}). Contact Uri may show the disambiguation dialog while
-     * data Uri won't.
-     */
-    public static void startInteractionForPhoneCall(TransactionSafeActivity activity, Uri uri) {
-        (new PhoneNumberInteraction(activity, ContactDisplayUtils.INTERACTION_CALL, null))
-                .startInteraction(uri, true, MimeTypeUtils.getAllEnabledMimeTypes(
-                        DialerDataSubscription.get(activity)));
-    }
-
-    /**
-     * Start call action using given contact Uri. If there are multiple candidates for the phone
-     * call, dialog is automatically shown and the user is asked to choose one.
-     *
-     * @param activity that is calling this interaction. This must be of type
-     * {@link TransactionSafeActivity} because we need to check on the activity state after the
-     * phone numbers have been queried for.
-     * @param uri contact Uri (built from {@link Contacts#CONTENT_URI}) or data Uri
-     * (built from {@link Data#CONTENT_URI}). Contact Uri may show the disambiguation dialog while
-     * data Uri won't.
-     * @param useDefault Whether or not to use the primary(default) phone number. If true, the
-     * primary phone number will always be used by default if one is available. If false, a
-     * disambiguation dialog will be shown regardless of whether or not a primary phone number
-     * is available.
+     * @param isVideoCall {@code true} if the call is a video call, {@code false} otherwise.
+     * @param callInitiationType Indicates the UI affordance that was used to initiate the call.
      */
     public static void startInteractionForPhoneCall(TransactionSafeActivity activity, Uri uri,
-            boolean useDefault) {
-        (new PhoneNumberInteraction(activity, ContactDisplayUtils.INTERACTION_CALL, null))
-                .startInteraction(uri, useDefault, MimeTypeUtils.getAllEnabledMimeTypes(
-                        DialerDataSubscription.get(activity)));
-    }
-
-    /**
-     * @param activity that is calling this interaction. This must be of type
-     * {@link TransactionSafeActivity} because we need to check on the activity state after the
-     * phone numbers have been queried for.
-     * @param uri contact Uri (built from {@link Contacts#CONTENT_URI}) or data Uri
-     * (built from {@link Data#CONTENT_URI}). Contact Uri may show the disambiguation dialog while
-     * data Uri won't.
-     * @param callOrigin If non null, {@link PhoneConstants#EXTRA_CALL_ORIGIN} will be
-     * appended to the Intent initiating phone call. See comments in Phone package (PhoneApp)
-     * for more detail.
-     * @param accountHandle If non null, will be used specifically as out call account instead of
-     * prompting user (only applicable to msim)
-     */
-    public static void startInteractionForPhoneCall(TransactionSafeActivity activity, Uri uri,
-            String callOrigin, PhoneAccountHandle accountHandle) {
+            boolean isVideoCall, int callInitiationType) {
         (new PhoneNumberInteraction(activity, ContactDisplayUtils.INTERACTION_CALL, null,
-                callOrigin, accountHandle))
-                .startInteraction(uri, true, MimeTypeUtils.getAllEnabledMimeTypes(
-                        DialerDataSubscription.get(activity)));
+                isVideoCall, callInitiationType)).startInteraction(uri, true);
     }
 
     /**
@@ -579,8 +490,7 @@ public class PhoneNumberInteraction implements OnLoadCompleteListener<Cursor> {
      */
     public static void startInteractionForTextMessage(TransactionSafeActivity activity, Uri uri) {
         (new PhoneNumberInteraction(activity, ContactDisplayUtils.INTERACTION_SMS, null))
-                .startInteraction(uri, true, MimeTypeUtils.getAllEnabledMimeTypes(
-                        DialerDataSubscription.get(activity)));
+                .startInteraction(uri, true);
     }
 
     @VisibleForTesting
@@ -590,7 +500,17 @@ public class PhoneNumberInteraction implements OnLoadCompleteListener<Cursor> {
 
     @VisibleForTesting
     /* package */ void showDisambiguationDialog(ArrayList<PhoneItem> phoneList) {
-        PhoneDisambiguationDialogFragment.show(((Activity)mContext).getFragmentManager(),
-                phoneList, mInteractionType, mCallOrigin, mAccountHandle);
+        final Activity activity = (Activity) mContext;
+        if (activity.isDestroyed()) {
+            // Check whether the activity is still running
+            return;
+        }
+        try {
+            PhoneDisambiguationDialogFragment.show(activity.getFragmentManager(),
+                    phoneList, mInteractionType, mIsVideoCall, mCallInitiationType);
+        } catch (IllegalStateException e) {
+            // ignore to be safe. Shouldn't happen because we checked the
+            // activity wasn't destroyed, but to be safe.
+        }
     }
 }

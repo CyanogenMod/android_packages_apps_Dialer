@@ -16,7 +16,7 @@
 
 package com.android.dialer;
 
-import static com.android.dialer.calllog.CallLogAsyncTaskUtil.Tasks.GET_CALL_DETAILS;
+import static com.android.dialer.calllog.CallLogAsyncTaskUtil.Tasks;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -29,12 +29,13 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.Suppress;
 import android.view.Menu;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.android.dialer.calllog.CallLogAsyncTaskUtil;
+import com.android.dialer.util.AppCompatConstants;
 import com.android.dialer.util.AsyncTaskExecutors;
 import com.android.dialer.util.FakeAsyncTaskExecutor;
-import com.android.internal.view.menu.ContextMenuBuilder;
 
 /**
  * Unit tests for the {@link CallDetailActivity}. NOTE: The screen needs to be on for the
@@ -83,35 +84,49 @@ public class CallDetailActivityTest extends ActivityInstrumentationTestCase2<Cal
     }
 
     /**
-     * Test for bug where voicemails should not have remove-from-call-log entry.
-     * <p>
-     * See http://b/5054103.
+     * Verifies the trash menu item is present and a voicemail URI is set.
      */
-    public void testVoicemailDoesNotHaveRemoveFromCallLog() throws Throwable {
+    @Suppress
+    public void testVoicemailDeleteButton() throws Throwable {
         setActivityIntentForTestVoicemailEntry();
         startActivityUnderTest();
-        mFakeAsyncTaskExecutor.runTask(GET_CALL_DETAILS);
+        mFakeAsyncTaskExecutor.runTask(Tasks.GET_CALL_DETAILS);
 
-        Menu menu = new ContextMenuBuilder(mActivityUnderTest);
-        mActivityUnderTest.onCreateOptionsMenu(menu);
-        mActivityUnderTest.onPrepareOptionsMenu(menu);
-        assertFalse(menu.findItem(R.id.menu_remove_from_call_log).isVisible());
-        assertTrue(menu.findItem(R.id.menu_trash).isVisible());
+        Menu optionsMenu = (new PopupMenu(mActivityUnderTest, null)).getMenu();
+        mActivityUnderTest.onCreateOptionsMenu(optionsMenu);
+        mActivityUnderTest.onPrepareOptionsMenu(optionsMenu);
+
+        assertTrue(mActivityUnderTest.hasVoicemail());
+        mActivityUnderTest.runOnUiThread(new Runnable() {
+            public void run() {
+                mActivityUnderTest.findViewById(R.id.call_detail_delete_menu_item).performClick();
+            }
+        });
+        getInstrumentation().waitForIdleSync();
+        mFakeAsyncTaskExecutor.runTask(Tasks.DELETE_VOICEMAIL);
     }
 
     /**
-     * Test to check that I haven't broken the remove-from-call-log entry from regular calls.
+     * Verifies the trash menu item is present and a voicemail URI is not set.
      */
+    @Suppress
     public void testRegularCallDoesHaveRemoveFromCallLog() throws Throwable {
         setActivityIntentForTestCallEntry();
         startActivityUnderTest();
-        mFakeAsyncTaskExecutor.runTask(GET_CALL_DETAILS);
+        mFakeAsyncTaskExecutor.runTask(Tasks.GET_CALL_DETAILS);
 
-        Menu menu = new ContextMenuBuilder(mActivityUnderTest);
-        mActivityUnderTest.onCreateOptionsMenu(menu);
-        mActivityUnderTest.onPrepareOptionsMenu(menu);
-        assertTrue(menu.findItem(R.id.menu_remove_from_call_log).isVisible());
-        assertFalse(menu.findItem(R.id.menu_trash).isVisible());
+        Menu optionsMenu = (new PopupMenu(mActivityUnderTest, null)).getMenu();
+        mActivityUnderTest.onCreateOptionsMenu(optionsMenu);
+        mActivityUnderTest.onPrepareOptionsMenu(optionsMenu);
+
+        assertFalse(mActivityUnderTest.hasVoicemail());
+        mActivityUnderTest.runOnUiThread(new Runnable() {
+            public void run() {
+                mActivityUnderTest.findViewById(R.id.call_detail_delete_menu_item).performClick();
+            }
+        });
+        getInstrumentation().waitForIdleSync();
+        mFakeAsyncTaskExecutor.runTask(Tasks.DELETE_CALL);
     }
 
     private void setActivityIntentForTestCallEntry() {
@@ -121,7 +136,7 @@ public class CallDetailActivityTest extends ActivityInstrumentationTestCase2<Cal
         ContentValues values = new ContentValues();
         values.put(CallLog.Calls.NUMBER, CONTACT_NUMBER);
         values.put(CallLog.Calls.NUMBER_PRESENTATION, CallLog.Calls.PRESENTATION_ALLOWED);
-        values.put(CallLog.Calls.TYPE, CallLog.Calls.INCOMING_TYPE);
+        values.put(CallLog.Calls.TYPE, AppCompatConstants.CALLS_INCOMING_TYPE);
         mCallLogUri = contentResolver.insert(CallLog.Calls.CONTENT_URI, values);
         setActivityIntent(new Intent(Intent.ACTION_VIEW, mCallLogUri));
     }
@@ -132,7 +147,8 @@ public class CallDetailActivityTest extends ActivityInstrumentationTestCase2<Cal
         ContentValues values = new ContentValues();
         values.put(VoicemailContract.Voicemails.NUMBER, CONTACT_NUMBER);
         values.put(VoicemailContract.Voicemails.HAS_CONTENT, 1);
-        values.put(VoicemailContract.Voicemails._DATA, VOICEMAIL_FILE_LOCATION);
+        // VoicemailContract.Voicemails._DATA
+        values.put("_data", VOICEMAIL_FILE_LOCATION);
         mVoicemailUri = contentResolver.insert(VoicemailContract.Voicemails.CONTENT_URI, values);
 
         Uri callLogUri = ContentUris.withAppendedId(CallLog.Calls.CONTENT_URI_WITH_VOICEMAIL,

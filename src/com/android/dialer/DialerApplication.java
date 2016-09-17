@@ -17,74 +17,42 @@
 package com.android.dialer;
 
 import android.app.Application;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
+import android.content.Context;
 import android.os.Trace;
-
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
-import android.util.Log;
-import com.android.contacts.common.extensions.ExtensionsFactory;
-import com.android.contacts.commonbind.analytics.AnalyticsUtil;
-import com.android.dialer.discovery.WifiCallStatusNudgeListener;
-import com.android.dialer.incall.InCallMetricsHelper;
-import com.android.phone.common.incall.DialerDataSubscription;
-import com.android.dialer.util.MetricsHelper;
-import com.android.dialer.deeplink.DeepLinkIntegrationManager;
+import android.support.annotation.Nullable;
 
-import java.util.Locale;
+import com.android.contacts.common.extensions.ExtensionsFactory;
+import com.android.contacts.common.testing.NeededForTesting;
+import com.android.dialer.database.FilteredNumberAsyncQueryHandler;
+import com.android.dialer.filterednumber.BlockedNumbersAutoMigrator;
 
 public class DialerApplication extends Application {
 
     private static final String TAG = "DialerApplication";
-    private static final boolean DEBUG = false;
 
-    private static final String PREF_LAST_GLOBAL_LOCALE = "last_global_locale";
+    private static Context sContext;
 
     @Override
     public void onCreate() {
+        sContext = this;
         Trace.beginSection(TAG + " onCreate");
         super.onCreate();
-
         Trace.beginSection(TAG + " ExtensionsFactory initialization");
         ExtensionsFactory.init(getApplicationContext());
         Trace.endSection();
-
-        Trace.beginSection(TAG + " Analytics initialization");
-        AnalyticsUtil.initialize(this);
-        Trace.endSection();
-
-        DialerDataSubscription.init(this);
-        MetricsHelper.init(this);
-        WifiCallStatusNudgeListener.init(this);
-        InCallMetricsHelper.init(this);
-        DeepLinkIntegrationManager.getInstance().setUp(this);
-
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        Locale locale = getResources().getConfiguration().locale;
-        String currentLocale = locale != null ? locale.toString() : "";
-        prefs.edit().putString(PREF_LAST_GLOBAL_LOCALE, currentLocale).apply();
+        new BlockedNumbersAutoMigrator(PreferenceManager.getDefaultSharedPreferences(this),
+                new FilteredNumberAsyncQueryHandler(getContentResolver())).autoMigrate();
         Trace.endSection();
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
+    @Nullable
+    public static Context getContext() {
+        return sContext;
+    }
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String previousLocale = prefs.getString(PREF_LAST_GLOBAL_LOCALE, "");
-        String newLocale = (newConfig != null && newConfig.locale != null) ?
-                newConfig.locale.toString() : "";
-        if (DEBUG) {
-            Log.d(TAG, "onConfigurationChanged: previous locale=" + previousLocale +
-                    ", new locale=" + newLocale);
-        }
-
-        // If locale changed, update incall api plugins
-        if (!TextUtils.equals(previousLocale, newLocale)) {
-            prefs.edit().putString(PREF_LAST_GLOBAL_LOCALE, newLocale).apply();
-            DialerDataSubscription.get(this).refresh();
-        }
-
+    @NeededForTesting
+    public static void setContextForTest(Context context) {
+        sContext = context;
     }
 }

@@ -15,27 +15,37 @@
  */
 package com.android.dialer.list;
 
-import android.content.ComponentName;
+import static android.Manifest.permission.CALL_PHONE;
+
+import android.app.Activity;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v13.app.FragmentCompat;
+import android.util.Log;
+import android.view.View;
 
 import com.android.contacts.common.list.ContactEntryListAdapter;
+import com.android.contacts.common.util.PermissionsUtil;
 import com.android.dialer.dialpad.SmartDialCursorLoader;
+import com.android.dialer.logging.Logger;
+import com.android.dialer.logging.ScreenEvent;
 import com.android.dialer.R;
-import com.android.phone.common.incall.CallMethodInfo;
-import com.android.phone.common.incall.DialerDataSubscription;
-import com.android.phone.common.incall.utils.CallMethodFilters;
+import com.android.dialer.widget.EmptyContentView;
+import com.android.incallui.Call.LogState;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
 /**
  * Implements a fragment to load and display SmartDial search results.
  */
 public class SmartDialSearchFragment extends SearchFragment
-        implements DialerPhoneNumberListAdapter.searchMethodClicked {
+        implements EmptyContentView.OnEmptyViewActionButtonClickedListener,
+        FragmentCompat.OnRequestPermissionsResultCallback {
     private static final String TAG = SmartDialSearchFragment.class.getSimpleName();
+
+    private static final int CALL_PHONE_PERMISSION_REQUEST_CODE = 1;
 
     /**
      * Creates a SmartDialListAdapter to display and operate on search results.
@@ -47,10 +57,7 @@ public class SmartDialSearchFragment extends SearchFragment
         adapter.setQuickContactEnabled(true);
         // Set adapter's query string to restore previous instance state.
         adapter.setQueryString(getQueryString());
-        adapter.setSearchListner(this);
-        adapter.setAvailableCallMethods(CallMethodFilters.getAllEnabledCallMethods(
-                DialerDataSubscription.get(getActivity())));
-
+        adapter.setListener(this);
         return adapter;
     }
 
@@ -63,7 +70,10 @@ public class SmartDialSearchFragment extends SearchFragment
         if (id == getDirectoryLoaderId()) {
             return super.onCreateLoader(id, args);
         } else {
-            return updateData();
+            final SmartDialNumberListAdapter adapter = (SmartDialNumberListAdapter) getAdapter();
+            SmartDialCursorLoader loader = new SmartDialCursorLoader(super.getContext());
+            adapter.configureLoader(loader);
+            return loader;
         }
     }
 
@@ -78,29 +88,44 @@ public class SmartDialSearchFragment extends SearchFragment
         return adapter.getDataUri(position);
     }
 
-    private Loader<Cursor> updateData() {
-        final SmartDialNumberListAdapter adapter = (SmartDialNumberListAdapter) getAdapter();
-
-        SmartDialCursorLoader loader = new SmartDialCursorLoader(super.getContext());
-
-        if (mCurrentCallMethodInfo != null) {
-            adapter.configureLoader(loader, mCurrentCallMethodInfo.mMimeType);
-        } else {
-            adapter.configureLoader(loader, null);
+    @Override
+    protected void setupEmptyView() {
+        if (mEmptyView != null && getActivity() != null) {
+            if (!PermissionsUtil.hasPermission(getActivity(), CALL_PHONE)) {
+                mEmptyView.setImage(R.drawable.empty_contacts);
+                mEmptyView.setActionLabel(R.string.permission_single_turn_on);
+                mEmptyView.setDescription(R.string.permission_place_call);
+                mEmptyView.setActionClickedListener(this);
+            } else {
+                mEmptyView.setImage(EmptyContentView.NO_IMAGE);
+                mEmptyView.setActionLabel(EmptyContentView.NO_LABEL);
+                mEmptyView.setDescription(EmptyContentView.NO_LABEL);
+            }
         }
-
-        return loader;
     }
 
-    public void setAvailableProviders(HashMap<ComponentName, CallMethodInfo> callMethods) {
-        if (mAvailableProviders != null) {
-            mAvailableProviders.clear();
-        } else {
-            mAvailableProviders = new HashMap<ComponentName, CallMethodInfo>();
+    @Override
+    public void onEmptyViewActionButtonClicked() {
+        final Activity activity = getActivity();
+        if (activity == null) {
+            return;
         }
-        // Note: these should be available (enabled) providers only!
-        mAvailableProviders.putAll(callMethods);
-        setupEmptyView();
+
+        FragmentCompat.requestPermissions(this, new String[] {CALL_PHONE},
+            CALL_PHONE_PERMISSION_REQUEST_CODE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            int[] grantResults) {
+        if (requestCode == CALL_PHONE_PERMISSION_REQUEST_CODE) {
+            setupEmptyView();
+        }
+    }
+
+    @Override
+    protected int getCallInitiationType(boolean isRemoteDirectory) {
+        return LogState.INITIATION_SMART_DIAL;
     }
 
     public boolean isShowingPermissionRequest() {

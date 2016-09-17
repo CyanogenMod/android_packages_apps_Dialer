@@ -23,18 +23,27 @@ import android.app.DialogFragment;
 import android.app.LoaderManager;
 import android.app.TimePickerDialog;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.provider.CallLog.Calls;
+import android.provider.VoicemailContract;
+import android.provider.VoicemailContract.Status;
+import android.provider.VoicemailContract.Voicemails;
+import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
-import android.telecom.TelecomManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -46,7 +55,10 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.android.contacts.common.compat.telecom.TelecomManagerCompat;
 import com.android.dialer.tests.R;
+import com.android.dialer.util.AppCompatConstants;
+import com.android.dialer.util.TelecomUtil;
 
 import java.util.Calendar;
 import java.util.List;
@@ -62,7 +74,9 @@ public class FillCallLogTestActivity extends Activity {
 
     private static final Random RNG = new Random();
     private static final int[] CALL_TYPES = new int[] {
-        Calls.INCOMING_TYPE, Calls.OUTGOING_TYPE, Calls.MISSED_TYPE,
+        AppCompatConstants.CALLS_INCOMING_TYPE,
+        AppCompatConstants.CALLS_OUTGOING_TYPE,
+        AppCompatConstants.CALLS_MISSED_TYPE
     };
 
     private TextView mNumberTextView;
@@ -72,6 +86,9 @@ public class FillCallLogTestActivity extends Activity {
     private RadioButton mCallTypeIncoming;
     private RadioButton mCallTypeMissed;
     private RadioButton mCallTypeOutgoing;
+    private RadioButton mCallTypeVoicemail;
+    private RadioButton mCallTypeCustom;
+    private EditText mCustomCallTypeTextView;
     private CheckBox mCallTypeVideo;
     private RadioButton mPresentationAllowed;
     private RadioButton mPresentationRestricted;
@@ -125,6 +142,9 @@ public class FillCallLogTestActivity extends Activity {
         mCallTypeIncoming = (RadioButton) findViewById(R.id.call_type_incoming);
         mCallTypeMissed = (RadioButton) findViewById(R.id.call_type_missed);
         mCallTypeOutgoing = (RadioButton) findViewById(R.id.call_type_outgoing);
+        mCallTypeVoicemail = (RadioButton) findViewById(R.id.call_type_voicemail);
+        mCallTypeCustom = (RadioButton) findViewById(R.id.call_type_custom);
+        mCustomCallTypeTextView = (EditText) findViewById(R.id.call_type_custom_text);
         mCallTypeVideo = (CheckBox) findViewById(R.id.call_type_video);
         mPresentationAllowed = (RadioButton) findViewById(R.id.presentation_allowed);
         mPresentationPayphone = (RadioButton) findViewById(R.id.presentation_payphone);
@@ -136,6 +156,24 @@ public class FillCallLogTestActivity extends Activity {
         mOffset = (EditText) findViewById(R.id.delta_after_add);
         mAccount0 = (RadioButton) findViewById(R.id.account0);
         mAccount1 = (RadioButton) findViewById(R.id.account1);
+
+        mCustomCallTypeTextView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Do nothing.
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Toggle the custom call type radio button if the text is changed/focused.
+                mCallTypeCustom.toggle();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Do nothing.
+            }
+        });
 
         // Use the current time as the default values for the picker
         final Calendar c = Calendar.getInstance();
@@ -372,11 +410,15 @@ public class FillCallLogTestActivity extends Activity {
      */
     private int getManualCallType() {
         if (mCallTypeIncoming.isChecked()) {
-            return Calls.INCOMING_TYPE;
+            return AppCompatConstants.CALLS_INCOMING_TYPE;
         } else if (mCallTypeOutgoing.isChecked()) {
-            return Calls.OUTGOING_TYPE;
+            return AppCompatConstants.CALLS_OUTGOING_TYPE;
+        } else if (mCallTypeVoicemail.isChecked()) {
+            return AppCompatConstants.CALLS_VOICEMAIL_TYPE;
+        } else if (mCallTypeCustom.isChecked()) {
+            return Integer.parseInt(mCustomCallTypeTextView.getText().toString());
         } else {
-            return Calls.MISSED_TYPE;
+            return AppCompatConstants.CALLS_MISSED_TYPE;
         }
     }
 
@@ -398,8 +440,8 @@ public class FillCallLogTestActivity extends Activity {
     }
 
     private PhoneAccountHandle getManualAccount() {
-        TelecomManager telecomManager = TelecomManager.from(this);
-        List <PhoneAccountHandle> accountHandles = telecomManager.getCallCapablePhoneAccounts();
+        List <PhoneAccountHandle> accountHandles = TelecomUtil.getCallCapablePhoneAccounts(this);
+        //TODO: hide the corresponding radio buttons if no accounts are available.
         if (mAccount0.isChecked()) {
             return accountHandles.get(0);
         } else if (mAccount1.isChecked()){
@@ -497,9 +539,13 @@ public class FillCallLogTestActivity extends Activity {
             dataUsage = (long) RNG.nextInt(52428800);
         }
 
-        Calls.addCall(null, this, mPhoneNumber.getText().toString(), getManualPresentation(),
-                getManualCallType(), features, getManualAccount(),
-                dateTime.getTimeInMillis(), RNG.nextInt(60 * 60), dataUsage, null);
+        if (getManualCallType() == AppCompatConstants.CALLS_VOICEMAIL_TYPE) {
+            addManualVoicemail(dateTime.getTimeInMillis());
+        } else {
+            addCall(mPhoneNumber.getText().toString(), getManualPresentation(),
+                    getManualCallType(), features, getManualAccount(),
+                    dateTime.getTimeInMillis(), RNG.nextInt(60 * 60), dataUsage);
+        }
 
         // Subtract offset from the call date/time and store as new date/time
         int offset = Integer.parseInt(mOffset.getText().toString());
@@ -512,5 +558,101 @@ public class FillCallLogTestActivity extends Activity {
         mCallTimeMinute = dateTime.get(Calendar.MINUTE);
         setDisplayDate();
         setDisplayTime();
+    }
+
+    // Copied and modified to compile unbundled from android.provider.CallLog
+    public Uri addCall(String number,
+            int presentation, int callType, int features, PhoneAccountHandle accountHandle,
+            long start, int duration, Long dataUsage) {
+        final ContentResolver resolver = getContentResolver();
+        int numberPresentation = Calls.PRESENTATION_ALLOWED;
+
+        String accountAddress = null;
+        if (accountHandle != null) {
+            PhoneAccount account = TelecomUtil.getPhoneAccount(this, accountHandle);
+            if (account != null) {
+                Uri address = account.getSubscriptionAddress();
+                if (address != null) {
+                    accountAddress = address.getSchemeSpecificPart();
+                }
+            }
+        }
+
+        if (numberPresentation != Calls.PRESENTATION_ALLOWED) {
+            number = "";
+        }
+
+        // accountHandle information
+        String accountComponentString = null;
+        String accountId = null;
+        if (accountHandle != null) {
+            accountComponentString = accountHandle.getComponentName().flattenToString();
+            accountId = accountHandle.getId();
+        }
+
+        ContentValues values = new ContentValues(6);
+
+        values.put(Calls.NUMBER, number);
+        values.put(Calls.NUMBER_PRESENTATION, Integer.valueOf(numberPresentation));
+        values.put(Calls.TYPE, Integer.valueOf(callType));
+        values.put(Calls.FEATURES, features);
+        values.put(Calls.DATE, Long.valueOf(start));
+        values.put(Calls.DURATION, Long.valueOf(duration));
+        if (dataUsage != null) {
+            values.put(Calls.DATA_USAGE, dataUsage);
+        }
+        values.put(Calls.PHONE_ACCOUNT_COMPONENT_NAME, accountComponentString);
+        values.put(Calls.PHONE_ACCOUNT_ID, accountId);
+        // Calls.PHONE_ACCOUNT_ADDRESS
+        values.put("phone_account_address", accountAddress);
+        values.put(Calls.NEW, Integer.valueOf(1));
+
+        if (callType == AppCompatConstants.CALLS_MISSED_TYPE) {
+            values.put(Calls.IS_READ, 0);
+        }
+
+        return addEntryAndRemoveExpiredEntries(this, Calls.CONTENT_URI, values);
+    }
+
+    // Copied from android.provider.CallLog
+    private static Uri addEntryAndRemoveExpiredEntries(Context context, Uri uri,
+            ContentValues values) {
+        final ContentResolver resolver = context.getContentResolver();
+        Uri result = resolver.insert(uri, values);
+        resolver.delete(uri, "_id IN " +
+                "(SELECT _id FROM calls ORDER BY " + Calls.DEFAULT_SORT_ORDER
+                + " LIMIT -1 OFFSET 500)", null);
+        return result;
+    }
+
+    private void addManualVoicemail(Long time) {
+        final ContentValues contentValues = new ContentValues();
+        contentValues.put(Voicemails.DATE, time);
+        contentValues.put(Voicemails.NUMBER, mPhoneNumber.getText().toString());
+        contentValues.put(Voicemails.DURATION, 5000);
+        contentValues.put(Voicemails.SOURCE_PACKAGE, getPackageName());
+        contentValues.put(Voicemails.SOURCE_DATA, 500);
+        contentValues.put(Voicemails.IS_READ, 0);
+
+        getContentResolver().insert(VoicemailContract.Voicemails.buildSourceUri(getPackageName()),
+                contentValues);
+
+        updateVoicemailStatus();
+    }
+
+    private void updateVoicemailStatus() {
+        ContentResolver contentResolver = getContentResolver();
+        Uri statusUri = VoicemailContract.Status.buildSourceUri(getPackageName());
+        final PhoneAccountHandle accountHandle = getManualAccount();
+
+        ContentValues values = new ContentValues();
+        values.put(Status.PHONE_ACCOUNT_COMPONENT_NAME, getPackageName());
+        values.put(Status.PHONE_ACCOUNT_ID, "ACCOUNT_ID");
+        values.put(Status.CONFIGURATION_STATE, VoicemailContract.Status.CONFIGURATION_STATE_OK);
+        values.put(Status.DATA_CHANNEL_STATE, VoicemailContract.Status.DATA_CHANNEL_STATE_OK);
+        values.put(Status.NOTIFICATION_CHANNEL_STATE,
+                VoicemailContract.Status.NOTIFICATION_CHANNEL_STATE_OK);
+
+        contentResolver.insert(statusUri, values);
     }
 }

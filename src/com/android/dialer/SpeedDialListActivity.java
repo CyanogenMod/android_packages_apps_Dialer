@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2014, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2013-2016, The Linux Foundation. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are
@@ -30,25 +30,36 @@
 package com.android.dialer;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentUris;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.Settings;
+import android.telecom.PhoneAccountHandle;
+import android.telecom.TelecomManager;
+import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.QuickContactBadge;
@@ -57,6 +68,10 @@ import android.widget.TextView;
 import com.android.contacts.common.ContactPhotoManager;
 import com.android.contacts.common.ContactPhotoManager.DefaultImageRequest;
 import com.android.internal.telephony.PhoneConstants;
+import com.google.common.base.FinalizablePhantomReference;
+
+import static com.android.internal.telephony.PhoneConstants.SUBSCRIPTION_KEY;
+import java.util.List;
 
 public class SpeedDialListActivity extends ListActivity implements
         AdapterView.OnItemClickListener, PopupMenu.OnMenuItemClickListener {
@@ -64,6 +79,13 @@ public class SpeedDialListActivity extends ListActivity implements
     private static final String ACTION_ADD_VOICEMAIL =
             "com.android.phone.CallFeaturesSetting.ADD_VOICEMAIL";
     public static final String EXTRA_INITIAL_PICK_NUMBER = "initialPickNumber";
+
+    // Extra on intent containing the id of a subscription.
+    public static final String SUB_ID_EXTRA =
+            "com.android.phone.settings.SubscriptionInfoHelper.SubscriptionId";
+    // Extra on intent containing the label of a subscription.
+    private static final String SUB_LABEL_EXTRA =
+            "com.android.phone.settings.SubscriptionInfoHelper.SubscriptionLabel";
 
     private static final String[] LOOKUP_PROJECTION = new String[] {
         ContactsContract.Contacts._ID,
@@ -85,6 +107,8 @@ public class SpeedDialListActivity extends ListActivity implements
     private static final int COLUMN_PHOTO = 2;
     private static final int COLUMN_NUMBER = 3;
     private static final int COLUMN_NORMALIZED = 4;
+    private static final int MENU_REPLACE = 1001;
+    private static final int MENU_DELETE = 1002;
 
     private static class Record {
         long contactId;
@@ -103,11 +127,13 @@ public class SpeedDialListActivity extends ListActivity implements
     private int mPickNumber;
     private int mInitialPickNumber;
     private SpeedDialAdapter mAdapter;
-
-    private static final int MENU_REPLACE = 0;
-    private static final int MENU_DELETE = 1;
+    private AlertDialog mAddSpeedDialDialog;
+    private EditText mEditNumber;
+    private Button mCompleteButton;
 
     private static final int PICK_CONTACT_RESULT = 0;
+
+    private SubscriptionManager mSubscriptionManager;
 
     /** Called when the activity is first created. */
     @Override
@@ -119,6 +145,8 @@ public class SpeedDialListActivity extends ListActivity implements
 
         //the first item is the "1.voice mail", it never changes
         mRecords.put(1, new Record(getString(R.string.voicemail)));
+
+        mSubscriptionManager = SubscriptionManager.from(this);
 
         ListView listview = getListView();
         listview.setOnItemClickListener(this);
@@ -196,18 +224,89 @@ public class SpeedDialListActivity extends ListActivity implements
         return record;
     }
 
+    private void showAddSpeedDialDialog(final int number) {
+        mPickNumber = number;
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.speed_dial_settings);
+        View contentView = LayoutInflater.from(this).inflate(
+                R.layout.add_speed_dial_dialog, null);
+        builder.setView(contentView);
+        ImageButton pickContacts = (ImageButton) contentView
+                .findViewById(R.id.select_contact);
+        pickContacts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickContact(number);
+                dismissDialog();
+            }
+        });
+        mEditNumber = (EditText) contentView.findViewById(R.id.edit_container);
+        if (null != mRecords.get(number)) {
+            mEditNumber.setText(SpeedDialUtils.getNumber(this, number));
+        }
+        Button cancelButton = (Button) contentView
+                .findViewById(R.id.btn_cancel);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dismissDialog();
+            }
+        });
+        mCompleteButton = (Button) contentView.findViewById(R.id.btn_complete);
+        mCompleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mEditNumber.getText().toString().isEmpty()) {
+                    dismissDialog();
+                    return;
+                }
+                saveSpeedDial();
+                dismissDialog();
+            }
+        });
+        mAddSpeedDialDialog = builder.create();
+        mAddSpeedDialDialog.show();
+    }
+
+    private void saveSpeedDial() {
+        String number = mEditNumber.getText().toString();
+        Record record = null;
+        if (number != null) {
+            Uri uri = Uri.withAppendedPath(
+                    ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+                    Uri.encode(number));
+            record = getRecordFromQuery(uri, LOOKUP_PROJECTION);
+            if (record == null) {
+                record = new Record(number);
+                record.normalizedNumber = number;
+            }
+        }
+        if (record != null) {
+            SpeedDialUtils.saveNumber(this, mPickNumber,
+                    record.normalizedNumber);
+            mRecords.put(mPickNumber, record);
+            mAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void dismissDialog() {
+        if (null != mAddSpeedDialDialog && mAddSpeedDialDialog.isShowing()) {
+            mAddSpeedDialDialog.dismiss();
+        }
+    }
+
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (position == 0) {
             Intent intent = new Intent(ACTION_ADD_VOICEMAIL);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             if (TelephonyManager.getDefault().getPhoneCount() > 1) {
-                long sub = SubscriptionManager.getDefaultVoiceSubId();
-                intent.setClassName("com.android.phone",
-                        "com.android.phone.MSimCallFeaturesSubSetting");
-                intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, sub);
-            } else {
-                intent.setClassName("com.android.phone",
-                        "com.android.phone.CallFeaturesSetting");
+                int sub = SubscriptionManager.getDefaultVoiceSubscriptionId();
+                SubscriptionInfo subInfo = mSubscriptionManager.getActiveSubscriptionInfo(sub);
+                if (subInfo != null) {
+                    intent.putExtra(SUB_ID_EXTRA, subInfo.getSubscriptionId());
+                    intent.putExtra(SUB_LABEL_EXTRA, subInfo.getDisplayName().toString());
+                }
             }
             try {
                 startActivity(intent);
@@ -218,15 +317,59 @@ public class SpeedDialListActivity extends ListActivity implements
             int number = position + 1;
             final Record record = mRecords.get(number);
             if (record == null) {
-                pickContact(number);
+                showAddSpeedDialDialog(number);
             } else {
-                PopupMenu pm = new PopupMenu(this, view);
+                PopupMenu pm = new PopupMenu(this, view, Gravity.START);
                 pm.getMenu().add(number, MENU_REPLACE, 0, R.string.speed_dial_replace);
                 pm.getMenu().add(number, MENU_DELETE, 0, R.string.speed_dial_delete);
                 pm.setOnMenuItemClickListener(this);
                 pm.show();
             }
         }
+    }
+
+    private boolean isMultiAccountAvailable() {
+        TelecomManager telecomManager = getTelecomManager(this);
+        return (telecomManager.getUserSelectedOutgoingPhoneAccount() == null)
+                && (telecomManager.getAllPhoneAccountsCount() > 1);
+    }
+
+    private void showSelectAccountDialog(Context context) {
+        TelecomManager telecomManager = getTelecomManager(context);
+        List<PhoneAccountHandle> accountsList = telecomManager
+                .getCallCapablePhoneAccounts();
+        final PhoneAccountHandle[] accounts = accountsList
+                .toArray(new PhoneAccountHandle[accountsList.size()]);
+        CharSequence[] accountEntries = new CharSequence[accounts.length];
+        for (int i = 0; i < accounts.length; i++) {
+            CharSequence label = telecomManager.getPhoneAccount(accounts[i])
+                    .getLabel();
+            accountEntries[i] = (label == null) ? null : label.toString();
+        }
+        AlertDialog dialog = new AlertDialog.Builder(context)
+                .setTitle(R.string.select_account_dialog_title)
+                .setItems(accountEntries, new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(ACTION_ADD_VOICEMAIL);
+                        int sub = Integer.parseInt(accounts[which].getId());
+                        intent.setClassName("com.android.phone",
+                                "com.android.phone.MSimCallFeaturesSubSetting");
+                        intent.putExtra(SUBSCRIPTION_KEY, sub);
+                        try {
+                            startActivity(intent);
+                        } catch (ActivityNotFoundException e) {
+                            Log.w(TAG, "can not find activity deal with voice mail");
+                        }
+                    }
+                })
+                .create();
+        dialog.show();
+    }
+
+    private TelecomManager getTelecomManager(Context context) {
+        return TelecomManager.from(context);
     }
 
     /*
@@ -262,7 +405,7 @@ public class SpeedDialListActivity extends ListActivity implements
 
         switch (item.getItemId()) {
             case MENU_REPLACE:
-                pickContact(number);
+                showAddSpeedDialDialog(number);
                 return true;
             case MENU_DELETE:
                 mRecords.put(number, null);
