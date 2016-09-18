@@ -97,7 +97,6 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     @Nullable private ContactsPreferences mContactsPreferences;
     private boolean mSpinnerShowing = false;
     private boolean mHasShownToast = false;
-    private static boolean isSupportLanguage;
     private InCallContactInteractions mInCallContactInteractions;
     private boolean mIsFullscreen = false;
 
@@ -202,7 +201,6 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         InCallPresenter.getInstance().addIncomingCallListener(this);
         InCallPresenter.getInstance().addDetailsListener(this);
         InCallPresenter.getInstance().addInCallEventListener(this);
-        isSupportLanguage = SudaUtils.isSupportLanguage(true);
     }
 
     @Override
@@ -928,9 +926,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                     number,
                     name,
                     nameIsNumber,
-                    isChildNumberShown || isCallSubjectShown ? null : isSupportLanguage ? TextUtils.isEmpty(mPrimaryContactInfo.label) ? mPrimaryContactInfo.location :
-                        TextUtils.isEmpty(mPrimaryContactInfo.location) ? mPrimaryContactInfo.label : mPrimaryContactInfo.label + " "
-                            + mPrimaryContactInfo.location : mPrimaryContactInfo.label,
+                    isChildNumberShown || isCallSubjectShown ? null : mPrimaryContactInfo.label,
                     mPrimaryContactInfo.photo,
                     mPrimaryContactInfo.isSipCall,
                     isForwarded,
@@ -1103,10 +1099,18 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                 contactInfo.namePrimary,
                 contactInfo.nameAlternative,
                 mContactsPreferences);
-        if (TextUtils.isEmpty(preferredName)) {
-            return contactInfo.number;
+        if (SudaUtils.isSupportLanguage(true)) {
+		CharSequence location = PhoneLocation.getCityFromPhone(preferredName);
+        	if (TextUtils.isEmpty(preferredName)) {
+                return String.valueOf(location);
+            }
+            return !TextUtils.isEmpty(location) ? location + " " + preferredName : preferredName;
+        } else {
+        	if (TextUtils.isEmpty(preferredName)) {
+            	return contactInfo.number;
         }
         return preferredName;
+        }
     }
 
     /**
@@ -1120,15 +1124,18 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                     contactInfo.namePrimary,
                     contactInfo.nameAlternative,
                     mContactsPreferences);
-        if (TextUtils.isEmpty(preferredName)) {
-            if (!isSupportLanguage) {
-				CharSequence location = PhoneLocation.getCityFromPhone(contactInfo.nameAlternative);
-                return contactInfo.location;
-            } else {
-                return "";
+        if (SudaUtils.isSupportLanguage(true)) {
+		CharSequence location = PhoneLocation.getCityFromPhone(contactInfo.number);
+        	if (TextUtils.isEmpty(preferredName)) {
+                return String.valueOf(location);
             }
+            return !TextUtils.isEmpty(location) ? location + " " + contactInfo.number : contactInfo.number;
+        } else {	
+       	    if (TextUtils.isEmpty(preferredName)) {
+                return contactInfo.location;
         }
         return contactInfo.number;
+        }
     }
 
     public void secondaryInfoClicked() {
