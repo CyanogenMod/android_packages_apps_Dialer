@@ -1099,18 +1099,10 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                 contactInfo.namePrimary,
                 contactInfo.nameAlternative,
                 mContactsPreferences);
-        if (SudaUtils.isSupportLanguage(true)) {
-		CharSequence location = PhoneLocation.getCityFromPhone(preferredName);
-        	if (TextUtils.isEmpty(preferredName)) {
-                return String.valueOf(location);
-            }
-            return !TextUtils.isEmpty(location) ? location + " " + preferredName : preferredName;
-        } else {
-        	if (TextUtils.isEmpty(preferredName)) {
-            	return contactInfo.number;
+        if (TextUtils.isEmpty(preferredName)) {
+            return contactInfo.number;
         }
         return preferredName;
-        }
     }
 
     /**
