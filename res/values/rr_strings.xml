@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2013-2014 The CyanogenMod Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- Proximity speaker -->
+    <string name="speaker_settings_label">Proximity speakerphone</string>
+    <string name="prox_auto_speaker_title">Automatic proximity speakerphone</string>
+    <string name="prox_auto_speaker_summary">Enable speakerphone automatically when your phone is removed from your ear</string>
+    <string name="prox_auto_speaker_delay_title">Speakerphone delay</string>
+    <string name="prox_auto_speaker_delay_dialog_title">Speakerphone delay in (ms)</string>
+    <string name="prox_auto_speaker_delay_summary">Speakerphone will be activated in <xliff:g id="number">%d</xliff:g> ms</string>
+    <string name="prox_auto_speaker_incall_only_title">Only while in call</string>
+    <string name="prox_auto_speaker_incall_only_summary_on">On outgoing calls, listener will only become active after the receiving party answers</string>
+    <string name="prox_auto_speaker_incall_only_summary_off">Listener will be active during all offhook call states (default)</string>
+
+</resources>
