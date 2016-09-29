@@ -326,6 +326,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         // Start/stop timers.
         if (isPrimaryCallActive()) {
             Log.d(this, "Starting the calltime timer");
+            mPrimary.triggerCalcBaseChronometerTime();
             mCallTimer.start(CALL_TIME_UPDATE_INTERVAL_MS);
         } else {
             Log.d(this, "Canceling the calltime timer");
@@ -385,7 +386,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
      * @param sessionModificationState The new session modification state.
      */
     @Override
-    public void onSessionModificationStateChange(int sessionModificationState) {
+    public void onSessionModificationStateChange(Call call, int sessionModificationState) {
         Log.d(this, "onSessionModificationStateChange : sessionModificationState = " +
                 sessionModificationState);
 
@@ -454,7 +455,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         return null;
     }
 
-    private void updatePrimaryCallState() {
+    public void updatePrimaryCallState() {
         if (getUi() != null && mPrimary != null) {
             boolean isWorkCall = mPrimary.hasProperty(PROPERTY_ENTERPRISE_CALL)
                     || (mPrimaryContactInfo == null ? false
@@ -572,9 +573,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
             ui.setPrimaryCallElapsedTime(false, 0);
             mCallTimer.cancel();
         } else {
-            final long callStart = mPrimary.getConnectTimeMillis();
-            final long duration = System.currentTimeMillis() - callStart;
-            ui.setPrimaryCallElapsedTime(true, duration);
+            ui.setPrimaryCallElapsedTime(true, mPrimary.getCallDuration());
         }
     }
 
