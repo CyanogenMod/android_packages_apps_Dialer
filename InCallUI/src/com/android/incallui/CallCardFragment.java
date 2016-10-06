@@ -79,6 +79,10 @@ import com.android.phone.common.animation.AnimUtils;
 
 import java.util.List;
 
+import com.sudamod.sdk.phonelocation.PhoneUtil;
+import com.sudamod.sdk.phonelocation.PhoneUtil.CallBack;
+import android.suda.utils.SudaUtils;
+
 /**
  * Fragment for call card.
  */
@@ -267,6 +271,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     private static final int TTY_MODE_HCO = 2;
 
     private static final String VOLUME_BOOST = "volume_boost";
+    private static PhoneUtil mPu;
 
     @Override
     public CallCardPresenter.CallCardUi getUi() {
@@ -319,6 +324,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         final CallList calls = CallList.getInstance();
         final Call call = calls.getFirstCall();
         getPresenter().init(getActivity(), call);
+        mPu = PhoneUtil.getPhoneUtil(getActivity());
     }
 
     @Override
@@ -697,6 +703,23 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
 
         // Set the label (Mobile, Work, etc)
         setPrimaryLabel(label);
+
+        if (SudaUtils.isSupportLanguage(true) && !TextUtils.isEmpty(name)
+                   && nameIsNumber) {
+            mPu.getOnlineNumberInfo(name, new CallBack() {
+                    public void execute(final String response) {
+                        if(getActivity() == null)
+                            return;	
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                setPrimaryLabel(response);
+                            }
+                         });
+                     }
+                }
+            );
+        }
 
         showCallType(isSipCall, isForwarded);
 

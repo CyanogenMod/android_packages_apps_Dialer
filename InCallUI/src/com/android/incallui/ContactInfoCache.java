@@ -49,6 +49,9 @@ import com.android.incallui.Call.LogState;
 import com.android.incallui.service.PhoneNumberService;
 import com.android.incalluibind.ObjectFactory;
 
+import com.sudamod.sdk.phonelocation.PhoneUtil;
+import android.suda.utils.SudaUtils;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -68,7 +71,7 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
     private static final String TAG = ContactInfoCache.class.getSimpleName();
     private static final int TOKEN_UPDATE_PHOTO_FOR_CALL_STATE = 0;
 
-    private final Context mContext;
+    private static Context mContext;
     private final PhoneNumberService mPhoneNumberService;
     private final CachedNumberLookupService mCachedNumberLookupService;
     private final HashMap<String, ContactCacheEntry> mInfoMap = Maps.newHashMap();
@@ -562,7 +565,13 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
 
         cce.namePrimary = displayName;
         cce.number = displayNumber;
-        cce.location = displayLocation;
+        String location = PhoneUtil.getPhoneUtil(mContext).getLocalNumberInfo(cce.number, false);
+        if (!TextUtils.isEmpty(location)) {
+            info.geoDescription = location;
+            cce.location = info.geoDescription;
+        } else {
+            cce.location = displayLocation;
+        }
         cce.label = label;
         cce.isSipCall = isSipCall;
         cce.userType = info.userType;

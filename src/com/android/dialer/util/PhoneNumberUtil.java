@@ -35,6 +35,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import com.sudamod.sdk.phonelocation.PhoneUtil;
+import android.suda.utils.SudaUtils;
+
 public class PhoneNumberUtil {
     private static final String TAG = "PhoneNumberUtil";
     private static final Set<String> LEGACY_UNKNOWN_NUMBERS = Sets.newHashSet("-1", "-2", "-3");
@@ -101,6 +104,9 @@ public class PhoneNumberUtil {
      */
     public static String getGeoDescription(Context context, String number) {
         Log.v(TAG, "getGeoDescription('" + pii(number) + "')...");
+
+        if(SudaUtils.isSupportLanguage(true))
+            return PhoneUtil.getPhoneUtil(context).getLocalNumberInfo(number, false);
 
         if (TextUtils.isEmpty(number)) {
             return null;
