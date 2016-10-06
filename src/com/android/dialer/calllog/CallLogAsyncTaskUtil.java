@@ -43,8 +43,6 @@ import com.android.dialer.util.AsyncTaskExecutors;
 import com.android.dialer.util.PhoneNumberUtil;
 import com.android.dialer.util.TelecomUtil;
 
-import android.suda.location.PhoneLocation;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
@@ -236,7 +234,7 @@ public class CallLogAsyncTaskUtil {
             details.date = cursor.getLong(CallDetailQuery.DATE_COLUMN_INDEX);
             details.duration = cursor.getLong(CallDetailQuery.DURATION_COLUMN_INDEX);
             details.features = cursor.getInt(CallDetailQuery.FEATURES);
-            details.geocode = PhoneLocation.getCityFromPhone(number);
+            details.geocode = cursor.getString(CallDetailQuery.GEOCODED_LOCATION_COLUMN_INDEX);
             details.transcription = cursor.getString(CallDetailQuery.TRANSCRIPTION_COLUMN_INDEX);
 
             details.countryIso = !TextUtils.isEmpty(countryIso) ? countryIso

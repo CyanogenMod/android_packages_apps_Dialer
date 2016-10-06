@@ -38,8 +38,6 @@ import android.telephony.PhoneNumberUtils;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.suda.location.PhoneLocation;
-import android.suda.utils.SudaUtils;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.ListAdapter;
@@ -1115,18 +1113,10 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                     contactInfo.namePrimary,
                     contactInfo.nameAlternative,
                     mContactsPreferences);
-        if (SudaUtils.isSupportLanguage(true)) {
-		CharSequence location = PhoneLocation.getCityFromPhone(contactInfo.number);
-        	if (TextUtils.isEmpty(preferredName)) {
-                return String.valueOf(location);
-            }
-            return !TextUtils.isEmpty(location) ? location + " " + contactInfo.number : contactInfo.number;
-        } else {	
-       	    if (TextUtils.isEmpty(preferredName)) {
-                return contactInfo.location;
+        if (TextUtils.isEmpty(preferredName)) {
+            return contactInfo.location;
         }
         return contactInfo.number;
-        }
     }
 
     public void secondaryInfoClicked() {

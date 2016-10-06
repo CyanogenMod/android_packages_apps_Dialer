@@ -63,8 +63,6 @@ import com.android.dialer.service.ExtendedBlockingButtonRenderer;
 import com.android.dialer.util.PhoneNumberUtil;
 import com.android.dialer.voicemail.VoicemailPlaybackPresenter;
 
-import android.suda.location.PhoneLocation;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -542,7 +540,7 @@ public class CallLogAdapter extends GroupingListAdapter
         details.date = c.getLong(CallLogQuery.DATE);
         details.duration = c.getLong(CallLogQuery.DURATION);
         details.features = getCallFeatures(c, count);
-        details.geocode = PhoneLocation.getCityFromPhone(number);
+        details.geocode = c.getString(CallLogQuery.GEOCODED_LOCATION);
         details.transcription = c.getString(CallLogQuery.TRANSCRIPTION);
         details.callTypes = getCallTypes(c, count);
 
