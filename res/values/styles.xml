@@ -331,6 +331,18 @@
         <item name="android:textColor">@android:color/white</item>
     </style>
 
+    <style name="MiniMarkActivityStyle" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:colorPrimaryDark">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/dialer_theme_color_dark</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+
+    <style name="MiniMarkRootViewStyle" parent="android:Theme.Material.Light">
+        <item name="android:listViewStyle">@style/ListViewStyle</item>
+    </style>
+
     <style name="BlockedNumbersDescriptionTextStyle">
         <item name="android:lineSpacingMultiplier">1.43</item>
         <item name="android:paddingTop">8dp</item>

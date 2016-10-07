@@ -333,6 +333,11 @@
                   android:resizeableActivity="true">
         </activity>
 
+        <activity
+            android:name=".MiniMarkActivity"
+            android:excludeFromRecents="true"
+            android:theme="@style/MiniMarkActivityStyle" />
+
         <service android:name="com.android.incallui.InCallServiceImpl"
                  android:permission="android.permission.BIND_INCALL_SERVICE"
                  android:directBootAware="true" >

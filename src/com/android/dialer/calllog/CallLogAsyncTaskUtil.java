@@ -43,10 +43,10 @@ import com.android.dialer.util.AsyncTaskExecutors;
 import com.android.dialer.util.PhoneNumberUtil;
 import com.android.dialer.util.TelecomUtil;
 
-import com.sudamod.sdk.phonelocation.PhoneUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
+import com.sudamod.sdk.phonelocation.PhoneUtil;
 
 public class CallLogAsyncTaskUtil {
     private static String TAG = CallLogAsyncTaskUtil.class.getSimpleName();
