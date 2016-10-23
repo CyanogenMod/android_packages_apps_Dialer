@@ -29,6 +29,7 @@ import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.provider.Settings;
+import cyanogenmod.providers.CMSettings;
 import android.telecom.CallAudioState;
 import android.view.Display;
 
@@ -144,7 +145,9 @@ public class ProximitySensor implements AccelerometerListener.OrientationListene
         boolean hasOngoingCall = InCallState.INCALL == newState && callList.hasLiveCall();
         boolean isOffhook = (InCallState.OUTGOING == newState) || hasOngoingCall;
         mHasIncomingCall = (InCallState.INCOMING == newState);
+
         mIsPhoneOutgoing = (InCallState.OUTGOING == newState);
+
 
         if (isOffhook != mIsPhoneOffhook) {
             mIsPhoneOffhook = isOffhook;
@@ -158,6 +161,10 @@ public class ProximitySensor implements AccelerometerListener.OrientationListene
 
         if (hasOngoingCall && InCallState.OUTGOING == oldState) {
             setProxSpeaker(mIsProxSensorFar);
+        }
+
+        if (mHasIncomingCall) {
+            updateProximitySensorMode();
         }
 
         if (mHasIncomingCall) {
@@ -299,6 +306,8 @@ public class ProximitySensor implements AccelerometerListener.OrientationListene
                     || CallAudioState.ROUTE_SPEAKER == audioMode
                     || CallAudioState.ROUTE_BLUETOOTH == audioMode
                     || mIsHardKeyboardOpen);
+            screenOnImmediately |= CMSettings.System.getInt(mContext.getContentResolver(),
+                    CMSettings.System.PROXIMITY_ON_WAKE, 1) == 0;
 
             // We do not keep the screen off when the user is outside in-call screen and we are
             // horizontal, but we do not force it on when we become horizontal until the
@@ -326,8 +335,8 @@ public class ProximitySensor implements AccelerometerListener.OrientationListene
 
             if ((mIsPhoneOffhook || mHasIncomingCall) && !screenOnImmediately) {
                 Log.d(this, "Turning on proximity sensor");
-                // Phone is in use!  Arrange for the screen to turn off
-                // automatically when the sensor detects a close object.
+                // Phone is idle.  We don't want any special proximity sensor
+                // behavior in this case.
                 turnOnProximitySensor();
             } else {
                 Log.d(this, "Turning off proximity sensor");
