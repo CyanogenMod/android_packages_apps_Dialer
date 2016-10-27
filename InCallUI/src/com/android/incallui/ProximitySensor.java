@@ -148,7 +148,6 @@ public class ProximitySensor implements AccelerometerListener.OrientationListene
 
         mIsPhoneOutgoing = (InCallState.OUTGOING == newState);
 
-
         if (isOffhook != mIsPhoneOffhook) {
             mIsPhoneOffhook = isOffhook;
 
@@ -161,6 +160,10 @@ public class ProximitySensor implements AccelerometerListener.OrientationListene
 
         if (hasOngoingCall && InCallState.OUTGOING == oldState) {
             setProxSpeaker(mIsProxSensorFar);
+        }
+
+        if (mHasIncomingCall) {
+            updateProximitySensorMode();
         }
 
         if (mHasIncomingCall) {
