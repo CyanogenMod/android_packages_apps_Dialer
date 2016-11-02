@@ -16,16 +16,11 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <plurals name="minute">
-    <item quantity="one">1 min-o</item>
-    <item quantity="other">%d min-oj</item>
-  </plurals>
-  <plurals name="second">
-    <item quantity="one">1 sek-o</item>
-    <item quantity="other">%d sek-oj</item>
-  </plurals>
-  <plurals name="call">
-    <item quantity="one">1 alvoko</item>
-    <item quantity="other">%d alvokoj</item>
-  </plurals>
+  <!-- 0:           sec
+         1:      min
+         2:      min  sec
+         3: hour
+         4: hour      sec
+         5: hour min
+         6: hour min  sec -->
 </resources>
