@@ -49,6 +49,7 @@ import com.android.contacts.common.compat.PhoneNumberUtilsCompat;
 import com.android.contacts.common.preference.ContactsPreferences;
 import com.android.contacts.common.util.PermissionsUtil;
 import com.android.dialer.DialtactsActivity;
+import com.android.dialer.MiniMarkActivity;
 import com.android.dialer.PhoneCallDetails;
 import com.android.dialer.R;
 import com.android.dialer.calllog.calllogcache.CallLogCache;
@@ -66,14 +67,14 @@ import com.android.dialer.voicemail.VoicemailPlaybackPresenter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
-
+import com.sudamod.sdk.phonelocation.PhoneUtil;
 /**
  * Adapter class to fill in data for the Call Log.
  */
 public class CallLogAdapter extends GroupingListAdapter
         implements CallLogGroupBuilder.GroupCreator,
                 VoicemailPlaybackPresenter.OnVoicemailDeletedListener,
-                ExtendedBlockingButtonRenderer.Listener {
+                ExtendedBlockingButtonRenderer.Listener, MiniMarkActivity.CallBack {
 
     // Types of activities the call log adapter is used for
     public static final int ACTIVITY_TYPE_CALL_LOG = 1;
@@ -259,6 +260,11 @@ public class CallLogAdapter extends GroupingListAdapter
                 }
             };
 
+    @Override
+    public void updateView() {
+        this.notifyDataSetChanged();
+    }
+
     public CallLogAdapter(
             Context context,
             CallFetcher callFetcher,
@@ -267,6 +273,7 @@ public class CallLogAdapter extends GroupingListAdapter
             int activityType) {
         super(context);
 
+        MiniMarkActivity.setCallBack(context.getClass().toString(), CallLogAdapter.this);
         mContext = context;
         mCallFetcher = callFetcher;
         mContactInfoHelper = contactInfoHelper;
@@ -540,7 +547,7 @@ public class CallLogAdapter extends GroupingListAdapter
         details.date = c.getLong(CallLogQuery.DATE);
         details.duration = c.getLong(CallLogQuery.DURATION);
         details.features = getCallFeatures(c, count);
-        details.geocode = c.getString(CallLogQuery.GEOCODED_LOCATION);
+        details.geocode = PhoneUtil.getPhoneUtil(mContext).getLocalNumberInfo(number);
         details.transcription = c.getString(CallLogQuery.TRANSCRIPTION);
         details.callTypes = getCallTypes(c, count);
 
