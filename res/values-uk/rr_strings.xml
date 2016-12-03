@@ -17,8 +17,8 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
-  <string name="speaker_settings_label">Датчик наближення і гучний зв\'язок</string>
-  <string name="prox_auto_speaker_title">Увімкнення гучного зв\'язку за датчиком наближення</string>
+  <string name="speaker_settings_label">Датчик приближення і гучний зв\'язок</string>
+  <string name="prox_auto_speaker_title">Увімкнення гучного зв\'язку за датчиком приближення</string>
   <string name="prox_auto_speaker_summary">Автоматично вмикати гучний зв\'язок, при видаленні телефону від вуха</string>
   <string name="prox_auto_speaker_delay_title">Затримка увімкнення гучного зв\'язку</string>
   <string name="prox_auto_speaker_delay_dialog_title">Затримка увімкнення гучного зв\'язку (мс)</string>

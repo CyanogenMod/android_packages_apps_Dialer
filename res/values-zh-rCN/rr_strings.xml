@@ -19,7 +19,7 @@
   <!-- Proximity speaker -->
   <string name="speaker_settings_label">自动免提</string>
   <string name="prox_auto_speaker_title">自动启动免提功能</string>
-  <string name="prox_auto_speaker_summary">当您的手机离开您的耳边时启用扬声器</string>
+  <string name="prox_auto_speaker_summary">当您的手机离开您的耳边时自动启用扬声器</string>
   <string name="prox_auto_speaker_delay_title">扬声器延迟</string>
   <string name="prox_auto_speaker_delay_dialog_title">扬声器延迟(毫秒)</string>
   <string name="prox_auto_speaker_delay_summary">免提功能将在 <xliff:g id="number">%d</xliff:g> 毫秒后激活</string>

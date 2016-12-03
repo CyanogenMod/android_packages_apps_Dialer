@@ -17,4 +17,6 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
+  <string name="prox_auto_speaker_delay_title">揚聲器延遲</string>
+  <string name="prox_auto_speaker_delay_dialog_title">揚聲器延遲時間(毫秒)</string>
 </resources>
