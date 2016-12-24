@@ -17,4 +17,13 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
+  <string name="speaker_settings_label">Yaxınlıq səsucaldanı</string>
+  <string name="prox_auto_speaker_title">Avtomatik yaxınlıq səsucaldanı</string>
+  <string name="prox_auto_speaker_summary">Telefonunuzu qulağınızdan çəkdiyinizdə səsucaldanı avtomatik olaraq aktivləşdirir</string>
+  <string name="prox_auto_speaker_delay_title">Səsucaldan gecikməsi</string>
+  <string name="prox_auto_speaker_delay_dialog_title">Səsucaldan gecikməsi (ms)</string>
+  <string name="prox_auto_speaker_delay_summary">Səsucaldan <xliff:g id="number">%d</xliff:g> ms ərzində aktif ediləcəkdir</string>
+  <string name="prox_auto_speaker_incall_only_title">Yalnız zəng arasında</string>
+  <string name="prox_auto_speaker_incall_only_summary_on">Gedən zənglərdə dinləyici sadəcə alıcı tərəf cavab verdikdən sonra aktiv hala gələcəkdir</string>
+  <string name="prox_auto_speaker_incall_only_summary_off">Dinləyici çağırışa cavab verdiyi halda effektiv olacaq (varsayılan)</string>
 </resources>

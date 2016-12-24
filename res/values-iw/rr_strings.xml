@@ -17,4 +17,5 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
+  <string name="prox_auto_speaker_incall_only_title">רק בזמן שיחה</string>
 </resources>

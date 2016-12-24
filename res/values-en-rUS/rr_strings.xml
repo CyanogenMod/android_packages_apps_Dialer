@@ -17,4 +17,13 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
+  <string name="speaker_settings_label">Proximity Speakerphone</string>
+  <string name="prox_auto_speaker_title">Automatic Proximity Speakerphone</string>
+  <string name="prox_auto_speaker_summary">Enable Speakerphone automatically when your phone is removed from your ear</string>
+  <string name="prox_auto_speaker_delay_title">Speakerphone Delay</string>
+  <string name="prox_auto_speaker_delay_dialog_title">Speakerphone Delay in (ms)</string>
+  <string name="prox_auto_speaker_delay_summary">Speakerphone will be Activated in <xliff:g id="number">%d</xliff:g> ms</string>
+  <string name="prox_auto_speaker_incall_only_title">Only while in Call</string>
+  <string name="prox_auto_speaker_incall_only_summary_on">On outgoing calls, listener will only become active after the receiving party answers</string>
+  <string name="prox_auto_speaker_incall_only_summary_off">Listener will be active during all offhook call states (default)</string>
 </resources>
