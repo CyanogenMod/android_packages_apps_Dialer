@@ -18,6 +18,9 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
   <string name="prox_auto_speaker_summary">Омогући глас преко звучника аутоматски када ти је склониш телефон са ува</string>
-  <string name="prox_auto_speaker_incall_only_title">Једино током позива</string>
-  <string name="prox_auto_speaker_incall_only_summary_on">Током одлазних позива, слушалац ће само постати активан након што се друга страна јави</string>
+  <string name="prox_auto_speaker_delay_title">Застој звучника</string>
+  <string name="prox_auto_speaker_delay_dialog_title">Застој звучника (у ms)</string>
+  <string name="prox_auto_speaker_delay_summary">Звучник ће бити активиран за <xliff:g id="number">%d</xliff:g> ms</string>
+  <string name="prox_auto_speaker_incall_only_title">Само у току позива</string>
+  <string name="prox_auto_speaker_incall_only_summary_on">Током одлазних позива, слушалац ће постати активан само након што се друга страна јави</string>
 </resources>
