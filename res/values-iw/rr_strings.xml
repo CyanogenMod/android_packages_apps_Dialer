@@ -17,5 +17,10 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
+  <string name="prox_auto_speaker_summary">הפעל ספיקר אוטומטית כאשר המכשיר אינו קרוב לאוזן</string>
+  <string name="prox_auto_speaker_delay_title">השהיית ספיקר</string>
+  <string name="prox_auto_speaker_delay_dialog_title">השהיית ספיקר (מיל\"ש)</string>
+  <string name="prox_auto_speaker_delay_summary">הספיקר יהיה מופעל בעוד <xliff:g id="number">%d</xliff:g> מיל\"ש</string>
   <string name="prox_auto_speaker_incall_only_title">רק בזמן שיחה</string>
+  <string name="prox_auto_speaker_incall_only_summary_on">בזמן שיחות יוצאות, המאזין יפעל רק לאחר שהמשיב יענה</string>
 </resources>
