@@ -17,4 +17,13 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
+  <string name="speaker_settings_label">Difuzor proximitate</string>
+  <string name="prox_auto_speaker_title">Comutare la difuzor în funcție de senzorul de proximitate</string>
+  <string name="prox_auto_speaker_summary">Activare automată difuzor atunci când telefonul este îndepărtat de ureche</string>
+  <string name="prox_auto_speaker_delay_title">Întârziere difuzor</string>
+  <string name="prox_auto_speaker_delay_dialog_title">Întârzierea difuzorului (ms)</string>
+  <string name="prox_auto_speaker_delay_summary">Difuzorul va fi activat în <xliff:g id="number">%d </xliff:g> ms</string>
+  <string name="prox_auto_speaker_incall_only_title">Numai în timpul apelului</string>
+  <string name="prox_auto_speaker_incall_only_summary_on">În apelurile efectuate, ascultătorul va deveni activ doar după ce interlocutorul a răspuns</string>
+  <string name="prox_auto_speaker_incall_only_summary_off">Ascultătorul va fi activ în toate stările apelului (implicit)</string>
 </resources>
