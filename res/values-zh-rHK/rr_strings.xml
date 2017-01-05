@@ -19,11 +19,11 @@
   <!-- Proximity speaker -->
   <string name="speaker_settings_label">免提揚聲器</string>
   <string name="prox_auto_speaker_title">自動開啟免提揚聲器</string>
-  <string name="prox_auto_speaker_summary">當你的手機從你的耳朵中移除時自動啟用揚聲器</string>
+  <string name="prox_auto_speaker_summary">當你的手機離開你的耳朵時自動啟用免提揚聲器</string>
   <string name="prox_auto_speaker_delay_title">揚聲器延遲</string>
   <string name="prox_auto_speaker_delay_dialog_title">揚聲器延遲 (毫秒)</string>
   <string name="prox_auto_speaker_delay_summary">免持聽筒將在 <xliff:g id="number">%d </xliff:g> ms 中啟動</string>
   <string name="prox_auto_speaker_incall_only_title">僅通話時</string>
   <string name="prox_auto_speaker_incall_only_summary_on">僅在電話接通時啟用聆聽器</string>
-  <string name="prox_auto_speaker_incall_only_summary_off">聆聽器將在所有 offhook 狀態下啟用 (預設)</string>
+  <string name="prox_auto_speaker_incall_only_summary_off">持續啟用聆聽器 (預設)</string>
 </resources>
