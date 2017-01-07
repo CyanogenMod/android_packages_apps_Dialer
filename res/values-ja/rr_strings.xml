@@ -17,4 +17,13 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
+  <string name="speaker_settings_label">近接スピーカーフォン</string>
+  <string name="prox_auto_speaker_title">自動近接スピーカーフォン</string>
+  <string name="prox_auto_speaker_summary">電話を耳から離したときにスピーカーフォンを自動的に有効にする</string>
+  <string name="prox_auto_speaker_delay_title">スピーカーフォンの遅延</string>
+  <string name="prox_auto_speaker_delay_dialog_title">スピーカーフォンの遅延（ミリ秒）</string>
+  <string name="prox_auto_speaker_delay_summary">スピーカーフォンは<xliff:g id="number">%d</xliff:g>ミリ秒でアクティブになります</string>
+  <string name="prox_auto_speaker_incall_only_title">通話中のみ</string>
+  <string name="prox_auto_speaker_incall_only_summary_on">発信側では、受信側が応答した後にリスナーがアクティブになります</string>
+  <string name="prox_auto_speaker_incall_only_summary_off">リスナーは、通話時のすべての状態でアクティブになります（デフォルト）</string>
 </resources>
