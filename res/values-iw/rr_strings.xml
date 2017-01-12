@@ -17,6 +17,8 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
+  <string name="speaker_settings_label">חיישן קרבה לספיקר</string>
+  <string name="prox_auto_speaker_title">חיישן קרבה לספיקר אוטומטי</string>
   <string name="prox_auto_speaker_summary">הפעל ספיקר אוטומטית כאשר המכשיר אינו קרוב לאוזן</string>
   <string name="prox_auto_speaker_delay_title">השהיית ספיקר</string>
   <string name="prox_auto_speaker_delay_dialog_title">השהיית ספיקר (מיל\"ש)</string>

@@ -20,8 +20,8 @@
   <string name="speaker_settings_label">Freisprecheinrichtung bei Annäherung</string>
   <string name="prox_auto_speaker_title">Automatische Freisprecheinrichtung bei Annäherung</string>
   <string name="prox_auto_speaker_summary">Freisprechen automatisch aktivieren, wenn Ihr Telefon vom Ohr entfernt wird</string>
-  <string name="prox_auto_speaker_delay_title">Freisprecheinrichtung Verzögerung</string>
-  <string name="prox_auto_speaker_delay_dialog_title">Freisprecheinrichtung Verzögerung (ms)</string>
+  <string name="prox_auto_speaker_delay_title">Freisprecheinrichtungsverzögerung</string>
+  <string name="prox_auto_speaker_delay_dialog_title">Freisprecheinrichtungsverzögerung in (ms)</string>
   <string name="prox_auto_speaker_delay_summary">Freisprecheinrichtung wird in <xliff:g id="number">%d</xliff:g> ms aktiviert</string>
   <string name="prox_auto_speaker_incall_only_title">Nur während eines Anrufs</string>
   <string name="prox_auto_speaker_incall_only_summary_on">Bei ausgehenden Anrufen wird der Hörer erst dann aktiv, wenn der Empfänger antwortet</string>
