@@ -17,13 +17,13 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
-  <string name="speaker_settings_label">Snímač priblízenia hlasitého odposluchu</string>
-  <string name="prox_auto_speaker_title">Automatický snímač priblíženia hlasitého odposluchu</string>
-  <string name="prox_auto_speaker_summary">Automaticky povoliť hlasitý odposluch, ak je telefón odobratý z Vášho ucha</string>
+  <string name="speaker_settings_label">Priblíženie reproduktoru</string>
+  <string name="prox_auto_speaker_title">Automatické priblíženie reproduktoru</string>
+  <string name="prox_auto_speaker_summary">Automaticky povoliť hlasitý odposluch, ak je telefón vzdialený od ucha</string>
   <string name="prox_auto_speaker_delay_title">Oneskorenie hlasitého odposluchu</string>
-  <string name="prox_auto_speaker_delay_dialog_title">Oneskorenie hlasitého odposluchu v (milisekundách)</string>
-  <string name="prox_auto_speaker_delay_summary">Hlasitý odposluch sa aktivuje v <xliff:g id="number">%d </xliff:g> ms</string>
+  <string name="prox_auto_speaker_delay_dialog_title">Oneskorenie hlasitého odposluchu v ms</string>
+  <string name="prox_auto_speaker_delay_summary">Hlasitý odposluch sa aktivuje za <xliff:g id="number">%d </xliff:g> ms</string>
   <string name="prox_auto_speaker_incall_only_title">Len počas hovoru</string>
-  <string name="prox_auto_speaker_incall_only_summary_on">Pri odchádzajúcich hovoroch sa reproduktor aktivuje pri prijatí hovoru protistranou</string>
+  <string name="prox_auto_speaker_incall_only_summary_on">Pri odchádzajúcich hovoroch sa reproduktor aktivuje po prijatí hovoru protistranou</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Reproduktor bude aktívny vždy, aj pri zvonení (predvolené)</string>
 </resources>

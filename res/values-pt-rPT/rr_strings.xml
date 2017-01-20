@@ -19,10 +19,10 @@
   <!-- Proximity speaker -->
   <string name="speaker_settings_label">Altifalante de proximidade</string>
   <string name="prox_auto_speaker_title">Altifalante de proximidade automático</string>
-  <string name="prox_auto_speaker_summary">Ativar o altifalante automaticamente quando o telefone é removido da sua orelha</string>
+  <string name="prox_auto_speaker_summary">Ativar o altifalante automaticamente quando o telefone é afastado da sua orelha</string>
   <string name="prox_auto_speaker_delay_title">Atraso do altifalante</string>
-  <string name="prox_auto_speaker_delay_dialog_title">Atraso do altifalante (ms)</string>
-  <string name="prox_auto_speaker_delay_summary">O altifalante será ativado em <xliff:g id="number">%d </xliff:g> ms</string>
+  <string name="prox_auto_speaker_delay_dialog_title">Atraso do altifalante em (ms)</string>
+  <string name="prox_auto_speaker_delay_summary">O altifalante será ativado passados <xliff:g id="number">%d</xliff:g> ms</string>
   <string name="prox_auto_speaker_incall_only_title">Apenas quando numa chamada</string>
   <string name="prox_auto_speaker_incall_only_summary_on">Em chamadas efetuadas, o altifalante só se ativará após o recetor responder</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Altifalante ativo durante todos os estados da chamada (predefinido)</string>
