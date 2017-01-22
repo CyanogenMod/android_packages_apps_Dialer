@@ -17,4 +17,13 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
+  <string name="speaker_settings_label">Närhetssensor högtalartelefon</string>
+  <string name="prox_auto_speaker_title">Automatisk närhetssensor högtalartelefon</string>
+  <string name="prox_auto_speaker_summary">Aktivera högtalartelefonen automatiskt när telefonen tas bort från ditt öra</string>
+  <string name="prox_auto_speaker_delay_title">Högtalartelefon fördröjning</string>
+  <string name="prox_auto_speaker_delay_dialog_title">Högtalartelefon fördröjning i (ms)</string>
+  <string name="prox_auto_speaker_delay_summary">Högtalartelefonen kommer att aktiveras i <xliff:g id="number">%d </xliff:g> ms</string>
+  <string name="prox_auto_speaker_incall_only_title">Endast under samtal</string>
+  <string name="prox_auto_speaker_incall_only_summary_on">Vid utgående samtal, lyssnaren kommer endast vara aktiv vid svar</string>
+  <string name="prox_auto_speaker_incall_only_summary_off">Lyssnaren kommer vara aktiv under hela det utgående samtalet (standard)</string>
 </resources>
