@@ -30,7 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="#00000000" />
+            android:background="@color/background_color_transparent" />
         <!-- Dialpad shadow -->
         <View
             android:layout_width="match_parent"

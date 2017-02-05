@@ -18,4 +18,17 @@
     <color name="promo_card_header_text_color">@color/background_dialer_white</color>
     <color name="promo_card_details_text_color">@color/background_dialer_white</color>
     <color name="dialpad_digits_color">@color/incall_background_color</color>
+    <color name="background_color_transparent">#00000000</color>
+    <color name="call_log_primary_background_color">#000000</color>
+    <color name="call_log_secondary_background_color">#333333</color>
+    <color name="call_log_header_color">#33b5e5</color>
+    <color name="call_log_voicemail_status_background_color">#262626</color>
+    <color name="call_log_voicemail_status_text_color">#888888</color>
+    <color name="call_log_voicemail_status_action_text_color">#33b5e5</color>
+    <color name="call_log_primary_bg_color">#FFFFFF</color>
+    <color name="call_log_secondary_bg_color">#FFFFFF</color>
+    <color name="call_log_header_color_dark">#FFFFFF</color>
+    <color name="dialer_button_text_color">#fff</color>
+    <color name="dialpad_text_color">#FFFFFF</color>
+    <color name="keyguard_preview_bg">#ffffff</color>
 </resources>
