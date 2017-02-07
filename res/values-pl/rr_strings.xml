@@ -22,8 +22,8 @@
   <string name="prox_auto_speaker_summary">Włącz zestaw głośnomówiący automatycznie, gdy telefon zostanie odsunięty od ucha</string>
   <string name="prox_auto_speaker_delay_title">Opóźnienie zestawu głośnomówiącego</string>
   <string name="prox_auto_speaker_delay_dialog_title">Opóźnienie zestawu głośnomówiącego w (ms)</string>
-  <string name="prox_auto_speaker_delay_summary">Zestaw głośnomówiący zostanie aktywowany w <xliff:g id="number">%d </xliff:g> ms</string>
+  <string name="prox_auto_speaker_delay_summary">Zestaw głośnomówiący zostanie aktywowany w ciągu <xliff:g id="number">%d </xliff:g> ms</string>
   <string name="prox_auto_speaker_incall_only_title">Tylko podczas rozmowy</string>
   <string name="prox_auto_speaker_incall_only_summary_on">Dla połączeń wychodzących, detektor będzie aktywny tylko po otrzymaniu odpowiedzi</string>
-  <string name="prox_auto_speaker_incall_only_summary_off">Detektor będzie aktywny dla wszystkich rodzajów połączeń gdy jest w użyciu (domyślnie)</string>
+  <string name="prox_auto_speaker_incall_only_summary_off">Detektor będzie aktywny dla wszystkich rodzajów połączeń, gdy jest w użyciu (domyślnie)</string>
 </resources>
