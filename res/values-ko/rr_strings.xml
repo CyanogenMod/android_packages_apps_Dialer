@@ -17,4 +17,8 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
+  <string name="prox_auto_speaker_delay_title">스피커폰 지연</string>
+  <string name="prox_auto_speaker_delay_dialog_title">스피커폰 지연 (ms)</string>
+  <string name="prox_auto_speaker_delay_summary">스피커폰은 <xliff:g id="number">%d </xliff:g> ms안에 활성화 될 것입니다.</string>
+  <string name="prox_auto_speaker_incall_only_title">통화중에만</string>
 </resources>
