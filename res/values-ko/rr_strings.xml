@@ -17,8 +17,13 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
+  <string name="speaker_settings_label">근접 스피커폰</string>
+  <string name="prox_auto_speaker_title">자동 근접 스피커폰</string>
+  <string name="prox_auto_speaker_summary">기기가 사용자 귀로부터 분리되었을 때 자동으로 스피커폰 활성화</string>
   <string name="prox_auto_speaker_delay_title">스피커폰 지연</string>
   <string name="prox_auto_speaker_delay_dialog_title">스피커폰 지연 (ms)</string>
   <string name="prox_auto_speaker_delay_summary">스피커폰은 <xliff:g id="number">%d </xliff:g> ms안에 활성화 될 것입니다.</string>
   <string name="prox_auto_speaker_incall_only_title">통화중에만</string>
+  <string name="prox_auto_speaker_incall_only_summary_on">발신 중일 경우, 스피커 센서는 수신자가 회신하는 경우에만 활성화됩니다.</string>
+  <string name="prox_auto_speaker_incall_only_summary_off">스피커는 모든 통화 중에 활성화됩니다. (기본값)</string>
 </resources>
