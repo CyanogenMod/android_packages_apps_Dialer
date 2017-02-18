@@ -63,6 +63,7 @@
   <string name="speed_dial_delete">刪除</string>
   <string name="speed_dial_unassigned_dialog_title">未指定按鍵</string>
   <string name="speed_dial_unassigned_dialog_message">號碼鍵「<xliff:g id="number">%s</xliff:g>」未指定快速撥號操作。是否現在指定一個操作？</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">是</string>
   <string name="no">否</string>
   <!-- Text displayed when the list of incoming calls is empty -->

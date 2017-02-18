@@ -79,6 +79,7 @@
   <string name="speed_dial_delete">Läschen</string>
   <string name="speed_dial_unassigned_dialog_title">Net zougewisen Tast</string>
   <string name="speed_dial_unassigned_dialog_message">Der Tast \'<xliff:g id="number">%s</xliff:g>\' gouf keng Kuerzwielaktioun zougewisen. Wëlls du dat elo maachen?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Jo</string>
   <string name="no">Nee</string>
   <!-- Text displayed when the list of incoming calls is empty -->

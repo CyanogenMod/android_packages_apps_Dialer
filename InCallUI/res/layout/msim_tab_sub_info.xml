@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
- /* Copyright (c) 2016, The Linux Foundation. All rights reserved.
+/*
+ * Copyright (c) 2013-2015, The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -29,16 +30,17 @@
  *
  */
 -->
-<resources>
-  <bool name="config_regional_video_call_welcome_dialog">false</bool>
-  <bool name="config_regional_pup_no_available_network">false</bool>
-  <bool name="config_regional_call_data_usage_enable">false</bool>
 
-  <!--not display SIP dial icon -->
-  <bool name="config_hide_SIP_dial_icon">true</bool>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tab_sub_info"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal"
+    android:background="@color/incall_background_color">
 
-  <integer name="speed_dial_emergency_number_assigned_key">9</integer>
+    <TextView
+        android:id="@+id/tabSubText"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"/>
 
-  <bool name="call_recording_enabled">false</bool>
-  <integer name="call_recording_audio_source">1</integer>
-</resources>
+</LinearLayout>

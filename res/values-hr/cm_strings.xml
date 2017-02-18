@@ -86,6 +86,7 @@
   <string name="speed_dial_delete">Obriši</string>
   <string name="speed_dial_unassigned_dialog_title">Tipka nije dodijeljena</string>
   <string name="speed_dial_unassigned_dialog_message">Tipki \"<xliff:g id="number">%s</xliff:g>\" nije dodijeljena akcija brzog biranja. Želite li joj sada dodijeliti akciju?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Da</string>
   <string name="no">Ne</string>
   <!-- Text displayed when the list of incoming calls is empty -->

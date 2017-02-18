@@ -83,6 +83,7 @@
   <string name="speed_dial_delete">ഇല്ലാതാക്കുക</string>
   <string name="speed_dial_unassigned_dialog_title">കീ നിയോഗിച്ചിട്ടില്ല</string>
   <string name="speed_dial_unassigned_dialog_message">\'<xliff:g id="number">%s</xliff:g>\' നമ്പർ കീയില്‍ വേഗ ഡയൽ നടപടി നിയോഗിച്ചിട്ടില്ല. നിങ്ങൾക്ക് ഇപ്പോൾ ഒരു പ്രവർത്തനം നിയോഗിക്കണോ?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">ഉണ്ട്</string>
   <string name="no">ഇല്ല</string>
   <!-- Text displayed when the list of incoming calls is empty -->

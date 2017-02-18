@@ -83,6 +83,7 @@
   <string name="speed_dial_delete">ลบ</string>
   <string name="speed_dial_unassigned_dialog_title">ไม่ได้ระบุปุ่ม</string>
   <string name="speed_dial_unassigned_dialog_message">ไม่ได้ตั้งการโทรแบบรวดเร็วไว้กับปุ่ม \'<xliff:g id="number">%s</xliff:g>\' ต้องการตั้งเดี๋ยวนี้หรือไม่</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">ใช่</string>
   <string name="no">ไม่</string>
   <!-- Text displayed when the list of incoming calls is empty -->

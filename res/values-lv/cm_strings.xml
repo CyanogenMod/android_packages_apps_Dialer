@@ -67,6 +67,7 @@
   <string name="speed_dial_delete">Dzēst</string>
   <string name="speed_dial_unassigned_dialog_title">Neiestatīts taustiņš</string>
   <string name="speed_dial_unassigned_dialog_message">Šim taustiņam \'<xliff:g id="number">%s</xliff:g>\' nav piesaistīts ātrais zvans. Vai piesaistīt tagad?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Jā</string>
   <string name="no">Nē</string>
   <!-- Text displayed when the list of incoming calls is empty -->

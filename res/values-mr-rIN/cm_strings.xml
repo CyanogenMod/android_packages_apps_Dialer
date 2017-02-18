@@ -83,6 +83,7 @@
   <string name="speed_dial_delete">हटवायचे?</string>
   <string name="speed_dial_unassigned_dialog_title">की नेमलेली नाही</string>
   <string name="speed_dial_unassigned_dialog_message">नंबर की \'<xliff:g id="number">%s</xliff:g>\' ला कोणतीही स्पीड डायल क्रिया नेमलेली नाही. तुम्हाला क्रिया आत्ता नेमायची आहे का?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">होय</string>
   <string name="no">नाही</string>
   <!-- Text displayed when the list of incoming calls is empty -->

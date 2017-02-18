@@ -87,6 +87,7 @@
   <string name="speed_dial_unassigned_dialog_title">Nøkkel utilordnet</string>
   <string name="speed_dial_unassigned_dialog_message">Ingen hurtigringing er angitt til denne nummertasten \'<xliff:g id="number">%s</xliff:g>\'. Vil du angi ett nå?</string>
   <string name="dialog_speed_dial_airplane_mode_message">For å bruke hurtigoppringing må du skru av flymodus</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Ja</string>
   <string name="no">Nei</string>
   <!-- Text displayed when the list of incoming calls is empty -->

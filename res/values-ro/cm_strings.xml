@@ -87,6 +87,8 @@
   <string name="speed_dial_unassigned_dialog_title">Cheie neatribuită</string>
   <string name="speed_dial_unassigned_dialog_message">Nicio acțiune de apel rapid nu este atribuită acestui număr \'<xliff:g id="number">%s</xliff:g>\'. Vreți să atribuiți o acțiune acum?</string>
   <string name="dialog_speed_dial_airplane_mode_message">Pentru a utiliza apelarea rapidă, în primul rând, opriți modul avion</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
+  <string name="speed_dial_can_not_be_set">Apelarea Directă Nu a putut fi setată pentru această Cheie</string>
   <string name="yes">Da</string>
   <string name="no">Nu</string>
   <!-- Text displayed when the list of incoming calls is empty -->
@@ -114,6 +116,7 @@
   <string name="alert_call_over_wifi">Apelurile vor fi efectuate prin Wi-Fi.</string>
   <string name="alert_call_no_cellular_coverage">Nu există nicio reţea celulară disponibilă. Conectați-vă la o rețea Wi-Fi disponibilă pentru a efectua apeluri.</string>
   <string name="alert_user_connect_to_wifi_for_call">Conectați-vă la Wi-Fi pentru a efectua apeluri.</string>
+  <string name="alert_user_connect_to_wifi_for_call_text">Apăsaţi aici pentru a vizualiza reţelele disponibile</string>
   <string name="menu_add_to_4g_conference_call">Adaugați la apel conferință 4G</string>
   <string name="menu_4g_conference_call">Apel conferință 4G</string>
   <!-- Title for incoming 4G voice call in call details screen [CHAR LIMIT=60] -->

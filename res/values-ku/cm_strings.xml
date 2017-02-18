@@ -68,6 +68,7 @@
   <string name="speed_dial_delete">سڕینەوە؟</string>
   <string name="speed_dial_unassigned_dialog_title">کلیل تەرخان نەکراوە</string>
   <string name="speed_dial_unassigned_dialog_message">هیچ ژمارەیەک دیاری نەکراوە تەلەفۆنی خێرا \'<xliff:g id="number">%s</xliff:g>\'. Do you want to ئەتەوێت ئێستا دیاری بکەیت?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">بەڵێ</string>
   <string name="no">نەخێر</string>
   <!-- Text displayed when the list of incoming calls is empty -->

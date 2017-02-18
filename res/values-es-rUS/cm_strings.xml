@@ -87,6 +87,8 @@
   <string name="speed_dial_unassigned_dialog_title">Tecla sin asignar</string>
   <string name="speed_dial_unassigned_dialog_message">La tecla \'<xliff:g id="number">%s</xliff:g>\' no tiene una acción de marcación rápida asignada. ¿Quieres asignar una acción ahora?</string>
   <string name="dialog_speed_dial_airplane_mode_message">Para utilizar la marcación rápida, primero desactiva el modo avión</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
+  <string name="speed_dial_can_not_be_set">No puedes establecer este número para marcado rápido</string>
   <string name="yes">Sí</string>
   <string name="no">No</string>
   <!-- Text displayed when the list of incoming calls is empty -->
@@ -114,6 +116,7 @@
   <string name="alert_call_over_wifi">Las llamadas se harán sobre Wi-Fi.</string>
   <string name="alert_call_no_cellular_coverage">Sin red móvil disponible. Conectar una red Wi-Fi disponible para hacer llamadas.</string>
   <string name="alert_user_connect_to_wifi_for_call">Conectar a Wi-Fi para hacer llamadas.</string>
+  <string name="alert_user_connect_to_wifi_for_call_text">Pulsa aquí para ver las redes disponibles</string>
   <string name="menu_add_to_4g_conference_call">Añadir a la conferencia telefónica 4G</string>
   <string name="menu_4g_conference_call">Conferencia telefónica 4G</string>
   <!-- Title for incoming 4G voice call in call details screen [CHAR LIMIT=60] -->

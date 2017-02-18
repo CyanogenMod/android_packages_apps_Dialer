@@ -83,6 +83,7 @@
   <string name="speed_dial_delete">Supprimer</string>
   <string name="speed_dial_unassigned_dialog_title">Touche non attribuée</string>
   <string name="speed_dial_unassigned_dialog_message">Aucune action de numérotation rapide n\'est assignée au chiffre \'<xliff:g id="number">%s</xliff:g>\'. Voulez-vous assigner une action maintenant ?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Oui</string>
   <string name="no">Non</string>
   <!-- Text displayed when the list of incoming calls is empty -->

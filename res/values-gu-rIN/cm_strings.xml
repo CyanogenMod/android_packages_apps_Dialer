@@ -83,6 +83,7 @@
   <string name="speed_dial_delete">હટાવો</string>
   <string name="speed_dial_unassigned_dialog_title">કિ બિનફળવાયેલ</string>
   <string name="speed_dial_unassigned_dialog_message">નંબર કી \'<xliff:g id="number">%s</xliff:g>\' ને કોઇ સ્પીડ ડાયલ ક્રિયા ફળવાઇ નથી. શું તમારે હવે ક્રિયા ફાળવવી છે?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">હા</string>
   <string name="no">નહીં</string>
   <!-- Text displayed when the list of incoming calls is empty -->

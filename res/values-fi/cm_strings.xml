@@ -87,6 +87,7 @@
   <string name="speed_dial_unassigned_dialog_title">Näppäinta ei määritetty</string>
   <string name="speed_dial_unassigned_dialog_message">Mitään pikavalintaa ei ole määritetty numerolle \'<xliff:g id="number">%s</xliff:g>\'. Haluatko määrittää pikavalinnan nyt?</string>
   <string name="dialog_speed_dial_airplane_mode_message">Käyttääksesi pikavalintaa, ota lentokonetila pois käytöstä</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Kyllä</string>
   <string name="no">Ei</string>
   <!-- Text displayed when the list of incoming calls is empty -->
@@ -114,16 +115,30 @@
   <string name="alert_call_over_wifi">Puhelut soitetaan Wi-Fin kautta.</string>
   <string name="alert_call_no_cellular_coverage">Matkapuhelinverkkoa ei saatavilla. Yhdistä Wi-Fiin soittaaksesi puheluita</string>
   <string name="alert_user_connect_to_wifi_for_call">Yhdistä Wi-Fiin soittaaksesi puheluita.</string>
+  <string name="menu_add_to_4g_conference_call">Lisää 4G-puhelinneuvotteluun</string>
+  <string name="menu_4g_conference_call">4G-puhelinneuvottelu</string>
   <!-- Title for incoming 4G voice call in call details screen [CHAR LIMIT=60] -->
+  <string name="type_incoming_volte">Saapuva 4G-äänipuhelu</string>
   <!-- Title for incoming 4G video call in call details screen [CHAR LIMIT=60] -->
+  <string name="type_incoming_video_lte">Saapuva 4G-videopuhelu</string>
   <!-- Title for outgoing 4G voice call in call details screen [CHAR LIMIT=60] -->
+  <string name="type_outgoing_volte">Lähtevä 4G-äänipuhelu</string>
   <!-- Title for incoming 4G video call in call details screen [CHAR LIMIT=60] -->
+  <string name="type_outgoing_video_lte">Lähtevä 4G-videopuhelu</string>
   <!-- Title for missed 4G voice call in call details screen [CHAR LIMIT=60] -->
+  <string name="type_missed_volte">Vastaamaton 4G-äänipuhelu</string>
   <!-- Title for missed 4G video call in call details screen [CHAR LIMIT=60] -->
+  <string name="type_missed_video_lte">Vastaamaton 4G-videopuhelu</string>
   <!-- Title for incoming wifi voice call in call details screen [CHAR LIMIT=60] -->
+  <string name="type_incoming_vowifi">Saapuva Wi-Fi-äänipuhelu</string>
   <!-- Title for incoming wifi video call in call details screen [CHAR LIMIT=60] -->
+  <string name="type_incoming_video_wifi">Saapuva Wi-Fi-videopuhelu</string>
   <!-- Title for outgoing wifi voice call in call details screen [CHAR LIMIT=60] -->
+  <string name="type_outgoing_vowifi">Lähtevä Wi-Fi-äänipuhelu</string>
   <!-- Title for outgoing wifi video call in call details screen [CHAR LIMIT=60] -->
+  <string name="type_outgoing_video_wifi">Lähtevä Wi-Fi-videopuhelu</string>
   <!-- Title for missed wifi voice call in call details screen [CHAR LIMIT=60] -->
+  <string name="type_missed_vowifi">Vastaamaton Wi-Fi-äänipuhelu</string>
   <!-- Title for missed wifi video call in call details screen [CHAR LIMIT=60] -->
+  <string name="type_missed_video_wifi">Vastaamaton Wi-Fi-videopuhelu</string>
 </resources>

@@ -82,11 +82,13 @@
   <!-- Speed Dial -->
   <string name="speed_dial_settings">快速撥號設定</string>
   <string name="speed_dial_not_set">(未設定)</string>
-  <string name="speed_dial_replace">取代</string>
+  <string name="speed_dial_replace">替換</string>
   <string name="speed_dial_delete">刪除</string>
   <string name="speed_dial_unassigned_dialog_title">按鍵未分配</string>
   <string name="speed_dial_unassigned_dialog_message">數字鍵「<xliff:g id="number">%s</xliff:g>」未設定快速撥號，您現在要設定嗎？</string>
   <string name="dialog_speed_dial_airplane_mode_message">若要使用快速撥號，請先關閉飛航模式</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
+  <string name="speed_dial_can_not_be_set">不能設定此鍵為快速撥號</string>
   <string name="yes">是</string>
   <string name="no">否</string>
   <!-- Text displayed when the list of incoming calls is empty -->
@@ -114,6 +116,7 @@
   <string name="alert_call_over_wifi">將透過 Wi-Fi 進行通話。</string>
   <string name="alert_call_no_cellular_coverage">沒有可用的行動網路。 將連線至可用的 Wi-Fi 以撥打通話。</string>
   <string name="alert_user_connect_to_wifi_for_call">連線至 Wi-Fi 以撥打通話。</string>
+  <string name="alert_user_connect_to_wifi_for_call_text">輕觸這裡以檢視可用的網路</string>
   <string name="menu_add_to_4g_conference_call">新增至 4G 多方通話</string>
   <string name="menu_4g_conference_call">4G 多方通話</string>
   <!-- Title for incoming 4G voice call in call details screen [CHAR LIMIT=60] -->

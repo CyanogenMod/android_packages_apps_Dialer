@@ -83,6 +83,7 @@
   <string name="speed_dial_delete">நீக்கு</string>
   <string name="speed_dial_unassigned_dialog_title">விசை ஒதுக்கீடுசெய்யப்படவில்லை</string>
   <string name="speed_dial_unassigned_dialog_message">எண் விசை \’<xliff:g id="number">%s</xliff:g>\'க்கு விரைவு டயல் செயல்பாடு ஒதுக்கீடு செய்யப்படவில்லை. நீங்கள் இப்போது ஒரு செயல்பாட்டை ஒதுக்கீடுசெய்ய விரும்புகிறீர்களா?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">அனுமதிக்கப்பட்டது</string>
   <string name="no">அனுமதிக்கப்படவில்லை</string>
   <!-- Text displayed when the list of incoming calls is empty -->

@@ -369,6 +369,12 @@ public class Call {
                     List<android.telecom.Call> conferenceableCalls) {
                 update();
             }
+
+            @Override
+            public void onConnectionEvent(android.telecom.Call call, String event, Bundle extras) {
+                Log.d(this, "TelecomCallCallback onConnectionEvent call=" + call);
+                update();
+            }
     };
 
     boolean mIsActiveSub = false;
@@ -395,8 +401,8 @@ public class Call {
     private String mLastForwardedNumber;
     private String mCallSubject;
     private PhoneAccountHandle mPhoneAccountHandle;
-    private boolean mIsOutgoing = false;
     private long mBaseChronometerTime = 0;
+    private boolean mIsOutgoing = false;
 
     /**
      * Indicates whether the phone account associated with this call supports specifying a call
@@ -1090,8 +1096,9 @@ public class Call {
             return String.valueOf(mId);
         }
 
-        return String.format(Locale.US, "[%s, %s, %s, %s, children:%s, parent:%s, conferenceable:%s, " +
-                "videoState:%s, mSessionModificationState:%d, VideoSettings:%s, mIsActivSub:%b]",
+        return String.format(Locale.US, "[%s, %s, %s, %s, children:%s, parent:%s, " +
+                "conferenceable:%s, videoState:%s, mSessionModificationState:%d, VideoSettings:%s" +
+                ", mIsActivSub:%b]" ,
                 mId,
                 State.toString(getState()),
                 Details.capabilitiesToString(mTelecomCall.getDetails().getCallCapabilities()),

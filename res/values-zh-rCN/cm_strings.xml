@@ -87,6 +87,8 @@
   <string name="speed_dial_unassigned_dialog_title">按键未分配</string>
   <string name="speed_dial_unassigned_dialog_message">快速拨号按键“<xliff:g id="number">%s</xliff:g>”尚未被使用。您是否要为它指定一个动作？</string>
   <string name="dialog_speed_dial_airplane_mode_message">若要使用快速拨号，请先关闭飞行模式</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
+  <string name="speed_dial_can_not_be_set">快速拨号不能设置为此按键</string>
   <string name="yes">是</string>
   <string name="no">否</string>
   <!-- Text displayed when the list of incoming calls is empty -->
@@ -114,6 +116,7 @@
   <string name="alert_call_over_wifi">将通过 Wi-Fi 进行呼叫</string>
   <string name="alert_call_no_cellular_coverage">没有可用的蜂窝网络。连接到可用的无线网络以拨打电话。</string>
   <string name="alert_user_connect_to_wifi_for_call">连接到 Wi-Fi 网络以进行通话。</string>
+  <string name="alert_user_connect_to_wifi_for_call_text">点按这里查看可用的网络</string>
   <string name="menu_add_to_4g_conference_call">添加到 4G 电话会议</string>
   <string name="menu_4g_conference_call">4G 电话会议</string>
   <!-- Title for incoming 4G voice call in call details screen [CHAR LIMIT=60] -->

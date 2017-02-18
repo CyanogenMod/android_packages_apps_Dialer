@@ -83,6 +83,7 @@
   <string name="speed_dial_delete">తొలగించు</string>
   <string name="speed_dial_unassigned_dialog_title">కీ కేటాయించబడలేదు</string>
   <string name="speed_dial_unassigned_dialog_message">నంబర్ కీ \'<xliff:g id="number">%s</xliff:g>\'కు ఎటువంటి త్వరిత డయల్ చర్య కేటాయించబడలేదు. మీరు ఇప్పుడు ఒక చర్యను కేటాయించాలని అనుకుంటున్నారా?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">హాజరు అవుతాము అన్నవి</string>
   <string name="no">లేదు</string>
   <!-- Text displayed when the list of incoming calls is empty -->

@@ -83,6 +83,7 @@
   <string name="speed_dial_delete">ئۆچۈر</string>
   <string name="speed_dial_unassigned_dialog_title">كۇنۇپكا تەقسىملەنمىگەن</string>
   <string name="speed_dial_unassigned_dialog_message">بۇ تېز نومۇر بۇراش كۇنۇپكىسى  \'<xliff:g id="number">%s</xliff:g>\' تېخى ئىشلىتىلمىگەن، ھازىر بىر مەشغۇلاتنى بەلگىلەمسىز؟</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">ھەئە</string>
   <string name="no">ياق</string>
   <!-- Text displayed when the list of incoming calls is empty -->

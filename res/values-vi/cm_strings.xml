@@ -87,6 +87,7 @@
   <string name="speed_dial_unassigned_dialog_title">Phím chưa ấn định</string>
   <string name="speed_dial_unassigned_dialog_message">Không có thao tác quay số nhanh nào được ấn định cho phím số \'<xliff:g id="number">%s</xliff:g>\'. Bạn có muốn ấn định một thao tác bây giờ không?</string>
   <string name="dialog_speed_dial_airplane_mode_message">Để sử dụng quay số nhanh, trước tiên hãy tắt chế độ máy bay</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Có</string>
   <string name="no">Không</string>
   <!-- Text displayed when the list of incoming calls is empty -->

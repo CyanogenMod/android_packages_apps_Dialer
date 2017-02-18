@@ -286,6 +286,7 @@ public class CallButtonFragment
             getPresenter().callTransferClicked(QtiImsExtUtils.QTI_IMS_CONSULTATIVE_TRANSFER);
         } else if (id == R.id.overflowButton) {
             if (mOverflowPopup != null) {
+                updateMergeCallsMenuItem();
                 mOverflowPopup.show();
             }
         } else if (id == R.id.manageVideoCallConferenceButton) {
@@ -304,6 +305,13 @@ public class CallButtonFragment
         view.performHapticFeedback(
                 HapticFeedbackConstants.VIRTUAL_KEY,
                 HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+    }
+
+    private void updateMergeCallsMenuItem() {
+        MenuItem item = mOverflowPopup.getMenu().findItem(BUTTON_MERGE);
+        if (item != null) {
+            item.setEnabled(mMergeButton.isEnabled());
+        }
     }
 
     public void updateColors() {

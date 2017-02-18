@@ -69,6 +69,7 @@
   <string name="speed_dial_delete">حذف</string>
   <string name="speed_dial_unassigned_dialog_title">کلید تعیین‌نشده</string>
   <string name="speed_dial_unassigned_dialog_message">هیچ عمل تماس سریعی به کلید «<xliff:g id="number">%s</xliff:g>» اختصاص داده نشده است. آیا اکنون یک عمل را اختصاص می‌دهید؟</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">بله</string>
   <string name="no">خیر</string>
   <!-- Text displayed when the list of incoming calls is empty -->

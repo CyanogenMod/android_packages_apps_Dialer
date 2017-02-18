@@ -113,8 +113,8 @@ public class InCallPresenter implements CallList.Listener,
 
     private AudioModeProvider mAudioModeProvider;
     private StatusBarNotifier mStatusBarNotifier;
-    private InCallVibrationHandler mInCallVibrationHandler;
     private ExternalCallNotifier mExternalCallNotifier;
+    private InCallVibrationHandler mInCallVibrationHandler;
     private ContactInfoCache mContactInfoCache;
     private Context mContext;
     private CallList mCallList;
@@ -340,6 +340,11 @@ public class InCallPresenter implements CallList.Listener,
         mProximitySensor = proximitySensor;
         addListener(mProximitySensor);
 
+        // dismiss any pending dialogues related to earlier call, which
+        // are no longer relevant now.
+        if (isActivityStarted()) {
+            mInCallActivity.dismissPendingDialogs();
+        }
         addIncomingCallListener(mAnswerPresenter);
         addInCallUiListener(mAnswerPresenter);
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -727,6 +732,7 @@ public class InCallPresenter implements CallList.Listener,
         if (CallList.getInstance().isDsdaEnabled() && (mInCallActivity != null)) {
             mInCallActivity.updateDsdaTab();
         }
+        wakeUpScreen();
     }
 
     @Override
@@ -967,7 +973,9 @@ public class InCallPresenter implements CallList.Listener,
         }
 
         Call call = mCallList.getIncomingCall();
-        answerIncomingCall(context, call.getVideoState());
+        if (call != null) {
+            answerIncomingCall(context, call.getVideoState());
+        }
     }
 
     /**
@@ -988,7 +996,7 @@ public class InCallPresenter implements CallList.Listener,
             InCallAudioManager.getInstance().onAnswerIncomingCall(call, videoState);
         }
 
-        if (call != null && VideoUtils.isVideoCall(videoState)) {
+        if (call != null) {
             showInCall(false, false/* newOutgoingCall */);
         }
     }
@@ -1398,6 +1406,15 @@ public class InCallPresenter implements CallList.Listener,
         }
     }
 
+    /**
+     * Called by the {@link VideoCallPresenter} to inform of a change in availability of
+     * incoming video stream.
+     */
+    public void notifyIncomingVideoAvailabilityChanged(boolean isAvailable) {
+        for (InCallEventListener listener : mInCallEventListeners) {
+            listener.onIncomingVideoAvailabilityChanged(isAvailable);
+        }
+    }
 
     /**
      * For some disconnected causes, we show a dialog.  This calls into the activity to show
@@ -1897,21 +1914,6 @@ public class InCallPresenter implements CallList.Listener,
         }
     }
 
-    public void enableScreenTimeout(boolean enable) {
-        Log.v(this, "enableScreenTimeout: value=" + enable);
-        if (mInCallActivity == null) {
-            Log.e(this, "enableScreenTimeout: InCallActivity is null.");
-            return;
-        }
-
-        final Window window = mInCallActivity.getWindow();
-        if (enable) {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        } else {
-            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        }
-    }
-
     /**
      * Returns the space available beside the call card.
      *
@@ -2134,6 +2136,7 @@ public class InCallPresenter implements CallList.Listener,
         public void onFullscreenModeChanged(boolean isFullscreenMode);
         public void onSecondaryCallerInfoVisibilityChanged(boolean isVisible, int height);
         public void updatePrimaryCallState();
+        public void onIncomingVideoAvailabilityChanged(boolean isAvailable);
     }
 
     public interface InCallUiListener {

@@ -83,6 +83,7 @@
   <string name="speed_dial_delete">حذف</string>
   <string name="speed_dial_unassigned_dialog_title">المفتاح غير معين</string>
   <string name="speed_dial_unassigned_dialog_message">لم يتم تعيين أي إجراء اتصال سريع للمفتاح الرقم \'<xliff:g id="number">%s</xliff:g>\'. هل تريد تعيين إجراء الآن؟</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">نعم</string>
   <string name="no">لا</string>
   <!-- Text displayed when the list of incoming calls is empty -->

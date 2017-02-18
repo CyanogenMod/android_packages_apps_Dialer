@@ -30,13 +30,24 @@ package com.android.incallui;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
+import android.net.IConnectivityManager;
+import android.net.INetworkStatsService;
+import android.net.LinkProperties;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.net.NetworkState;
 import android.os.Bundle;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 
 import com.android.incallui.InCallPresenter.InCallDetailsListener;
 import com.android.incallui.InCallVideoCallCallbackNotifier.VideoEventListener;
 import com.android.incallui.InCallVideoCallCallbackNotifier.SessionModificationListener;
 import org.codeaurora.ims.QtiCallConstants;
+import org.codeaurora.ims.QtiCarrierConfigs;
 import org.codeaurora.ims.QtiVideoCallDataUsage;
+import org.codeaurora.ims.utils.QtiImsExtUtils;
 
 /**
  * This class listens to incoming events for the listener classes it implements. It should
@@ -48,6 +59,11 @@ import org.codeaurora.ims.QtiVideoCallDataUsage;
 public class InCallMessageController implements InCallSubstateListener, VideoEventListener,
         CallList.Listener, SessionModificationListener, InCallSessionModificationCauseListener,
         InCallDetailsListener {
+
+    private INetworkStatsService mStatsService;
+    private IConnectivityManager mConnManager;
+    private long previousLteUsage;
+    private long previousWlanUsage;
 
     private static InCallMessageController sInCallMessageController;
 
@@ -76,6 +92,10 @@ public class InCallMessageController implements InCallSubstateListener, VideoEve
         InCallPresenter.getInstance().addListener(mPrimaryCallTracker);
         InCallVideoCallCallbackNotifier.getInstance().addSessionModificationListener(this);
         InCallPresenter.getInstance().addDetailsListener(this);
+        mStatsService = INetworkStatsService.Stub.asInterface(
+                ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
+        mConnManager = IConnectivityManager.Stub.asInterface(
+                ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
     }
 
     /**
@@ -93,6 +113,10 @@ public class InCallMessageController implements InCallSubstateListener, VideoEve
         InCallVideoCallCallbackNotifier.getInstance().removeSessionModificationListener(this);
         InCallPresenter.getInstance().removeDetailsListener(this);
         mPrimaryCallTracker = null;
+        mStatsService = null;
+        mConnManager = null;
+        previousLteUsage = 0;
+        previousWlanUsage = 0;
     }
 
     /**
@@ -165,8 +189,9 @@ public class InCallMessageController implements InCallSubstateListener, VideoEve
             Log.e(this, "onVideoQualityChanged - Context is null/not primary call.");
             return;
         }
-        final Resources resources = mContext.getResources();
-        if (resources.getBoolean(R.bool.config_display_video_quality_toast)) {
+        if (QtiImsExtUtils.isCarrierConfigEnabled(mContext,
+                QtiCarrierConfigs.SHOW_VIDEO_QUALITY_TOAST)) {
+            final Resources resources = mContext.getResources();
             final String videoQualityChangedText = resources.getString(
                     R.string.video_quality_changed) + resources.getString(
                     QtiCallUtils.getVideoQualityResourceId(videoQuality));
@@ -186,8 +211,8 @@ public class InCallMessageController implements InCallSubstateListener, VideoEve
             Log.e(this, "onCallSessionEvent - Context is null.");
             return;
         }
-        final Resources resources = mContext.getResources();
-        if (resources.getBoolean(R.bool.config_call_session_event_toast)) {
+        if (QtiImsExtUtils.isCarrierConfigEnabled(mContext,
+                QtiCarrierConfigs.SHOW_CALL_SESSION_EVENT_TOAST)) {
             QtiCallUtils.displayToast(mContext, QtiCallUtils.getCallSessionResourceId(event));
         }
     }
@@ -220,9 +245,15 @@ public class InCallMessageController implements InCallSubstateListener, VideoEve
         Log.i(this, "onDetailsChanged LTE data value = " + lteUsage + " WiFi data value = " +
                 wlanUsage);
 
-        final Resources resources = mContext.getResources();
-        if (resources.getBoolean(R.bool.config_display_data_usage_toast)) {
-            final String dataUsageChangedText = resources.getString(
+        if (mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_video_call_datausage_enable)) {
+            recordDataUsage(lteUsage, wlanUsage);
+        }
+
+
+        if (QtiImsExtUtils.isCarrierConfigEnabled(mContext,
+                QtiCarrierConfigs.SHOW_DATA_USAGE_TOAST)) {
+            final String dataUsageChangedText = mContext.getResources().getString(
                     R.string.wlan_data_usage_label) + wlanUsage;
             QtiCallUtils.displayToast(mContext, dataUsageChangedText);
         }
@@ -235,9 +266,9 @@ public class InCallMessageController implements InCallSubstateListener, VideoEve
     @Override
     public void onCallDataUsageChange(final long dataUsage) {
         Log.d(this, "onCallDataUsageChange: dataUsage = " + dataUsage);
-        final Resources resources = mContext.getResources();
-        if (resources.getBoolean(R.bool.config_display_data_usage_toast)) {
-            final String dataUsageChangedText = resources.getString(
+        if (QtiImsExtUtils.isCarrierConfigEnabled(mContext,
+                QtiCarrierConfigs.SHOW_DATA_USAGE_TOAST)) {
+            final String dataUsageChangedText = mContext.getResources().getString(
                     R.string.lte_data_usage_label) + dataUsage;
             QtiCallUtils.displayToast(mContext, dataUsageChangedText);
         }
@@ -394,4 +425,97 @@ public class InCallMessageController implements InCallSubstateListener, VideoEve
                 break;
         }
     }
+
+     /**
+      * This method is used to ignore the repeatly calling onDetailsChanged
+      */
+     private boolean hasDataUsageChanged(long lteUsage, long wlanUsage) {
+         boolean hasChanged = false;
+         if (previousLteUsage != lteUsage) {
+             hasChanged = true;
+             previousLteUsage = lteUsage;
+         }
+         if (previousWlanUsage != wlanUsage) {
+             hasChanged = true;
+             previousWlanUsage = wlanUsage;
+         }
+         return hasChanged;
+     }
+
+     private void recordDataUsage(long lteUsage, long wlanUsage) {
+         String wifiIface;
+         String imsIface;
+         if(!hasDataUsageChanged(lteUsage, wlanUsage)) {
+             return;
+         }
+
+         if (wlanUsage != 0) {
+             wifiIface = getWifiIface();
+             if (wifiIface != null)
+                 recordUsage(wifiIface, ConnectivityManager.TYPE_WIFI, wlanUsage, 0);
+         }
+
+         if (lteUsage != 0 ) {
+             imsIface = getImsIface();
+             if (imsIface != null)
+                 recordUsage(imsIface, ConnectivityManager.TYPE_MOBILE, lteUsage, 0);
+         }
+     }
+
+     private void recordUsage(String ifaces, int ifaceType, long rx, long tx) {
+         if (ifaces == null) {
+             Log.d(this, "recordDataUseage ifaces is null");
+             return;
+         }
+         Log.d(this,"recordDataUseage ifaces ="+ ifaces + "   ifaceType=" + ifaceType +
+                 "rx = " + rx + " tx =" + tx);
+
+         try {
+             mStatsService.recordVideoCallData(ifaces, ifaceType, rx, tx);
+         } catch (RuntimeException e) {
+             Log.e(this, "recordDataUseage RuntimeException" + e);
+         } catch (RemoteException e) {
+             Log.e(this, "recordDataUseage RemoteException" + e);
+         }
+     }
+
+    private String getImsIface() {
+        final NetworkState[] states;
+        try {
+            states = mConnManager.getAllNetworkState();
+        } catch (RemoteException e) {
+            Log.e(this, "getVoiceCallIfaces RemoteException" + e);
+            return null;
+        }
+
+        if (states != null) {
+            for (NetworkState state : states) {
+                if (state.networkInfo.isConnected() && state.networkCapabilities.hasCapability(
+                        NetworkCapabilities.NET_CAPABILITY_IMS)) {
+                    final boolean isMobile = ConnectivityManager.isNetworkTypeMobile(
+                            state.networkInfo.getType());
+                    final String baseIface = state.linkProperties.getInterfaceName();
+                    if (isMobile)
+                        return baseIface;
+                }
+            }
+        }
+        return null;
+    }
+
+    private String getWifiIface() {
+        final LinkProperties wifiLinkProperties;
+        try {
+            wifiLinkProperties =
+                    mConnManager.getLinkPropertiesForType(ConnectivityManager.TYPE_WIFI);
+            if (wifiLinkProperties != null) {
+                return wifiLinkProperties.getInterfaceName();
+            }
+        } catch (RemoteException e) {
+            Log.e(this, "get wifi Iface RemoteException" + e);
+        }
+        return null;
+    }
+
+
 }

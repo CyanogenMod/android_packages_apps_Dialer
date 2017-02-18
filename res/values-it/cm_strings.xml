@@ -87,6 +87,7 @@
   <string name="speed_dial_unassigned_dialog_title">Pulsante non assegnato</string>
   <string name="speed_dial_unassigned_dialog_message">Nessuna azione di composizione rapida assegnata al pulsante numero \'<xliff:g id="number">%s</xliff:g>\'. Vuoi assegnare un\'azione ora?</string>
   <string name="dialog_speed_dial_airplane_mode_message">Per utilizzare la composizione rapida, disattiva la modalità aereo</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Si</string>
   <string name="no">No</string>
   <!-- Text displayed when the list of incoming calls is empty -->

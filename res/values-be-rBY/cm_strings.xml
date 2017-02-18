@@ -83,6 +83,7 @@
   <string name="speed_dial_delete">Выдалiць</string>
   <string name="speed_dial_unassigned_dialog_title">Няма прызначанага нумару</string>
   <string name="speed_dial_unassigned_dialog_message">Няма прызначанага нумара да клавішы <xliff:g id="number">%s</xliff:g>. Прызначыць яго?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Так</string>
   <string name="no">Не</string>
   <!-- Text displayed when the list of incoming calls is empty -->

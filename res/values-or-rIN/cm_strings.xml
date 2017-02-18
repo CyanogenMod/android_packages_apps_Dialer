@@ -83,6 +83,7 @@
   <string name="speed_dial_delete">ବିଲୋପ କରନ୍ତୁ</string>
   <string name="speed_dial_unassigned_dialog_title">କୀ ଦିଆଯାଇ ନାହିଁ</string>
   <string name="speed_dial_unassigned_dialog_message">ନମ୍ବର କୀ \'<xliff:g id="number">%s</xliff:g>\'କୁ କୌଣସି ଦ୍ରୁତ ଡାଏଲ୍‍ ଦିଆଯାଇ ନାହିଁ। ବର୍ତ୍ତ୍ମାନ ଆପଣ ଏକ କ୍ରିୟା ଦେବାକୁ ଚାହାନ୍ତି କି?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">ହଁ</string>
   <string name="no">ନାହିଁ</string>
   <!-- Text displayed when the list of incoming calls is empty -->

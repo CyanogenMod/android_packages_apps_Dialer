@@ -83,6 +83,7 @@
   <string name="speed_dial_delete">Kustuta</string>
   <string name="speed_dial_unassigned_dialog_title">Number määramata</string>
   <string name="speed_dial_unassigned_dialog_message">Kiirvalik numbrile \'<xliff:g id="number">%s</xliff:g>\' on määramata. Kas soovid toimingu nüüd määrata?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Jah</string>
   <string name="no">Ei</string>
   <!-- Text displayed when the list of incoming calls is empty -->

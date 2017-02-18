@@ -69,6 +69,7 @@
   <string name="speed_dial_delete">Sil</string>
   <string name="speed_dial_unassigned_dialog_title">Nömrə təyin edilmədi</string>
   <string name="speed_dial_unassigned_dialog_message">\'<xliff:g id="number">%s</xliff:g>\' nömrəsinə cəld nömrə yığımı təyin edilmədi. İndi təyin etmək istərdiniz?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Bəli</string>
   <string name="no">Xeyr</string>
   <!-- Text displayed when the list of incoming calls is empty -->

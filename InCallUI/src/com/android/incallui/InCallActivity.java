@@ -202,6 +202,10 @@ public class InCallActivity extends TransactionSafeActivity implements FragmentD
         // TODO(klp): Do we need to add this back when prox sensor is not available?
         // lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
 
+        // Since activity is created newly, clear full screen flag. This will ensure that
+        // the flag is in sync with actual UI when UI is recreated due to orientation change.
+        InCallPresenter.getInstance().clearFullscreen();
+
         setContentView(R.layout.incall_screen);
 
         internalResolveIntent(getIntent());
@@ -293,8 +297,8 @@ public class InCallActivity extends TransactionSafeActivity implements FragmentD
         InCallPresenter.getInstance().setThemeColors();
         InCallPresenter.getInstance().onUiShowing(true);
 
-        // Clear fullscreen state onResume; the stored value may not match reality.
-        InCallPresenter.getInstance().clearFullscreen();
+        // Exit fullscreen state onResume; the stored value may not match reality.
+        InCallPresenter.getInstance().setFullScreen(false);
 
         // If there is a pending request to show or hide the dialpad, handle that now.
         if (mShowDialpadRequest != DIALPAD_REQUEST_NONE) {
@@ -989,12 +993,18 @@ public class InCallActivity extends TransactionSafeActivity implements FragmentD
     private void initializeDsdaSwitchTab() {
         int phoneCount = InCallServiceImpl.sPhoneCount;
         ActionBar bar = getActionBar();
+        View[] mDsdaTabLayout = new View[phoneCount];
         int[] subString = {R.string.sub_1, R.string.sub_2};
 
         Log.d(TAG, "initializeDsdaSwitchTab" + phoneCount);
         for (int i = 0; i < phoneCount; i++) {
-            mDsdaTab[i] = bar.newTab()
-                    .setText(subString[i])
+            mDsdaTabLayout[i] = getLayoutInflater()
+                    .inflate(R.layout.msim_tab_sub_info, null);
+
+            ((TextView)mDsdaTabLayout[i].findViewById(R.id.tabSubText))
+                    .setText(subString[i]);
+
+            mDsdaTab[i] = bar.newTab().setCustomView(mDsdaTabLayout[i])
                     .setTabListener(new TabListener(i));
         }
     }

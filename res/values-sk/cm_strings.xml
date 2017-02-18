@@ -87,6 +87,8 @@
   <string name="speed_dial_unassigned_dialog_title">Nepriradené tlačidlo</string>
   <string name="speed_dial_unassigned_dialog_message">Nie je priradená žiadna akcia rýchleho vytáčania pre tlačidlo s číslom \'<xliff:g id="number">%s</xliff:g>\'. Chcete priradiť akciu teraz?</string>
   <string name="dialog_speed_dial_airplane_mode_message">Pre použitie rýchleho vytáčania najprv vypnite režim v lietadle</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
+  <string name="speed_dial_can_not_be_set">Rýchle vytáčanie nie je možné nastaviť pre toto tlačidlo</string>
   <string name="yes">Áno</string>
   <string name="no">Nie</string>
   <!-- Text displayed when the list of incoming calls is empty -->
@@ -114,6 +116,7 @@
   <string name="alert_call_over_wifi">Hovory budú vykonané cez WiFi.</string>
   <string name="alert_call_no_cellular_coverage">Mobilná sieť nie je k dispozícii. Pre vykonanie hovoru sa pripojte sa k dostupnej W-Fi.</string>
   <string name="alert_user_connect_to_wifi_for_call">Pre vykonanie hovoru sa pripojte k Wi-Fi.</string>
+  <string name="alert_user_connect_to_wifi_for_call_text">Kliknite tu ak chcete zobraziť dostupné siete</string>
   <string name="menu_add_to_4g_conference_call">Pridať do 4G konferenčného hovoru</string>
   <string name="menu_4g_conference_call">4G konferenčný hovor</string>
   <!-- Title for incoming 4G voice call in call details screen [CHAR LIMIT=60] -->

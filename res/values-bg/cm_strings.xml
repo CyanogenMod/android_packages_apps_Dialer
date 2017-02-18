@@ -87,6 +87,8 @@
   <string name="speed_dial_unassigned_dialog_title">Бутон без предназначение</string>
   <string name="speed_dial_unassigned_dialog_message">Няма зададена бърза команда на бутон номер \"<xliff:g id="number">%s </xliff:g>\". Искате ли да зададете команда сега?</string>
   <string name="dialog_speed_dial_airplane_mode_message">За да използвате за бързо набиране, първо трябва да изключите самолетния режим</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
+  <string name="speed_dial_can_not_be_set">Бързо набиране не може да бъде приложено за този бутон</string>
   <string name="yes">Да</string>
   <string name="no">Не</string>
   <!-- Text displayed when the list of incoming calls is empty -->
@@ -114,6 +116,7 @@
   <string name="alert_call_over_wifi">Разговорите ще бъдат осъщесвени през Wi-Fi.</string>
   <string name="alert_call_no_cellular_coverage">Няма налична клетъчна мрежа. Свържете се към налични Wi-Fi мрежа за да провеждате разговори.</string>
   <string name="alert_user_connect_to_wifi_for_call">Свързване към Wi-Fi мрежа за провеждате разговори.</string>
+  <string name="alert_user_connect_to_wifi_for_call_text">Натиснете тук, за да видите наличните мрежи</string>
   <string name="menu_add_to_4g_conference_call">Добави към 4G конферентен разговор</string>
   <string name="menu_4g_conference_call">4G конферентен разговор</string>
   <!-- Title for incoming 4G voice call in call details screen [CHAR LIMIT=60] -->

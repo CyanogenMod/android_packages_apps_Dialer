@@ -83,6 +83,7 @@
   <string name="speed_dial_delete">ಅಳಿಸಿ</string>
   <string name="speed_dial_unassigned_dialog_title">ಕೀ ನಿಯೋಜಿಸಲಾಗಿಲ್ಲ</string>
   <string name="speed_dial_unassigned_dialog_message">ಈ \'<xliff:g id="number">%s</xliff:g>\' ಸಂಖ್ಯೆ ಕೀಗೆ ಯಾವುದೇ ವೇಗ ಡಯಲ್ ಕ್ರಿಯೆಯನ್ನು ನಿಯೋಜಿಸಿಲ್ಲ. ನೀವು ಒಂದು ಕ್ರಿಯೆಯನ್ನು ನಿಯೋಜಿಸಲು ಬಯಸುವಿರಾ?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">ಹೌದು</string>
   <string name="no">ಬೇಡ</string>
   <!-- Text displayed when the list of incoming calls is empty -->

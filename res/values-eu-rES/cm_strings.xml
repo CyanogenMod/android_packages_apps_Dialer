@@ -86,6 +86,7 @@
   <string name="speed_dial_delete">Ezabatu</string>
   <string name="speed_dial_unassigned_dialog_title">Tekla esleitu gabea</string>
   <string name="speed_dial_unassigned_dialog_message"><xliff:g id="number">%s</xliff:g> teklari ez zaio kontakturik esleitu. Kontaktu bat esleitu nahi duzu orain?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Bai</string>
   <string name="no">Ez</string>
   <!-- Text displayed when the list of incoming calls is empty -->

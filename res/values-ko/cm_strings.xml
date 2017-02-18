@@ -83,6 +83,7 @@
   <string name="speed_dial_delete">삭제</string>
   <string name="speed_dial_unassigned_dialog_title">할당되지 않은 키</string>
   <string name="speed_dial_unassigned_dialog_message">\'<xliff:g id="number">%s</xliff:g>\' 키에 스피드 다이얼 번호가 할당되어 있지 않습니다. 지금 번호를 할당할까요?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">예</string>
   <string name="no">아니오</string>
   <!-- Text displayed when the list of incoming calls is empty -->

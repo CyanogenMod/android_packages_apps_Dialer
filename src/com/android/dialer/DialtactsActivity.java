@@ -1223,10 +1223,6 @@ public class DialtactsActivity extends TransactionSafeActivity implements View.O
         setConferenceDialButtonImage(false);
         setConferenceDialButtonVisibility(true);
         boolean mIsRecipientsShown = mDialpadFragment.isRecipientsShown();
-        if(mIsRecipientsShown) {
-            mDialpadFragment.hideAndClearDialConference();
-        }
-
         if (mIsDialpadShown || mIsRecipientsShown) {
             if (TextUtils.isEmpty(mSearchQuery) ||
                     (mSmartDialSearchFragment != null && mSmartDialSearchFragment.isVisible()
@@ -1553,7 +1549,7 @@ public class DialtactsActivity extends TransactionSafeActivity implements View.O
     }
 
     private void showVideoCallWelcomeDialog() {
-        if (DialerUtils.canShowWelcomeScreen(this)) {
+        if (DialerUtils.canShowWelcomeScreen(this) || DialerUtils.isFirstLaunch(this)) {
             final Intent intent = new Intent(this, VideoCallWelcomeActivity.class);
             startActivity(intent);
         }

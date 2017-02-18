@@ -50,6 +50,7 @@
   <string name="speed_dial_replace">প্রতিস্থাপন</string>
   <string name="speed_dial_delete">মুছুন</string>
   <string name="speed_dial_unassigned_dialog_title">অ-বরাদ্দকৃত কী</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">হ্যাঁ</string>
   <string name="no">না</string>
   <!-- Text displayed when the list of incoming calls is empty -->

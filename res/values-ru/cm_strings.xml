@@ -86,6 +86,7 @@
   <string name="speed_dial_delete">Удалить</string>
   <string name="speed_dial_unassigned_dialog_title">Нет назначенного номера</string>
   <string name="speed_dial_unassigned_dialog_message">Клавише «<xliff:g id="number">%s</xliff:g>» не присвоен номер быстрого набора. Присвоить?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Да</string>
   <string name="no">Нет</string>
   <!-- Text displayed when the list of incoming calls is empty -->

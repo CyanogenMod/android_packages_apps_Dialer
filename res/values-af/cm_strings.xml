@@ -83,6 +83,7 @@
   <string name="speed_dial_delete">Verwyder</string>
   <string name="speed_dial_unassigned_dialog_title">Sleutel nie toegeken</string>
   <string name="speed_dial_unassigned_dialog_message">Geen vinnige skakel aksie toegeken aan nommer sleutel \'<xliff:g id="number">%s</xliff:g>\'. Wil jy nou \'n aksie toeken?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Ja</string>
   <string name="no">Nee</string>
   <!-- Text displayed when the list of incoming calls is empty -->

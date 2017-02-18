@@ -85,6 +85,7 @@
   <string name="speed_dial_delete">Usuń</string>
   <string name="speed_dial_unassigned_dialog_title">Klawisz nieprzypisany</string>
   <string name="speed_dial_unassigned_dialog_message">Brak akcji szybkiego wybierania dla przycisku numer \'<xliff:g id="number">%s</xliff:g>\'. Chcesz przypisać akcję teraz?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Tak</string>
   <string name="no">Nie</string>
   <!-- Text displayed when the list of incoming calls is empty -->

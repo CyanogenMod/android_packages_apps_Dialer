@@ -83,6 +83,7 @@
   <string name="speed_dial_delete">মচি দিয়া</string>
   <string name="speed_dial_unassigned_dialog_title">কী আৰোপ কৰা নাই</string>
   <string name="speed_dial_unassigned_dialog_message">সংখ্যা কী \'<xliff:g id="number">%s</xliff:g>\' লৈ কোনো স্পিড ডায়েল নম্বৰ আৰোপ কৰা নাই। আপুনি এতিয়া এটা কাৰ্য আৰোপ কৰিব বিচাৰে নেকি?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">হয়</string>
   <string name="no">নহয়</string>
   <!-- Text displayed when the list of incoming calls is empty -->

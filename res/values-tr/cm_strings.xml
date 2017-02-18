@@ -87,6 +87,8 @@
   <string name="speed_dial_unassigned_dialog_title">Numara atanmadı</string>
   <string name="speed_dial_unassigned_dialog_message">\'<xliff:g id="number">%s</xliff:g>\' numarasına hızlı arama işlevi atanmadı. Şimdi atamak ister misiniz?</string>
   <string name="dialog_speed_dial_airplane_mode_message">Hızlı aramayı kullanmak için, önce uçak modunu kapatın</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
+  <string name="speed_dial_can_not_be_set">Hızlı arama bu numara için kullanılamıyor</string>
   <string name="yes">Evet</string>
   <string name="no">Hayır</string>
   <!-- Text displayed when the list of incoming calls is empty -->
@@ -114,6 +116,7 @@
   <string name="alert_call_over_wifi">Aramalar Wi-Fi üzerinden yapılacaktır.</string>
   <string name="alert_call_no_cellular_coverage">Hücresel ağ kullanılabilir değil. Arama yapmak için kablosuz ağa bağlanın.</string>
   <string name="alert_user_connect_to_wifi_for_call">Arama yapmak için Wi-Fi ağına bağlanın.</string>
+  <string name="alert_user_connect_to_wifi_for_call_text">Mevcut şebekeleri görüntülemek için buraya dokunun</string>
   <string name="menu_add_to_4g_conference_call">4G konferans çağrısına ekle</string>
   <string name="menu_4g_conference_call">4G konferans görüşmesi</string>
   <!-- Title for incoming 4G voice call in call details screen [CHAR LIMIT=60] -->

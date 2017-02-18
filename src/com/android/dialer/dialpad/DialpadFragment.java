@@ -30,6 +30,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -99,6 +100,9 @@ import com.android.phone.common.animation.AnimUtils;
 import com.android.phone.common.dialpad.DialpadKeyButton;
 import com.android.phone.common.dialpad.DialpadView;
 
+import static android.Manifest.permission.READ_CALL_LOG;
+import static android.Manifest.permission.WRITE_CALL_LOG;
+
 import java.util.HashSet;
 import java.util.List;
 
@@ -113,8 +117,9 @@ public class DialpadFragment extends Fragment
         DialpadKeyButton.OnPressedListener {
     private static final String TAG = "DialpadFragment";
 
-    /* define for Activity permission request for Android6.0 */
+    /* define for Activity permission request for Android >= 6.0 */
     private static final int PERMISSION_REQUEST_CODE_LOCATION = 2;
+    private static final int READ_WRITE_CALL_LOG_PERMISSION_REQUEST_CODE = 3;
     /**
      * LinearLayout with getter and setter methods for the translationY property using floats,
      * for animation purposes.
@@ -192,6 +197,8 @@ public class DialpadFragment extends Fragment
     /** Stream type used to play the DTMF tones off call, and mapped to the volume control keys */
     private static final int DIAL_TONE_STREAM_TYPE = AudioManager.STREAM_DTMF;
 
+    private static final String PROPERTY_RADIO_ATEL_CARRIER = "persist.radio.atel.carrier";
+    private static final String CARRIER_ONE_DEFAULT_MCC_MNC = "405854";
 
     private OnDialpadQueryChangedListener mDialpadQueryListener;
 
@@ -264,6 +271,8 @@ public class DialpadFragment extends Fragment
     private String mCurrentCountryIso;
 
     private CallStateReceiver mCallStateReceiver;
+
+    private boolean mHasReadAndWriteCallLogPermission = false;
 
     private class CallStateReceiver extends BroadcastReceiver {
         /**
@@ -645,11 +654,16 @@ public class DialpadFragment extends Fragment
     private void setFormattedDigits(String data, String normalizedNumber) {
         final String formatted = getFormattedDigits(data, normalizedNumber, mCurrentCountryIso);
         if (!TextUtils.isEmpty(formatted)) {
-            Editable digits = mDigits.getText();
-            digits.replace(0, digits.length(), formatted);
-            // for some reason this isn't getting called in the digits.replace call above..
-            // but in any case, this will make sure the background drawable looks right
-            afterTextChanged(digits);
+            if (isRecipientsShown()) {
+                mRecipients.setText(formatted);
+                afterTextChanged(mRecipients.getText());
+            } else {
+                Editable digits = mDigits.getText();
+                digits.replace(0, digits.length(), formatted);
+                // for some reason this isn't getting called in the digits.replace call above..
+                // but in any case, this will make sure the background drawable looks right
+                afterTextChanged(digits);
+            }
         }
     }
 
@@ -752,8 +766,16 @@ public class DialpadFragment extends Fragment
         final StopWatch stopWatch = StopWatch.start("Dialpad.onResume");
 
         // Query the last dialed number. Do it first because hitting
+        mHasReadAndWriteCallLogPermission =
+                PermissionsUtil.hasPermission(getActivity(), READ_CALL_LOG) &&
+                PermissionsUtil.hasPermission(getActivity(), WRITE_CALL_LOG);
         // the DB is 'slow'. This call is asynchronous.
-        queryLastOutgoingCall();
+        if (mHasReadAndWriteCallLogPermission){
+            queryLastOutgoingCall();
+        } else {
+            ActivityCompat.requestPermissions(getActivity(), new String[] {READ_CALL_LOG,
+                    WRITE_CALL_LOG}, READ_WRITE_CALL_LOG_PERMISSION_REQUEST_CODE);
+        }
 
         stopWatch.lap("qloc");
 
@@ -823,7 +845,7 @@ public class DialpadFragment extends Fragment
             IntentFilter filter = new IntentFilter(ACTION_WIFI_CALL_READY_STATUS_CHANGE);
             context.registerReceiver(mWifiCallReadyReceiver, filter);
             changeDialpadButton(WifiCallUtils.isWifiCallReadyEnabled(context));
-         }
+        }
         Trace.endSection();
     }
 
@@ -1122,6 +1144,33 @@ public class DialpadFragment extends Fragment
         }
     }
 
+    private int getNumberfromId(int id) {
+        int number = -1;
+        switch(id) {
+            case R.id.zero: number = 0; break;
+            case R.id.one: number = 1; break;
+            case R.id.two: number = 2; break;
+            case R.id.three: number = 3; break;
+            case R.id.four: number = 4; break;
+            case R.id.five: number = 5; break;
+            case R.id.six: number = 6; break;
+            case R.id.seven: number = 7; break;
+            case R.id.eight: number = 8; break;
+            case R.id.nine: number = 9; break;
+        }
+        return number;
+    }
+
+    private void placeEmergencyCall() {
+        Resources resources = getContext().getResources();
+        String emergencyNumber = resources.getString(
+                    com.android.internal.R.string.power_key_emergency_number);
+        Intent intent = new Intent(Intent.ACTION_CALL_EMERGENCY);
+        intent.setData(Uri.fromParts(PhoneAccount.SCHEME_TEL, emergencyNumber, null));
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
     @Override
     public boolean onLongClick(View view) {
         final Editable digits = mDigits.getText();
@@ -1218,6 +1267,14 @@ public class DialpadFragment extends Fragment
             case R.id.nine: {
                 if (mDigits.length() == 1) {
                     //removePreviousDigitIfPossible();
+                    String property = SystemProperties.get(PROPERTY_RADIO_ATEL_CARRIER);
+                    boolean isCarrierOneSupported = CARRIER_ONE_DEFAULT_MCC_MNC.equals(property);
+                    if (isCarrierOneSupported &&
+                           (getNumberfromId(id) == getContext().getResources().getInteger(
+                            R.integer.speed_dial_emergency_number_assigned_key))) {
+                        placeEmergencyCall();
+                        return true;
+                    }
                     final boolean isAirplaneModeOn =
                             Settings.System.getInt(getActivity().getContentResolver(),
                                     Settings.System.AIRPLANE_MODE_ON, 0) != 0;
@@ -2014,16 +2071,18 @@ public class DialpadFragment extends Fragment
     private void dialAfterNetworkCheck() {
         if (ActivityCompat.checkSelfPermission(getContext(),
                 Manifest.permission.ACCESS_COARSE_LOCATION) !=
-            PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[] {Manifest.permission.ACCESS_COARSE_LOCATION},
+                PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
                     PERMISSION_REQUEST_CODE_LOCATION);
         } else {
-            if(WifiCallUtils.shallShowWifiCallDialog(getActivity())) {
-                 WifiCallUtils.showWifiCallDialog(getActivity());
-             } else {
-                 getView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                 handleDialButtonPressed();
-             }
+            if (!PhoneNumberUtils.isEmergencyNumber(mDigits.getText().toString()) &&
+                    WifiCallUtils.shallShowWifiCallDialog(getActivity())) {
+                WifiCallUtils.showWifiCallDialog(getActivity());
+                WifiCallUtils.showWifiCallNotification(getActivity());
+            } else {
+                getView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                handleDialButtonPressed();
+            }
         }
     }
 
@@ -2043,6 +2102,15 @@ public class DialpadFragment extends Fragment
                 } else {
                     getView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                     handleDialButtonPressed();
+                }
+                break;
+            case READ_WRITE_CALL_LOG_PERMISSION_REQUEST_CODE:
+                for (int i = 0; i < grantResults.length; i++) {
+                    mHasReadAndWriteCallLogPermission &=
+                            PackageManager.PERMISSION_GRANTED == grantResults[i];
+                }
+                if (mHasReadAndWriteCallLogPermission) {
+                    queryLastOutgoingCall();
                 }
                 break;
             default:

@@ -87,6 +87,7 @@
   <string name="speed_dial_unassigned_dialog_title">Тастер недодељен</string>
   <string name="speed_dial_unassigned_dialog_message">Нема додељене акције брзог бирања нумеричком тастеру \'<xliff:g id="number">%s</xliff:g>\'. Да ли желиш сада да доделиш акцију?</string>
   <string name="dialog_speed_dial_airplane_mode_message">Да би користио брзо бирање, прво искључи режим рада у авиону</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Да</string>
   <string name="no">Не</string>
   <!-- Text displayed when the list of incoming calls is empty -->

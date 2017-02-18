@@ -87,6 +87,7 @@
   <string name="speed_dial_unassigned_dialog_title">Nem hozzárendelt kulcs</string>
   <string name="speed_dial_unassigned_dialog_message">Nincs gyorstárcsázási művelet hozzárendelve a következő számhoz: \"<xliff:g id="number">%s</xliff:g>\". Szeretne most hozzárendelni egy műveletet?</string>
   <string name="dialog_speed_dial_airplane_mode_message">Gyorshívás használatához először kapcsolja ki a Repülőgép üzemmódot</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Igen</string>
   <string name="no">Nem</string>
   <!-- Text displayed when the list of incoming calls is empty -->

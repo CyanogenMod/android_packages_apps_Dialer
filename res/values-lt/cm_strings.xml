@@ -69,6 +69,7 @@
   <string name="speed_dial_delete">Ištrinti</string>
   <string name="speed_dial_unassigned_dialog_title">Klavišas nepriskirtas</string>
   <string name="speed_dial_unassigned_dialog_message">Nėra priskirto greitojo rinkimo numerio klavišui „<xliff:g id="number">%s</xliff:g>“. Ar norite priskirtį veiksmą dabar?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Taip</string>
   <string name="no">Ne</string>
   <!-- Text displayed when the list of incoming calls is empty -->

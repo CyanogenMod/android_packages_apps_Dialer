@@ -50,6 +50,7 @@
   <string name="speed_dial_replace">ප්‍රතිස්ථාපනය</string>
   <string name="speed_dial_delete">මකන්න</string>
   <string name="speed_dial_unassigned_dialog_title">යතුර පවරා නොමැත</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">ඔව්</string>
   <string name="no">නැහැ</string>
   <!-- Text displayed when the list of incoming calls is empty -->

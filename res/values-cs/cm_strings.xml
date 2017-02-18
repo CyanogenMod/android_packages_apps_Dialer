@@ -87,6 +87,7 @@
   <string name="speed_dial_unassigned_dialog_title">Klávesa nepřiřazena</string>
   <string name="speed_dial_unassigned_dialog_message">Akce pro rychlé vytáčení není pro klávesu „<xliff:g id="number">%s</xliff:g>“ přiřazena. Chcete jí nyní přiřadit?</string>
   <string name="dialog_speed_dial_airplane_mode_message">Pro použití rychlého vytáčení nejprve vypněte režim „V letadle“</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">Ano</string>
   <string name="no">Ne</string>
   <!-- Text displayed when the list of incoming calls is empty -->

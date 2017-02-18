@@ -69,6 +69,7 @@
   <string name="speed_dial_delete">हटाएँ</string>
   <string name="speed_dial_unassigned_dialog_title">अनिर्दिष्ट कुंजी</string>
   <string name="speed_dial_unassigned_dialog_message">नंबर कुंजी \'<xliff:g id="number">%s</xliff:g>\' को कोई तेज़ डायल कार्य निर्दिष्ट नहीं किया गया है। क्या आप अभी कोई कार्य निर्दिष्ट करना चाहेंगे?</string>
+  <!-- Speed Dial can not be set for the key used for Emergency number-->
   <string name="yes">हाँ</string>
   <string name="no">नहीं</string>
   <!-- Text displayed when the list of incoming calls is empty -->

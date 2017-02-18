@@ -106,6 +106,10 @@
     <string name="speed_dial_unassigned_dialog_title">Key unassigned</string>
     <string name="speed_dial_unassigned_dialog_message">No speed dial action is assigned to number key \'<xliff:g id="number">%s</xliff:g>\'. Do you want to assign an action now?</string>
     <string name="dialog_speed_dial_airplane_mode_message">To use speed dial, first turn off airplane mode</string>
+
+    <!-- Speed Dial can not be set for the key used for Emergency number-->
+    <string name="speed_dial_can_not_be_set">Speed Dial Can not be set for this Key</string>
+
     <string name="yes">Yes</string>
     <string name="no">No</string>
 
@@ -137,6 +141,7 @@
     <string name="alert_call_over_wifi">Calls will be made over Wi-Fi.</string>
     <string name="alert_call_no_cellular_coverage">No cellular network available. Connect to available Wi-Fi to make calls.</string>
     <string name="alert_user_connect_to_wifi_for_call">Connect to Wi-Fi to make calls.</string>
+    <string name="alert_user_connect_to_wifi_for_call_text">Tap here to view available networks</string>
 
     <string name="menu_add_to_4g_conference_call">Add to 4G conference call</string>
     <string name="menu_4g_conference_call">4G conference call</string>
