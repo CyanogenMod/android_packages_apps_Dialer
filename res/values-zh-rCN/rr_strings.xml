@@ -26,4 +26,5 @@
   <string name="prox_auto_speaker_incall_only_title">仅在通话时</string>
   <string name="prox_auto_speaker_incall_only_summary_on">在拨出电话时，检测器在对方接听后才激活</string>
   <string name="prox_auto_speaker_incall_only_summary_off">检测器在通话状态始终激活(默认)</string>
+  <!-- Smart Options -->
 </resources>

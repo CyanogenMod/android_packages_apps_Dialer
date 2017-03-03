@@ -26,4 +26,5 @@
   <string name="prox_auto_speaker_incall_only_title">Тільки під час дзвінка</string>
   <string name="prox_auto_speaker_incall_only_summary_on">При вихідних дзвінках функція активується тільки після відповіді на виклик</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Функція активна при будь-яких викликів (за замовчуванням)</string>
+  <!-- Smart Options -->
 </resources>

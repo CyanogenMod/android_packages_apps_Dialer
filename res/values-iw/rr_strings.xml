@@ -25,4 +25,5 @@
   <string name="prox_auto_speaker_delay_summary">הספיקר יהיה מופעל בעוד <xliff:g id="number">%d</xliff:g> מיל\"ש</string>
   <string name="prox_auto_speaker_incall_only_title">רק בזמן שיחה</string>
   <string name="prox_auto_speaker_incall_only_summary_on">בזמן שיחות יוצאות, המאזין יפעל רק לאחר שהמשיב יענה</string>
+  <!-- Smart Options -->
 </resources>

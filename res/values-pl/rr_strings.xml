@@ -26,4 +26,5 @@
   <string name="prox_auto_speaker_incall_only_title">Tylko podczas rozmowy</string>
   <string name="prox_auto_speaker_incall_only_summary_on">Dla połączeń wychodzących, detektor będzie aktywny tylko po otrzymaniu odpowiedzi</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Detektor będzie aktywny dla wszystkich rodzajów połączeń, gdy jest w użyciu (domyślnie)</string>
+  <!-- Smart Options -->
 </resources>

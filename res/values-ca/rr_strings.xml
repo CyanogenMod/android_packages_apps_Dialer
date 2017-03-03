@@ -26,4 +26,5 @@
   <string name="prox_auto_speaker_incall_only_title">Només durant la trucada</string>
   <string name="prox_auto_speaker_incall_only_summary_on">En les trucades sortints, l\'oient només s\'activarà després que la part receptora respongui</string>
   <string name="prox_auto_speaker_incall_only_summary_off">L\'oient romandrà actiu durant els estats de trucades fora d\'espera (predeterminat)</string>
+  <!-- Smart Options -->
 </resources>

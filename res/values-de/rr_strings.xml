@@ -26,4 +26,5 @@
   <string name="prox_auto_speaker_incall_only_title">Nur während eines Anrufs</string>
   <string name="prox_auto_speaker_incall_only_summary_on">Bei ausgehenden Anrufen wird der Hörer erst dann aktiv, wenn der Empfänger antwortet</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Der Hörer ist während des gesamten Telefonats aktiv (Standard)</string>
+  <!-- Smart Options -->
 </resources>

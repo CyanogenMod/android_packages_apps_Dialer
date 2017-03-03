@@ -26,4 +26,5 @@
   <string name="prox_auto_speaker_incall_only_title">Sadece arama sırasında</string>
   <string name="prox_auto_speaker_incall_only_summary_on">Giden aramalarda dinleyici sadece alıcı taraf cevapladıktan sonra aktif hale gelecektir</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Dinleyici çağrıyı cevapladığı durumda etkin olacak (varsayılan)</string>
+  <!-- Smart Options -->
 </resources>

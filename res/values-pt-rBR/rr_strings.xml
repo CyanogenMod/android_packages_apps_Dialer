@@ -26,4 +26,5 @@
   <string name="prox_auto_speaker_incall_only_title">Apenas em ligação</string>
   <string name="prox_auto_speaker_incall_only_summary_on">Em chamadas de saída, ouvinte só ficará ativo após a chamada for atendida</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Ouvinte estará ativo durante todos os estados da chamada offhook (padrão)</string>
+  <!-- Smart Options -->
 </resources>

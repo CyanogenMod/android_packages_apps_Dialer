@@ -26,4 +26,5 @@
   <string name="prox_auto_speaker_incall_only_title">僅通話時</string>
   <string name="prox_auto_speaker_incall_only_summary_on">僅在電話接通時啟用麥克風</string>
   <string name="prox_auto_speaker_incall_only_summary_off">持續啟用麥克風 (預設)</string>
+  <!-- Smart Options -->
 </resources>

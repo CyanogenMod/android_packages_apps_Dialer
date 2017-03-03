@@ -26,4 +26,5 @@
   <string name="prox_auto_speaker_incall_only_title">Pouze při hovoru</string>
   <string name="prox_auto_speaker_incall_only_summary_on">Při odchozích hovorech se reproduktor aktivuje při přijmutí hovoru protistranou</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Reproduktor bude aktivní vždy, i při vyzvánění (výchozí)</string>
+  <!-- Smart Options -->
 </resources>

@@ -22,4 +22,5 @@
   <string name="prox_auto_speaker_delay_dialog_title">تأخير مكبر الصوت (مللي ثانية)</string>
   <string name="prox_auto_speaker_delay_summary">سيتم تنشيط مكبر الصوت في <xliff:g id="number">%d </xliff:g> ms</string>
   <string name="prox_auto_speaker_incall_only_title">فقط في حين وقت المكالمة</string>
+  <!-- Smart Options -->
 </resources>

@@ -18,4 +18,5 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
   <string name="prox_auto_speaker_summary">Aktivere høyttalertelefonen automatisk når telefonen fjernes fra øret</string>
+  <!-- Smart Options -->
 </resources>

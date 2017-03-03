@@ -26,4 +26,5 @@
   <string name="prox_auto_speaker_incall_only_title">Само у току позива</string>
   <string name="prox_auto_speaker_incall_only_summary_on">Током одлазних позива, слушалац ће постати активан само након што се друга страна јави</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Слушалац ће бити активан током свих \"offhook\" позива (подразумевно)</string>
+  <!-- Smart Options -->
 </resources>

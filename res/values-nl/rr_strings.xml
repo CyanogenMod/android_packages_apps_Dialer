@@ -26,4 +26,5 @@
   <string name="prox_auto_speaker_incall_only_title">Alleen tijdens bellen</string>
   <string name="prox_auto_speaker_incall_only_summary_on">Bij uitgaande oproepen zal de microfoon pas geactiveerd worden wanneer de oproep beantwoord wordt</string>
   <string name="prox_auto_speaker_incall_only_summary_off">De microfoon is actief gedurende het hele gesprek (standaard)</string>
+  <!-- Smart Options -->
 </resources>

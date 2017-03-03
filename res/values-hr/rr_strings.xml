@@ -26,4 +26,5 @@
   <string name="prox_auto_speaker_incall_only_title">Samo tijekom poziva</string>
   <string name="prox_auto_speaker_incall_only_summary_on">Pri odlaznim će se pozivima slušalica aktivirati tek nakon odgovora pozvane osobe.</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Slušalica će ostati aktivna tijekom svih vrsta spojene veze (zadano).</string>
+  <!-- Smart Options -->
 </resources>

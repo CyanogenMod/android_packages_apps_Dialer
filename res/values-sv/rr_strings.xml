@@ -26,4 +26,5 @@
   <string name="prox_auto_speaker_incall_only_title">Endast under samtal</string>
   <string name="prox_auto_speaker_incall_only_summary_on">Vid utgående samtal, lyssnaren kommer endast vara aktiv vid svar</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Lyssnaren kommer vara aktiv under hela det utgående samtalet (standard)</string>
+  <!-- Smart Options -->
 </resources>

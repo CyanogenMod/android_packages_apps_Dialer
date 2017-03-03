@@ -26,4 +26,5 @@
   <string name="prox_auto_speaker_incall_only_title">Only while in Call</string>
   <string name="prox_auto_speaker_incall_only_summary_on">On outgoing calls, listener will only become active after the receiving party answers</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Listener will be active during all offhook call states (default)</string>
+  <!-- Smart Options -->
 </resources>

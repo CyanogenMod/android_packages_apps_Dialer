@@ -26,4 +26,5 @@
   <string name="prox_auto_speaker_incall_only_title">Yalnız zəng arasında</string>
   <string name="prox_auto_speaker_incall_only_summary_on">Gedən zənglərdə dinləyici sadəcə alıcı tərəf cavab verdikdən sonra aktiv hala gələcəkdir</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Dinləyici çağırışa cavab verdiyi halda effektiv olacaq (varsayılan)</string>
+  <!-- Smart Options -->
 </resources>
