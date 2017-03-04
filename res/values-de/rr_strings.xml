@@ -27,4 +27,7 @@
   <string name="prox_auto_speaker_incall_only_summary_on">Bei ausgehenden Anrufen wird der Hörer erst dann aktiv, wenn der Empfänger antwortet</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Der Hörer ist während des gesamten Telefonats aktiv (Standard)</string>
   <!-- Smart Options -->
+  <string name="smart_category_title">Smart-Optionen</string>
+  <string name="smart_mute_title">Smart Stumm schalten</string>
+  <string name="smart_mute_summary">Den eingehenden Anruf durch umdrehen des Handys stumm schalten</string>
 </resources>

@@ -27,4 +27,7 @@
   <string name="prox_auto_speaker_incall_only_summary_on">Em chamadas de saída, ouvinte só ficará ativo após a chamada for atendida</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Ouvinte estará ativo durante todos os estados da chamada offhook (padrão)</string>
   <!-- Smart Options -->
+  <string name="smart_category_title">Opções inteligentes</string>
+  <string name="smart_mute_title">Silenciar chamada</string>
+  <string name="smart_mute_summary">Silenciar chamada recebida virando o dispositivo para baixo</string>
 </resources>

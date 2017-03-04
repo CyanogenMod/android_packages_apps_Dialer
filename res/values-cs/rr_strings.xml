@@ -27,4 +27,7 @@
   <string name="prox_auto_speaker_incall_only_summary_on">Při odchozích hovorech se reproduktor aktivuje při přijmutí hovoru protistranou</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Reproduktor bude aktivní vždy, i při vyzvánění (výchozí)</string>
   <!-- Smart Options -->
+  <string name="smart_category_title">Inteligentní možnosti</string>
+  <string name="smart_mute_title">Inteligentní ztlumení</string>
+  <string name="smart_mute_summary">Ztlumit vyzvánění příchozího hovoru otočením zařízení</string>
 </resources>

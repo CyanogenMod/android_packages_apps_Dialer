@@ -27,4 +27,6 @@
   <string name="prox_auto_speaker_incall_only_summary_on">A kimenő hívások esetén a hallgató csak akkor lesz aktív, miután a fogadó fél válaszolt</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Hallgató aktív lesz az összes felvett telefon állapot alatt (alapértelmezett)</string>
   <!-- Smart Options -->
+  <string name="smart_category_title">Intelligens műveletek</string>
+  <string name="smart_mute_title">Intelligens némítás</string>
 </resources>

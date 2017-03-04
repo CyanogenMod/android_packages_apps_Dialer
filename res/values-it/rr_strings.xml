@@ -27,4 +27,7 @@
   <string name="prox_auto_speaker_incall_only_summary_on">Nelle chiamate in uscita, il vivavoce si attiverà dopo la risposta</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Il vivavoce sarà attivato per tutte le chiamate (predefinito)</string>
   <!-- Smart Options -->
+  <string name="smart_category_title">Opzioni intelligenti</string>
+  <string name="smart_mute_title">Muto intelligente</string>
+  <string name="smart_mute_summary">Disattivare la chiamata in arrivo spostando il dispositivo</string>
 </resources>

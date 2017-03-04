@@ -27,4 +27,7 @@
   <string name="prox_auto_speaker_incall_only_summary_on">Trong các cuộc gọi đi, loa ngoài sẽ chỉ kích hoạt sau khi bên nhận trả lời</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Người nghe sẽ được hoạt động trong tất cả các nước gọi offhook (mặc định)</string>
   <!-- Smart Options -->
+  <string name="smart_category_title">Tùy chọn thông minh</string>
+  <string name="smart_mute_title">Tắt tiếng thông minh</string>
+  <string name="smart_mute_summary">Tắt tiếng cuộc gọi đến bằng cách lật thiết bị</string>
 </resources>

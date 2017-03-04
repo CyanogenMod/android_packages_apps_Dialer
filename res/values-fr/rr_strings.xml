@@ -27,4 +27,7 @@
   <string name="prox_auto_speaker_incall_only_summary_on">Lors des appels sortants, le haut-parleur s\'active après la réponse du correspondant</string>
   <string name="prox_auto_speaker_incall_only_summary_off">L\'écouteur sera actif pendant tous les états de l\'appel décroché (par défaut)</string>
   <!-- Smart Options -->
+  <string name="smart_category_title">Options intelligentes</string>
+  <string name="smart_mute_title">Mute intelligent</string>
+  <string name="smart_mute_summary">Couper le son de l\'appel entrant en retournant l\'appareil</string>
 </resources>
