@@ -27,4 +27,5 @@
   <string name="prox_auto_speaker_incall_only_summary_on">În apelurile efectuate, ascultătorul va deveni activ doar după ce interlocutorul a răspuns</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Ascultătorul va fi activ în toate stările apelului (implicit)</string>
   <!-- Smart Options -->
+  <string name="smart_category_title">Opţiuni inteligente</string>
 </resources>

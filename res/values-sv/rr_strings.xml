@@ -27,4 +27,7 @@
   <string name="prox_auto_speaker_incall_only_summary_on">Vid utgående samtal, lyssnaren kommer endast vara aktiv vid svar</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Lyssnaren kommer vara aktiv under hela det utgående samtalet (standard)</string>
   <!-- Smart Options -->
+  <string name="smart_category_title">Smarta alternativ</string>
+  <string name="smart_mute_title">Smart tyst</string>
+  <string name="smart_mute_summary">Gör ljudlös vid inkommande samtal genom att vända på enheten</string>
 </resources>

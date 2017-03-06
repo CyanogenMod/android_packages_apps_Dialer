@@ -27,4 +27,5 @@
   <string name="prox_auto_speaker_incall_only_summary_on">Pada panggilan, pendengar hanya akan menjadi aktif setelah menerima jawaban</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Pendengar akan diaktifkan selama selama proses panggilan(default)</string>
   <!-- Smart Options -->
+  <string name="smart_category_title">Pilihan pintar</string>
 </resources>

@@ -27,4 +27,7 @@
   <string name="prox_auto_speaker_incall_only_summary_on">Bij uitgaande oproepen zal de microfoon pas geactiveerd worden wanneer de oproep beantwoord wordt</string>
   <string name="prox_auto_speaker_incall_only_summary_off">De microfoon is actief gedurende het hele gesprek (standaard)</string>
   <!-- Smart Options -->
+  <string name="smart_category_title">Slimme opties</string>
+  <string name="smart_mute_title">Slim dempen</string>
+  <string name="smart_mute_summary">Demp de inkomende oproep door uw apparaat om te keren</string>
 </resources>

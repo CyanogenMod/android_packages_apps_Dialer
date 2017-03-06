@@ -29,4 +29,5 @@
   <!-- Smart Options -->
   <string name="smart_category_title">Intelligens műveletek</string>
   <string name="smart_mute_title">Intelligens némítás</string>
+  <string name="smart_mute_summary">A készülék megfordítása elnémítja a bejövő hívást</string>
 </resources>
