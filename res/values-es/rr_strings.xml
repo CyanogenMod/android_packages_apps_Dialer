@@ -27,4 +27,7 @@
   <string name="prox_auto_speaker_incall_only_summary_on">En llamadas salientes, el altavoz solo se activará cuando la otra persona conteste</string>
   <string name="prox_auto_speaker_incall_only_summary_off">El altavoz estará activo durante cualquier estado de la llamada (por defecto)</string>
   <!-- Smart Options -->
+  <string name="smart_category_title">Opciones inteligentes</string>
+  <string name="smart_mute_title">Silenciado inteligente</string>
+  <string name="smart_mute_summary">Silenciar llamada entrante volteando el dispositivo</string>
 </resources>

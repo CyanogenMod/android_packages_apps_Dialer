@@ -27,4 +27,6 @@
   <string name="prox_auto_speaker_incall_only_summary_on">Για τις εξερχόμενες κλήσεις, o ακροατής θα είναι μόνο ενεργός μετά την λήψη ομαδοποιημένων απαντήσεων</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Ο ακροατής θα είναι ενεργός κατά την διάρκεια όλων τον απαγκυστρωμένων κλήσεων (προεπιλογή)</string>
   <!-- Smart Options -->
+  <string name="smart_category_title">Έξυπνες ρυθμίσεις</string>
+  <string name="smart_mute_title">Έξυπνη σίγαση</string>
 </resources>
