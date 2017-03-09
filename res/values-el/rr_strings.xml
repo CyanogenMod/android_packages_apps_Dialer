@@ -24,9 +24,10 @@
   <string name="prox_auto_speaker_delay_dialog_title">Καθυστέρηση μεγαφώνου σε (ms)</string>
   <string name="prox_auto_speaker_delay_summary">Το μεγάφωνο θα ενεργοποιηθεί σε <xliff:g id="number">%d</xliff:g> ms</string>
   <string name="prox_auto_speaker_incall_only_title">Μόνο κατά την κλήση</string>
-  <string name="prox_auto_speaker_incall_only_summary_on">Για τις εξερχόμενες κλήσεις, o ακροατής θα είναι μόνο ενεργός μετά την λήψη ομαδοποιημένων απαντήσεων</string>
-  <string name="prox_auto_speaker_incall_only_summary_off">Ο ακροατής θα είναι ενεργός κατά την διάρκεια όλων τον απαγκυστρωμένων κλήσεων (προεπιλογή)</string>
+  <string name="prox_auto_speaker_incall_only_summary_on">Στις εξερχόμενες κλήσεις, o ακροατής θα γίνει ενεργός μόνο μετά την λήψη ομαδοποιημένων απαντήσεων</string>
+  <string name="prox_auto_speaker_incall_only_summary_off">Ο ακροατής θα είναι ενεργός κατά την διάρκεια όλων τον απαγκιστρωμένων κρατών που καλούν (προεπιλογή)</string>
   <!-- Smart Options -->
-  <string name="smart_category_title">Έξυπνες ρυθμίσεις</string>
+  <string name="smart_category_title">Έξυπνες επιλογές</string>
   <string name="smart_mute_title">Έξυπνη σίγαση</string>
+  <string name="smart_mute_summary">Σιγήστε την εισερχόμενη κλήση κτυπώντας την συσκευή σας</string>
 </resources>
