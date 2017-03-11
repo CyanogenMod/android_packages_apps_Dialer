@@ -19,15 +19,15 @@
   <!-- Proximity speaker -->
   <string name="speaker_settings_label">Nabijheid luidspreker</string>
   <string name="prox_auto_speaker_title">Automatische nabijheid luidspreker</string>
-  <string name="prox_auto_speaker_summary">Luidspreker automatisch inschakelen wanneer de telefoon van je oor gehaald wordt</string>
+  <string name="prox_auto_speaker_summary">Luidspreker automatisch inschakelen wanneer telefoon van het oor gehaald wordt</string>
   <string name="prox_auto_speaker_delay_title">Luidspreker vertraging</string>
   <string name="prox_auto_speaker_delay_dialog_title">Luidspreker vertraging in (ms)</string>
   <string name="prox_auto_speaker_delay_summary">Luidspreker wordt geactiveerd in <xliff:g id="number">%d</xliff:g> ms</string>
   <string name="prox_auto_speaker_incall_only_title">Alleen tijdens bellen</string>
-  <string name="prox_auto_speaker_incall_only_summary_on">Bij uitgaande oproepen zal de microfoon pas geactiveerd worden wanneer de oproep beantwoord wordt</string>
-  <string name="prox_auto_speaker_incall_only_summary_off">De microfoon is actief gedurende het hele gesprek (standaard)</string>
+  <string name="prox_auto_speaker_incall_only_summary_on">Bij uitgaande oproepen zal de luidspreker pas geactiveerd worden wanneer de oproep beantwoord wordt</string>
+  <string name="prox_auto_speaker_incall_only_summary_off">De luidspreker is actief gedurende het hele gesprek (standaard)</string>
   <!-- Smart Options -->
   <string name="smart_category_title">Slimme opties</string>
   <string name="smart_mute_title">Slim dempen</string>
-  <string name="smart_mute_summary">Demp de inkomende oproep door uw apparaat om te keren</string>
+  <string name="smart_mute_summary">Demp inkomende oproep door het apparaat om te keren</string>
 </resources>

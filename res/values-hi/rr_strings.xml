@@ -28,5 +28,6 @@
   <string name="prox_auto_speaker_incall_only_summary_off">श्रोता सभी offhook कॉल के दौरान सक्रिय हो जाएगा (डिफ़ॉल्ट)</string>
   <!-- Smart Options -->
   <string name="smart_category_title">स्मार्ट विकल्प</string>
+  <string name="smart_mute_title">स्मार्ट मूक</string>
   <string name="smart_mute_summary">डिवाइस flipping द्वारा आवक कॉल म्यूट करें</string>
 </resources>
