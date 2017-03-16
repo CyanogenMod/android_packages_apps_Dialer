@@ -19,12 +19,12 @@
   <!-- Proximity speaker -->
   <string name="speaker_settings_label">接近度揚聲器</string>
   <string name="prox_auto_speaker_title">自動擴音</string>
-  <string name="prox_auto_speaker_summary">從您的耳朵中移開手機時自動啟用揚聲器</string>
-  <string name="prox_auto_speaker_delay_title">揚聲器延遲</string>
-  <string name="prox_auto_speaker_delay_dialog_title">揚聲器延遲時間(毫秒)</string>
-  <string name="prox_auto_speaker_delay_summary">揚聲器將在 <xliff:g id="number">%d</xliff:g> 分鐘內啟動</string>
+  <string name="prox_auto_speaker_summary">當您的手機離開耳朵時會自動啟用喇叭</string>
+  <string name="prox_auto_speaker_delay_title">喇叭延遲</string>
+  <string name="prox_auto_speaker_delay_dialog_title">喇叭延遲時間(毫秒)</string>
+  <string name="prox_auto_speaker_delay_summary">喇叭將在 <xliff:g id="number">%d</xliff:g> 分鐘內啟動</string>
   <string name="prox_auto_speaker_incall_only_title">僅通話時</string>
-  <string name="prox_auto_speaker_incall_only_summary_on">僅在電話接通時啟用麥克風</string>
+  <string name="prox_auto_speaker_incall_only_summary_on">在撥打時，電話接通後才會啟用麥克風</string>
   <string name="prox_auto_speaker_incall_only_summary_off">持續啟用麥克風 (預設)</string>
   <!-- Smart Options -->
   <string name="smart_category_title">智慧選項</string>

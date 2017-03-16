@@ -28,4 +28,6 @@
   <string name="prox_auto_speaker_incall_only_summary_off">Pendengar akan diaktifkan selama selama proses panggilan(default)</string>
   <!-- Smart Options -->
   <string name="smart_category_title">Pilihan pintar</string>
+  <string name="smart_mute_title">Bisukan cerdas</string>
+  <string name="smart_mute_summary">Bisukan panggilan masuk dengan membalik perangkat</string>
 </resources>
