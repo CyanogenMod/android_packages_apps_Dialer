@@ -28,4 +28,6 @@
   <string name="prox_auto_speaker_incall_only_summary_off">Ascultătorul va fi activ în toate stările apelului (implicit)</string>
   <!-- Smart Options -->
   <string name="smart_category_title">Opţiuni inteligente</string>
+  <string name="smart_mute_title">Mod fără sunet inteligent</string>
+  <string name="smart_mute_summary">Treceți pe mute apelul primit prin rotirea aparatului</string>
 </resources>
