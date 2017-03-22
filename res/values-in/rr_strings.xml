@@ -19,15 +19,15 @@
   <!-- Proximity speaker -->
   <string name="speaker_settings_label">Sensor proximity suara</string>
   <string name="prox_auto_speaker_title">Jarak speaker otomatis</string>
-  <string name="prox_auto_speaker_summary">Mengaktifkan speakerphone secara otomatis bila telepon Anda dihapus dari telinga Anda</string>
-  <string name="prox_auto_speaker_delay_title">Speakerphone ditunda</string>
-  <string name="prox_auto_speaker_delay_dialog_title">Tunda Speakerphone dalam (ms)</string>
+  <string name="prox_auto_speaker_summary">Mengaktifkan speakerphone secara otomatis saat Anda menjauhkan ponsel dari telinga</string>
+  <string name="prox_auto_speaker_delay_title">Tunda speakerphone</string>
+  <string name="prox_auto_speaker_delay_dialog_title">Tunda speakerphone dalam (ms)</string>
   <string name="prox_auto_speaker_delay_summary">Speakerphone akan diaktifkan dalam <xliff:g id="number">%d </xliff:g> ms</string>
   <string name="prox_auto_speaker_incall_only_title">Saat dalam panggilan saja</string>
   <string name="prox_auto_speaker_incall_only_summary_on">Pada panggilan, pendengar hanya akan menjadi aktif setelah menerima jawaban</string>
   <string name="prox_auto_speaker_incall_only_summary_off">Pendengar akan diaktifkan selama selama proses panggilan(default)</string>
   <!-- Smart Options -->
-  <string name="smart_category_title">Pilihan pintar</string>
+  <string name="smart_category_title">Pilihan cerdas</string>
   <string name="smart_mute_title">Bisukan cerdas</string>
   <string name="smart_mute_summary">Bisukan panggilan masuk dengan membalik perangkat</string>
 </resources>
