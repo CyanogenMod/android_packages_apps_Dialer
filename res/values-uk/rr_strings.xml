@@ -25,7 +25,7 @@
   <string name="prox_auto_speaker_delay_summary">Гучний зв\'язок буде увімкнено через <xliff:g id="number">%d</xliff:g> мс</string>
   <string name="prox_auto_speaker_incall_only_title">Тільки під час дзвінка</string>
   <string name="prox_auto_speaker_incall_only_summary_on">При вихідних дзвінках функція активується тільки після відповіді на виклик</string>
-  <string name="prox_auto_speaker_incall_only_summary_off">Функція активна при будь-яких викликів (за замовчуванням)</string>
+  <string name="prox_auto_speaker_incall_only_summary_off">Функція активна при будь-яких викликах (за замовчуванням)</string>
   <!-- Smart Options -->
   <string name="smart_category_title">Розумні параметри</string>
   <string name="smart_mute_title">Розумне приглушення</string>
