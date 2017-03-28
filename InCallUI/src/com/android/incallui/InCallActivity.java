@@ -192,6 +192,9 @@ public class InCallActivity extends TransactionSafeActivity implements
 
         getWindow().addFlags(flags);
 
+        // Enable Sustained Performance Mode
+        getWindow().setSustainedPerformanceMode(true);
+
         // Setup action bar for the conference call manager.
         requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         if (getActionBar() != null) {
