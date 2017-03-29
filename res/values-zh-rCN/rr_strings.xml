@@ -24,10 +24,10 @@
   <string name="prox_auto_speaker_delay_dialog_title">扬声器延迟(毫秒)</string>
   <string name="prox_auto_speaker_delay_summary">免提功能将在 <xliff:g id="number">%d</xliff:g> 毫秒后激活</string>
   <string name="prox_auto_speaker_incall_only_title">仅在通话时</string>
-  <string name="prox_auto_speaker_incall_only_summary_on">在拨出电话时，检测器在对方接听后才激活</string>
-  <string name="prox_auto_speaker_incall_only_summary_off">检测器在通话状态始终激活(默认)</string>
+  <string name="prox_auto_speaker_incall_only_summary_on">在拨出电话时，监听器在对方接听后才启用</string>
+  <string name="prox_auto_speaker_incall_only_summary_off">监听器将在通话时始终启用(默认)</string>
   <!-- Smart Options -->
   <string name="smart_category_title">智能选项</string>
   <string name="smart_mute_title">智能静音</string>
-  <string name="smart_mute_summary">翻转设备时静音来电</string>
+  <string name="smart_mute_summary">来电时翻转设备以静音</string>
 </resources>

@@ -18,14 +18,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
   <string name="speaker_settings_label">Haut-parleur</string>
-  <string name="prox_auto_speaker_title">Haut-parleur de proximité automatique</string>
+  <string name="prox_auto_speaker_title">Mode automatique</string>
   <string name="prox_auto_speaker_summary">Activer le haut-parleur lorsque l\'appareil est éloigné de l\'oreille</string>
   <string name="prox_auto_speaker_delay_title">Délai d\'activation</string>
-  <string name="prox_auto_speaker_delay_dialog_title">Délai d\'activation du haut-parleur</string>
+  <string name="prox_auto_speaker_delay_dialog_title">Délai (ms)</string>
   <string name="prox_auto_speaker_delay_summary">Activation du haut-parleur après <xliff:g id="number">%d</xliff:g> ms</string>
   <string name="prox_auto_speaker_incall_only_title">Seulement pendant les appels</string>
   <string name="prox_auto_speaker_incall_only_summary_on">Lors des appels sortants, le haut-parleur s\'active après la réponse du correspondant</string>
-  <string name="prox_auto_speaker_incall_only_summary_off">L\'écouteur sera actif pendant tous les états de l\'appel décroché (par défaut)</string>
+  <string name="prox_auto_speaker_incall_only_summary_off">(Par défaut) la fonction d\'écoute sera actif sur tous les appels reçus</string>
   <!-- Smart Options -->
   <string name="smart_category_title">Options intelligentes</string>
   <string name="smart_mute_title">Mute intelligent</string>
