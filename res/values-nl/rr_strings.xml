@@ -18,7 +18,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
   <string name="speaker_settings_label">Nabijheid luidspreker</string>
-  <string name="prox_auto_speaker_title">Automatische nabijheid luidspreker</string>
+  <string name="prox_auto_speaker_title">Automatische luidspreker</string>
   <string name="prox_auto_speaker_summary">Luidspreker automatisch inschakelen wanneer telefoon van het oor gehaald wordt</string>
   <string name="prox_auto_speaker_delay_title">Luidspreker vertraging</string>
   <string name="prox_auto_speaker_delay_dialog_title">Luidspreker vertraging in (ms)</string>
