@@ -27,5 +27,7 @@
   <string name="prox_auto_speaker_incall_only_summary_on">発信側では、受信側が応答した後にリスナーがアクティブになります</string>
   <string name="prox_auto_speaker_incall_only_summary_off">リスナーは、通話時のすべての状態でアクティブになります（デフォルト）</string>
   <!-- Smart Options -->
+  <string name="smart_category_title">スマートオプション</string>
+  <string name="smart_mute_title">スマートミュート</string>
   <string name="smart_mute_summary">端末を裏返しにすると着信をミュートします</string>
 </resources>
