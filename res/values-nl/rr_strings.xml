@@ -22,7 +22,7 @@
   <string name="prox_auto_speaker_summary">Luidspreker automatisch inschakelen wanneer telefoon van het oor gehaald wordt</string>
   <string name="prox_auto_speaker_delay_title">Luidspreker vertraging</string>
   <string name="prox_auto_speaker_delay_dialog_title">Luidspreker vertraging in (ms)</string>
-  <string name="prox_auto_speaker_delay_summary">Luidspreker wordt geactiveerd in <xliff:g id="number">%d</xliff:g> ms</string>
+  <string name="prox_auto_speaker_delay_summary">Luidspreker wordt geactiveerd na <xliff:g id="number">%d</xliff:g> ms</string>
   <string name="prox_auto_speaker_incall_only_title">Alleen tijdens bellen</string>
   <string name="prox_auto_speaker_incall_only_summary_on">Bij uitgaande oproepen zal de luidspreker pas geactiveerd worden wanneer de oproep beantwoord wordt</string>
   <string name="prox_auto_speaker_incall_only_summary_off">De luidspreker is actief gedurende het hele gesprek (standaard)</string>
