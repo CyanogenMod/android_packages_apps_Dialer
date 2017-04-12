@@ -30,6 +30,8 @@ LOCAL_AAPT_FLAGS := \
     --extra-packages com.android.contacts.common \
     --extra-packages com.android.phone.common
 
+LOCAL_AAPT_INCLUDE_ALL_RESOURCES := true
+
 LOCAL_JAVA_LIBRARIES := telephony-common \
                         ims-common
 
