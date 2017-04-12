@@ -20,6 +20,13 @@
 
 -verbose
 
+
+-dontwarn org.apache.http.**
+-dontwarn com.android.volley.toolbox.**
+-dontwarn android.net.http.**
+-dontwarn java.nio.file.**
+-dontwarn org.codehaus.mojo.**
+
 -keep public class cyanogenmod.app.StatusBarPanelCustomTile
 -keep public class cyanogenmod.app.CustomTile
 

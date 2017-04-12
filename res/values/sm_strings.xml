@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2015 The SudaMod Project
+    
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- Cloud Phone Number Location Engine -->
+    <string name="call_log_action_user_mark">MARK AS</string>
+    <string name="description_user_mark_action">Mark <xliff:g id="nameOrNumber" example="John Smith">^1</xliff:g> as</string>
+    <string name="cloud_location_lookup_mark_title">Mark %s </string>
+    <string name="cloud_location_lookup_mark_as">Mark caller info</string>
+    <string name="cloud_location_lookup_mark_custom">Custom caller info</string>
+    <string name="cloud_location_lookup_mark_done">Done</string>
+    <string name="cloud_location_lookup_enable_title" translatable="false">云端归属地</string>
+    <string name="cloud_location_lookup_enable_summary" translatable="false">通过云端查询更为精确的号码归属信息</string>
+    <string name="cloud_location_lookup_mark_harassment">Harassment</string>
+    <string name="cloud_location_lookup_mark_fraud">Fraud</string>
+    <string name="cloud_location_lookup_mark_advertisement">Advertisement</string>
+    <string name="cloud_location_lookup_mark_agency">Agency</string>
+    <string name="cloud_location_lookup_mark_takeaway">Takeaway</string>
+    <string name="cloud_location_lookup_mark_delivery">Delivery</string>
+    <string name="cloud_location_lookup_mark_service">Customer Service</string>
+    <string name="cloud_location_lookup_mark_taxi">Taxi</string>
+
+</resources>

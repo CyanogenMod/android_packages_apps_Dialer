@@ -276,6 +276,18 @@
         <item name="orangeColor">@color/blacklisted_call</item>
     </style>
 
+    <style name="MiniMarkActivityStyle" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:colorPrimaryDark">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/dialer_theme_color_dark</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+
+    <style name="MiniMarkRootViewStyle" parent="android:Theme.Material.Light">
+        <item name="android:listViewStyle">@style/ListViewStyle</item>
+    </style>
+
     <style name="Theme.Material.Light.Dialog.NoTitle" parent="@android:style/Theme.Material.Light.Dialog">
         <item name="android:windowNoTitle">true</item>
     </style>
