@@ -41,6 +41,7 @@ import com.android.dialer.PhoneCallDetails;
 import com.android.dialer.R;
 import com.android.dialer.calllog.calllogcache.CallLogCache;
 import com.android.dialer.util.DialerUtils;
+import android.suda.utils.SudaUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -245,7 +246,7 @@ public class PhoneCallDetailsHelper {
                 && !PhoneNumberHelper.isUriNumber(details.number.toString())
                 && !mCallLogCache.isVoicemailNumber(details.accountHandle, details.number)) {
 
-            if (TextUtils.isEmpty(details.namePrimary) && !TextUtils.isEmpty(details.geocode)) {
+            if (!TextUtils.isEmpty(details.geocode) && SudaUtils.isSupportLanguage(true)) {
                 numberFormattedLabel = details.geocode;
             } else if (!(details.numberType == Phone.TYPE_CUSTOM
                     && TextUtils.isEmpty(details.numberLabel))) {

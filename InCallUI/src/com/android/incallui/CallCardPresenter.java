@@ -65,6 +65,7 @@ import com.android.incalluibind.ObjectFactory;
 import java.lang.ref.WeakReference;
 
 import static com.android.contacts.common.compat.CallSdkCompat.Details.PROPERTY_ENTERPRISE_CALL;
+import android.suda.utils.SudaUtils;
 /**
  * Presenter for the Call Card Fragment.
  * <p>
@@ -105,6 +106,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
     private boolean mHasShownToast = false;
     private InCallContactInteractions mInCallContactInteractions;
     private boolean mIsFullscreen = false;
+    private static boolean isSupportLanguage;
 
     public static class ContactLookupCallback implements ContactInfoCacheCallback {
         private final WeakReference<CallCardPresenter> mCallCardPresenter;
@@ -208,6 +210,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
         InCallPresenter.getInstance().addIncomingCallListener(this);
         InCallPresenter.getInstance().addDetailsListener(this);
         InCallPresenter.getInstance().addInCallEventListener(this);
+        isSupportLanguage = SudaUtils.isSupportLanguage(true);
         AudioModeProvider.getInstance().addListener(this);
     }
 
@@ -963,7 +966,9 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
                     number,
                     name,
                     nameIsNumber,
-                    isChildNumberShown || isCallSubjectShown ? null : mPrimaryContactInfo.label,
+                    isChildNumberShown || isCallSubjectShown ? null : isSupportLanguage ? TextUtils.isEmpty(mPrimaryContactInfo.label) ? mPrimaryContactInfo.location :
+                        TextUtils.isEmpty(mPrimaryContactInfo.location) ? mPrimaryContactInfo.label : mPrimaryContactInfo.label + " "
+                            + mPrimaryContactInfo.location : mPrimaryContactInfo.label,
                     mPrimaryContactInfo.photo,
                     mPrimaryContactInfo.isSipCall,
                     isForwarded,
@@ -1154,7 +1159,11 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
                     contactInfo.nameAlternative,
                     mContactsPreferences);
         if (TextUtils.isEmpty(preferredName)) {
-            return contactInfo.location;
+            if (!isSupportLanguage) {
+                return contactInfo.location;
+            } else {
+                return "";
+            }
         }
         return contactInfo.number;
     }

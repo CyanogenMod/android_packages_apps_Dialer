@@ -52,6 +52,8 @@ import com.android.incalluibind.ObjectFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.sudamod.sdk.phonelocation.PhoneUtil;
+import android.suda.utils.SudaUtils;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -562,7 +564,13 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
 
         cce.namePrimary = displayName;
         cce.number = displayNumber;
-        cce.location = displayLocation;
+        String location = PhoneUtil.getPhoneUtil(context).getLocalNumberInfo(cce.number, false);
+        if (!TextUtils.isEmpty(location)) {
+            info.geoDescription = location;
+            cce.location = info.geoDescription;
+        } else {
+            cce.location = displayLocation;
+        }
         cce.label = label;
         cce.isSipCall = isSipCall;
         cce.userType = info.userType;

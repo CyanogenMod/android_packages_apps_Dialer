@@ -71,6 +71,10 @@ import com.android.phone.common.animation.AnimUtils;
 
 import java.util.List;
 
+import com.sudamod.sdk.phonelocation.PhoneUtil;
+import com.sudamod.sdk.phonelocation.PhoneUtil.CallBack;
+import android.suda.utils.SudaUtils;
+
 /**
  * Fragment for call card.
  */
@@ -663,6 +667,23 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
 
         // Set the label (Mobile, Work, etc)
         setPrimaryLabel(label);
+
+        if (SudaUtils.isSupportLanguage(true) && !TextUtils.isEmpty(name)
+                   && nameIsNumber) {
+            PhoneUtil.getPhoneUtil(getActivity()).getOnlineNumberInfo(name, new CallBack() {
+                    public void execute(final String response) {
+                        if(getActivity() == null)
+                            return;	
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                setPrimaryLabel(response);
+                            }
+                         });
+                     }
+                }
+            );
+        }
 
         showCallType(isSipCall, isForwarded);
 
