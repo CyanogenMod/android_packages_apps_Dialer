@@ -57,6 +57,8 @@ import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.preference.PreferenceManager;
+import android.content.SharedPreferences;
 
 import com.android.contacts.common.CallUtil;
 import com.android.contacts.common.dialog.ClearFrequentsDialog;
@@ -1061,6 +1063,15 @@ public class DialtactsActivity extends TransactionSafeActivity implements View.O
             if (showDialpadChooser && !mDialpadFragment.isVisible()) {
                 mInCallDialpadUp = true;
             }
+        }
+
+        SharedPreferences getPrefs;
+        getPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        
+        boolean isShowDialer = getPrefs.getBoolean(getApplicationContext().getString(R.string.showdialer), false);
+
+        if (isShowDialer) {
+            showDialpadFragment(false);
         }
     }
 

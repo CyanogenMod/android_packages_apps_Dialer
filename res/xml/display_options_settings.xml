@@ -28,4 +28,9 @@
         android:title="@string/display_options_view_names_as"
         android:dialogTitle="@string/display_options_view_names_as" />
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="@string/showdialer"
+        android:title="@string/showdialer_title"
+        android:summary="@string/showdialer_summary" />
 </PreferenceScreen>
