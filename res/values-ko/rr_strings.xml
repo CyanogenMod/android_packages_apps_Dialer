@@ -27,4 +27,8 @@
   <string name="prox_auto_speaker_incall_only_summary_on">발신 중일 경우, 수신자가 전화를 받은 후에만 자동 스피커폰 기능을 활성화 합니다</string>
   <string name="prox_auto_speaker_incall_only_summary_off">자동 스피커폰 기능은 모든 통화 중에 활성화됩니다 (기본값)</string>
   <!-- Smart Options -->
+  <string name="smart_category_title">스마트 옵션</string>
+  <string name="smart_mute_title">스마트 음소거</string>
+  <string name="smart_mute_summary">디바이스를 뒤집어 수신전화 벨소리 끄기</string>
+  <!-- Show or Hide Dialerpad -->
 </resources>

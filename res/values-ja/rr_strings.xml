@@ -30,4 +30,5 @@
   <string name="smart_category_title">スマートオプション</string>
   <string name="smart_mute_title">スマートミュート</string>
   <string name="smart_mute_summary">端末を裏返しにすると着信をミュートします</string>
+  <!-- Show or Hide Dialerpad -->
 </resources>

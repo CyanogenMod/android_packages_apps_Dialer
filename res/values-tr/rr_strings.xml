@@ -30,4 +30,5 @@
   <string name="smart_category_title">Akıllı seçenekler</string>
   <string name="smart_mute_title">Akıllı sessizlik</string>
   <string name="smart_mute_summary">Cihazı çevirerek gelen çağrıyı yoksay</string>
+  <!-- Show or Hide Dialerpad -->
 </resources>

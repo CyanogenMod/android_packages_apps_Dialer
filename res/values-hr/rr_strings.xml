@@ -30,4 +30,5 @@
   <string name="smart_category_title">Pametne opcije</string>
   <string name="smart_mute_title">Pametno utišavanje</string>
   <string name="smart_mute_summary">Utišajte dolazni poziv okretanjem uređaja.</string>
+  <!-- Show or Hide Dialerpad -->
 </resources>

@@ -30,4 +30,5 @@
   <string name="smart_category_title">Opcje inteligentne</string>
   <string name="smart_mute_title">Inteligentne wyciszanie</string>
   <string name="smart_mute_summary">Wyciszenie dzwonka połączenia pochodzącego przez obrócenie urządzenia</string>
+  <!-- Show or Hide Dialerpad -->
 </resources>

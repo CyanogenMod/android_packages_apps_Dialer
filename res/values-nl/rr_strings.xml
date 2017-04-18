@@ -30,4 +30,5 @@
   <string name="smart_category_title">Slimme opties</string>
   <string name="smart_mute_title">Slim dempen</string>
   <string name="smart_mute_summary">Demp inkomende oproep door het apparaat om te keren</string>
+  <!-- Show or Hide Dialerpad -->
 </resources>

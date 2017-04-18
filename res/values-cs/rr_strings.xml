@@ -30,4 +30,5 @@
   <string name="smart_category_title">Inteligentní možnosti</string>
   <string name="smart_mute_title">Inteligentní ztlumení</string>
   <string name="smart_mute_summary">Ztlumit vyzvánění příchozího hovoru otočením zařízení</string>
+  <!-- Show or Hide Dialerpad -->
 </resources>

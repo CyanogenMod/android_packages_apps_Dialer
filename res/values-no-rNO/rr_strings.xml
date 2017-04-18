@@ -19,4 +19,5 @@
   <!-- Proximity speaker -->
   <string name="prox_auto_speaker_summary">Aktivere høyttalertelefonen automatisk når telefonen fjernes fra øret</string>
   <!-- Smart Options -->
+  <!-- Show or Hide Dialerpad -->
 </resources>

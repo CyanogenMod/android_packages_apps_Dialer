@@ -27,4 +27,5 @@
   <string name="prox_auto_speaker_incall_only_summary_on">عند اجراء مكالمة هاتفية صادرة ، لن يتم تفعيل صوتك الا بعد ان يجيب المتلقي</string>
   <!-- Smart Options -->
   <string name="smart_category_title">خيارات ذكية</string>
+  <!-- Show or Hide Dialerpad -->
 </resources>
