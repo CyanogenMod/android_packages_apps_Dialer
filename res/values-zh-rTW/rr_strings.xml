@@ -31,4 +31,6 @@
   <string name="smart_mute_title">智慧靜音</string>
   <string name="smart_mute_summary">翻轉裝置時靜音來電</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">自動顯示撥號鍵盤</string>
+  <string name="showdialer_summary">開啟撥號程式後自動顯示撥號鍵盤</string>
 </resources>

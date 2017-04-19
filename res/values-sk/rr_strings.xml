@@ -31,4 +31,6 @@
   <string name="smart_mute_title">Inteligentné stíšenie</string>
   <string name="smart_mute_summary">Stlmiť vyzváňanie prichádzajúceho hovoru otočením zariadenia</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">Automaticky zobraziť číselník</string>
+  <string name="showdialer_summary">Automaticky zobraziť číselník pri otvorení aplikácie Telefón</string>
 </resources>

@@ -31,4 +31,6 @@
   <string name="smart_mute_title">Silenciado inteligente</string>
   <string name="smart_mute_summary">Silenciar llamada entrante volteando el dispositivo</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">Mostrar teclado automáticamente</string>
+  <string name="showdialer_summary">Mostrar teclado automáticamente al abrir la aplicación de teléfono</string>
 </resources>

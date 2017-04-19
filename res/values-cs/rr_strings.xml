@@ -31,4 +31,6 @@
   <string name="smart_mute_title">Inteligentní ztlumení</string>
   <string name="smart_mute_summary">Ztlumit vyzvánění příchozího hovoru otočením zařízení</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">Automaticky zobrazit číselník</string>
+  <string name="showdialer_summary">Automaticky zobrazit číselník při otevření aplikace Telefon</string>
 </resources>

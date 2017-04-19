@@ -17,7 +17,7 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
-  <string name="speaker_settings_label">Nabijheid luidspreker</string>
+  <string name="speaker_settings_label">Automatische luidspreker</string>
   <string name="prox_auto_speaker_title">Automatische luidspreker</string>
   <string name="prox_auto_speaker_summary">Luidspreker automatisch inschakelen wanneer telefoon van het oor gehaald wordt</string>
   <string name="prox_auto_speaker_delay_title">Luidspreker vertraging</string>
@@ -31,4 +31,6 @@
   <string name="smart_mute_title">Slim dempen</string>
   <string name="smart_mute_summary">Demp inkomende oproep door het apparaat om te keren</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">Toetsenblok automatisch weergeven</string>
+  <string name="showdialer_summary">Toetsenblok opent automatisch bij openen telefoon app</string>
 </resources>

@@ -31,4 +31,6 @@
   <string name="smart_mute_title">Έξυπνη σίγαση</string>
   <string name="smart_mute_summary">Σιγήστε την εισερχόμενη κλήση κτυπώντας την συσκευή σας</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">Εμφάνιση πληκτρολογίου αυτόματα</string>
+  <string name="showdialer_summary">Εμφάνιση πληκτρολογίου αυτόματα αφού ανοίξετε την εφαρμογή τηλεφώνου</string>
 </resources>

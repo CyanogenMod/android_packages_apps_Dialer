@@ -31,4 +31,6 @@
   <string name="smart_mute_title">Akıllı sessizlik</string>
   <string name="smart_mute_summary">Cihazı çevirerek gelen çağrıyı yoksay</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">Tuş takımını otomatik olarak göster</string>
+  <string name="showdialer_summary">Çevirici uygulaması açıldığında tuş takımı otomatik olarak gösterilir</string>
 </resources>

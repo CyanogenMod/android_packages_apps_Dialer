@@ -31,4 +31,6 @@
   <string name="smart_mute_title">Muto intelligente</string>
   <string name="smart_mute_summary">Silenzia la chiamata in arrivo spostando il dispositivo</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">Mostra tastierino numerico automaticamente</string>
+  <string name="showdialer_summary">Mostra tastierino numerico automaticamente all\'apertura dell\'app telefono</string>
 </resources>

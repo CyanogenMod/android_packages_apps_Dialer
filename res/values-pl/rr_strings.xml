@@ -31,4 +31,6 @@
   <string name="smart_mute_title">Inteligentne wyciszanie</string>
   <string name="smart_mute_summary">Wyciszenie dzwonka połączenia pochodzącego przez obrócenie urządzenia</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">Wyświetl klawiaturę automatycznie</string>
+  <string name="showdialer_summary">Wyświetl klawiaturę automatycznie po otwarciu aplikacji</string>
 </resources>

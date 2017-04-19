@@ -31,4 +31,6 @@
   <string name="smart_mute_title">Smart Stumm schalten</string>
   <string name="smart_mute_summary">Den eingehenden Anruf durch umdrehen des Handys stumm schalten</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">Zeigt Telefonpad automatisch</string>
+  <string name="showdialer_summary">Zeigt Telefonpad sofort beim Öffnen des Telefon Apps</string>
 </resources>

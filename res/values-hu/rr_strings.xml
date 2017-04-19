@@ -31,4 +31,6 @@
   <string name="smart_mute_title">Intelligens némítás</string>
   <string name="smart_mute_summary">A készülék megfordítása elnémítja a bejövő hívást</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">Tárcsázó automatikus megjelenítése</string>
+  <string name="showdialer_summary">A telefon alkalmazás megnyitásakor automatikusan megjeleníti a tárcsázót</string>
 </resources>
