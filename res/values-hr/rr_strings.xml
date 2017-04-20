@@ -31,4 +31,6 @@
   <string name="smart_mute_title">Pametno utišavanje</string>
   <string name="smart_mute_summary">Utišajte dolazni poziv okretanjem uređaja.</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">Automatski prikaži površinu za biranje</string>
+  <string name="showdialer_summary">Površina za biranje prikazivat će se odmah kad otvorite aplikaciju Telefon.</string>
 </resources>
