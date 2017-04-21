@@ -31,4 +31,6 @@
   <string name="smart_mute_title">Розумне приглушення</string>
   <string name="smart_mute_summary">Приглушити вхідний дзвінок, перевернувши телефон</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">Автоматично показувати кнопки набору</string>
+  <string name="showdialer_summary">Показує кнопки набору автоматично при відкритті додатку</string>
 </resources>

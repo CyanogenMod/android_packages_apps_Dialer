@@ -31,4 +31,6 @@
   <string name="smart_mute_title">Smart mute</string>
   <string name="smart_mute_summary">Mute the incoming call by flipping the device</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">Show dialpad automatically</string>
+  <string name="showdialer_summary">Shows dialpad automatically upon opening dialer app</string>
 </resources>
