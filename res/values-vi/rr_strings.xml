@@ -31,4 +31,6 @@
   <string name="smart_mute_title">Tắt tiếng thông minh</string>
   <string name="smart_mute_summary">Tắt tiếng cuộc gọi đến bằng cách lật thiết bị</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">Tự động hiện bàn phím quay số</string>
+  <string name="showdialer_summary">Tự động hiện bàn phím quay số khi mở ứng dụng trình quay số</string>
 </resources>

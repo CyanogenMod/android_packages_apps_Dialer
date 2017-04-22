@@ -31,4 +31,6 @@
   <string name="smart_mute_title">스마트 음소거</string>
   <string name="smart_mute_summary">디바이스를 뒤집어 수신전화 벨소리 끄기</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">자동으로 다이얼패드를 표시</string>
+  <string name="showdialer_summary">전화 앱을 열면 자동으로 다이얼패드를 표시합니다</string>
 </resources>
