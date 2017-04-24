@@ -31,4 +31,6 @@
   <string name="smart_mute_title">Mute intelligent</string>
   <string name="smart_mute_summary">Couper le son de l\'appel entrant en retournant l\'appareil</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">Affichage automatique du pavé numérique</string>
+  <string name="showdialer_summary">Afficher automatiquement le pavé numérique à l\'ouverture de l\'application d\'appel</string>
 </resources>
