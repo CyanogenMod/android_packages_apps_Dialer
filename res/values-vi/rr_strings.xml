@@ -18,8 +18,8 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
   <string name="speaker_settings_label">Tiệm cận loa thoại</string>
-  <string name="prox_auto_speaker_title">Tự động tiệm cận loa thoại</string>
-  <string name="prox_auto_speaker_summary">Bật loa thoại tự động khi điện thoại bạn rời khỏi tai bạn</string>
+  <string name="prox_auto_speaker_title">Tự động bật loa thoại theo cảm biến tiệm cận</string>
+  <string name="prox_auto_speaker_summary">Tự động bật loa thoại khi đưa điện thoại bạn rời khỏi tai</string>
   <string name="prox_auto_speaker_delay_title">Độ trễ loa thoại</string>
   <string name="prox_auto_speaker_delay_dialog_title">Loa thoại trễ (ms)</string>
   <string name="prox_auto_speaker_delay_summary">Loa thoại sẽ được kích hoạt trong <xliff:g id="number">%d </xliff:g> ms</string>

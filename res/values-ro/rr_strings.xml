@@ -31,4 +31,6 @@
   <string name="smart_mute_title">Mod fără sunet inteligent</string>
   <string name="smart_mute_summary">Treceți pe mute apelul primit prin rotirea aparatului</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">Arată tastatura automat</string>
+  <string name="showdialer_summary">Arată tastatura automat la deschiderea aplicației telefon</string>
 </resources>
