@@ -17,6 +17,12 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
+  <string name="speaker_settings_label">Nærheds højttaler</string>
+  <string name="prox_auto_speaker_title">Automatisk nærheds højttaler</string>
+  <string name="prox_auto_speaker_summary">Aktiver højttaler automatisk når din telefon er fjernet fra øret</string>
+  <string name="prox_auto_speaker_delay_title">Højttaler forsinkelse</string>
+  <string name="prox_auto_speaker_delay_dialog_title">Højttaler forsinkelse i (ms)</string>
+  <string name="prox_auto_speaker_delay_summary">Højttaler vil blive aktiveret om <xliff:g id="number">%d</xliff:g> ms</string>
   <string name="prox_auto_speaker_incall_only_title">Kun mens i opkald</string>
   <!-- Smart Options -->
   <!-- Show or Hide Dialerpad -->

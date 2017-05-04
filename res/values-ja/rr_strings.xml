@@ -31,4 +31,6 @@
   <string name="smart_mute_title">スマートミュート</string>
   <string name="smart_mute_summary">端末を裏返しにすると着信をミュートします</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">ダイヤルパッドを自動的に表示する</string>
+  <string name="showdialer_summary">ダイヤラアプリを開いたときに自動的にダイヤル パッドが表示します。</string>
 </resources>
