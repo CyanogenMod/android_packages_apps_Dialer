@@ -19,7 +19,7 @@
   <!-- Proximity speaker -->
   <string name="speaker_settings_label">자동 스피커폰</string>
   <string name="prox_auto_speaker_title">자동으로 스피커폰으로 전환</string>
-  <string name="prox_auto_speaker_summary">통화 중에 기기가 사용자 귀에서 멀어졌을 때 자동으로 스피커폰을 활성화</string>
+  <string name="prox_auto_speaker_summary">통화 중 기기가 사용자의 귀에서 멀어졌을 때 자동으로 스피커폰을 활성화</string>
   <string name="prox_auto_speaker_delay_title">스피커폰 지연 시간</string>
   <string name="prox_auto_speaker_delay_dialog_title">스피커폰 지연 (ms)</string>
   <string name="prox_auto_speaker_delay_summary"><xliff:g id="number">%d </xliff:g> 밀리초 후에 스피커폰 활성화</string>
