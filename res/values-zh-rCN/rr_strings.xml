@@ -31,6 +31,6 @@
   <string name="smart_mute_title">智能静音</string>
   <string name="smart_mute_summary">来电时翻转设备以静音</string>
   <!-- Show or Hide Dialerpad -->
-  <string name="showdialer_title">自动显示拨号盘</string>
-  <string name="showdialer_summary">打开拨号应用时自动显示拨号盘</string>
+  <string name="showdialer_title">自动显示拨号键盘</string>
+  <string name="showdialer_summary">打开电话应用时自动显示拨号键盘</string>
 </resources>
