@@ -17,15 +17,20 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Proximity speaker -->
-  <string name="speaker_settings_label">قرب مكبر الصوت</string>
-  <string name="prox_auto_speaker_title">تعيين تلقائي لمكبر الصوت</string>
-  <string name="prox_auto_speaker_summary">تمكين مكبر الصوت تلقائياً عند إزالة الهاتف من إذنك</string>
+  <string name="speaker_settings_label">مكبر الصوت التقاربي</string>
+  <string name="prox_auto_speaker_title">مكبر صوت تقاربي تلقائي</string>
+  <string name="prox_auto_speaker_summary">تفعيل مكبر الصوت تلقائياً عند إزالة الهاتف من أذنك</string>
   <string name="prox_auto_speaker_delay_title">تأخير مكبر الصوت</string>
   <string name="prox_auto_speaker_delay_dialog_title">تأخير مكبر الصوت (مللي ثانية)</string>
-  <string name="prox_auto_speaker_delay_summary">سيتم تنشيط مكبر الصوت في <xliff:g id="number">%d </xliff:g> ms</string>
-  <string name="prox_auto_speaker_incall_only_title">فقط في حين وقت المكالمة</string>
-  <string name="prox_auto_speaker_incall_only_summary_on">عند اجراء مكالمة هاتفية صادرة ، لن يتم تفعيل صوتك الا بعد ان يجيب المتلقي</string>
+  <string name="prox_auto_speaker_delay_summary">سيتم تفعيل مكبر الصوت بعد <xliff:g id="number">%d</xliff:g> مِلي ثانية</string>
+  <string name="prox_auto_speaker_incall_only_title">فقط أثناء المكالمة</string>
+  <string name="prox_auto_speaker_incall_only_summary_on">عند المكالمات الصادرة، المستمع سيصبح نشطاً فقط بعد أن يجيب الطرف المستلم</string>
+  <string name="prox_auto_speaker_incall_only_summary_off">المستمع سيكون نشطاً أثناء كل حالات رفع سماعة الإتصال.(إفتراضي)</string>
   <!-- Smart Options -->
-  <string name="smart_category_title">خيارات ذكية</string>
+  <string name="smart_category_title">الخيارات الذكية</string>
+  <string name="smart_mute_title">الكتم الذكي</string>
+  <string name="smart_mute_summary">كتم المكالمات المستلمة بقلب الجهاز</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">أظهر أزرار الإتصال تلقائياً</string>
+  <string name="showdialer_summary">أظهر أزرار الإتصال تلقائياً عند فتح تطبيق الإتصال</string>
 </resources>
