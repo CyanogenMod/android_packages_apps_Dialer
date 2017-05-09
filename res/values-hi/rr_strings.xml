@@ -31,4 +31,6 @@
   <string name="smart_mute_title">स्मार्ट मूक</string>
   <string name="smart_mute_summary">डिवाइस flipping द्वारा आवक कॉल म्यूट करें</string>
   <!-- Show or Hide Dialerpad -->
+  <string name="showdialer_title">Dialpad अपने आप दिखाएँ</string>
+  <string name="showdialer_summary">Dialer ऍप खोलने पर dialpad अपने आप दिखाए|</string>
 </resources>
